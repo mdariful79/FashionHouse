@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="src/FashionHouse.Application/FashionHouse.Application.csproj" Id="dd8b52d7-342a-41a3-9d61-e028c4942109" />
+  <Project Path="src/FashionHouse.Domain/FashionHouse.Domain.csproj" Id="e0d7cf09-11b1-4a75-bb64-205c0dea0002" />
+  <Project Path="src/FashionHouse.Infrastructure/FashionHouse.Infrastructure.csproj" Id="6b120d15-b31f-4351-b0fa-1a7f9585626e" />
   <Project Path="src/FashionHouse.Web/FashionHouse.Web.csproj" Id="ff9ef67d-1b65-4f35-b081-b38756e63ded" />
 </Solution>
