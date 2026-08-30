@@ -1,0 +1,6 @@
+﻿namespace FashionHouse.Web.Areas.Admin.Models
+{
+    public class HomeModel
+    {
+    }
+}
