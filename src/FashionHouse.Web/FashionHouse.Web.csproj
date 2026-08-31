@@ -15,6 +15,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Areas\Customer\Controllers\CustomerHomeController.cs" />
+    <Compile Include="Areas\Customer\Models\CustomerHomeModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Customer\Views\CustomerHome\Index.cshtml" />
+    <Content Include="Areas\Customer\Views\Shared\_CustomerLayout.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Customer\Views\_ViewImports.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Customer\Views\_ViewStart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
@@ -38,6 +59,11 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Customer\Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Areas\Customer\Views\Shared\_CustomerLayout.cshtml.css" />
   </ItemGroup>
 
 </Project>

@@ -80,10 +80,16 @@ try
     app.MapStaticAssets();
 
     app.MapControllerRoute(
+    name: "CustomerArea",
+    pattern: "Customer/{controller=CustomerHome}/{action=Index}/{id?}",
+    defaults: new { area = "Customer" })
+    .WithStaticAssets();
+
+    app.MapControllerRoute(
        name: "area",
        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
        .WithStaticAssets();
-
+   
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
