@@ -1,4 +1,5 @@
-﻿using FashionHouse.Infrastructure.Identity;
+﻿using FashionHouse.Domain.Entites;
+using FashionHouse.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ namespace FashionHouse.Infrastructure.Data
       ApplicationRoleClaim,
       ApplicationUserToken>(options)
     {
+        public DbSet<Product> Products { get; set; }
 
     }
 }
