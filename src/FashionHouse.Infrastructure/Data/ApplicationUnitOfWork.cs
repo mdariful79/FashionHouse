@@ -6,20 +6,12 @@ namespace FashionHouse.Infrastructure.Data
 {
     public class ApplicationUnitOfWork : UnitOfWork, IApplicationUnitOfWork
     {
-       
-        //public IProductRepository ProductRepository { get; private set; }
-      
+        public IProductRepository ProductRepository { get; private set; }
 
-        public ApplicationUnitOfWork(
-            ApplicationDbContext context
-            
-            //IProductRepository productRepository
-            ) : base(context)
+        public ApplicationUnitOfWork(ApplicationDbContext dbContext, IProductRepository productRepository)
+            : base(dbContext)
         {
-        
-            //ProductRepository = productRepository;
-      
-
+            ProductRepository = productRepository;
         }
     }
 }
