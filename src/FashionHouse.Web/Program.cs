@@ -1,10 +1,11 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FashionHouse.Infrastructure.Data;
+using FashionHouse.Infrastructure.Extensions;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using FashionHouse.Infrastructure.Extensions;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.File("Logs/web-log-.log", rollingInterval: RollingInterval.Day)
@@ -45,6 +46,19 @@ try
 
     #endregion
 
+    #region Mapster Configuration
+
+    // Custom Configuration
+    //var config = TypeAdapterConfig.GlobalSettings;
+    //config.Scan(typeof(MapsterConfiguration).Assembly);
+    //builder.Services.AddSingleton(config);
+    //builder.Services.AddScoped<IMapper, ServiceMapper>();
+
+    // Default Configuration
+    builder.Services.AddMapster();
+
+    #endregion
+
     #region DbContext Configuration
     builder.Services.AddDbContext(connectionString, migrationAssembly);
     #endregion
@@ -75,6 +89,7 @@ try
     app.UseHttpsRedirection();
     app.UseRouting();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapStaticAssets();

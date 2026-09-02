@@ -14,4 +14,8 @@
     <Folder Include="Features\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="10.0.12" />
+  </ItemGroup>
+
 </Project>

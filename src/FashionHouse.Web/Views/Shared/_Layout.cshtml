@@ -83,7 +83,7 @@
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
                         <a asp-area="" asp-controller="Home" asp-action="Index">
-                            <img src="~/FrontLayout/img/logo.png" alt="FashionHouse">
+                            <img src="~/FrontLayout/img/logo.png" alt="Fashion House">
                         </a>
                     </div>
                 </div>
@@ -93,7 +93,8 @@
                             <li class="active">
                                 <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
-                            <li><a asp-area="" asp-controller="Shop" asp-action="Index">Shop</a></li>
+                            <li><a asp-area="Admin" asp-controller="" asp-action="Index">Admin</a></li>
+                            <li><a asp-area="Customer" asp-controller="" asp-action="Index">Customer</a></li>
                             <li>
                                 <a href="#">Pages</a>
                                 <ul class="dropdown">
@@ -103,7 +104,6 @@
                                     <li><a href="#">Check Out</a></li>
                                 </ul>
                             </li>
-                            <li><a href="#">Blog</a></li>
                             <li><a href="#">Contacts</a></li>
                         </ul>
                     </nav>
@@ -127,7 +127,7 @@
     </main>
 
     <!-- Footer Section Begin -->
-    <footer class="footer">
+   @*  <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -179,24 +179,24 @@
                 <div class="col-lg-12 text-center">
                     <div class="footer__copyright__text">
                         <p>
-                            &copy; @DateTime.Now.Year - FashionHouse.Web -
+                            &copy; @DateTime.Now.Year - Fashion House -
                             <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
+    </footer> *@
     <!-- Footer Section End -->
     <!-- Search Begin -->
-    <div class="search-model">
+    @* <div class="search-model">
         <div class="h-100 d-flex align-items-center justify-content-center">
             <div class="search-close-switch">+</div>
             <form class="search-model-form">
                 <input type="text" id="search-input" placeholder="Search here.....">
             </form>
         </div>
-    </div>
+    </div> *@
     <!-- Search End -->
     <!-- Js Plugins (template) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -216,3 +216,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
