@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Cortex.Mediator.DependencyInjection;
 using FashionHouse.Infrastructure.Data;
 using FashionHouse.Infrastructure.Extensions;
 using Mapster;
@@ -43,6 +44,15 @@ try
     //{
     //    containerBuilder.RegisterModule(new WebModule(connectionString));
     //});
+
+    #endregion
+
+    #region Cortex Mediator Configuration
+
+    //builder.Services.AddCortexMediator(
+    //    new[] { typeof(Program), typeof(ProductAddCommand) },
+    //    options => options.AddDefaultBehaviors()
+    //);
 
     #endregion
 
@@ -95,16 +105,15 @@ try
     app.MapStaticAssets();
 
     app.MapControllerRoute(
-    name: "CustomerArea",
-    pattern: "Customer/{controller=CustomerHome}/{action=Index}/{id?}",
-    defaults: new { area = "Customer" })
-    .WithStaticAssets();
+    name: "Customer",
+    pattern: "Customer/{controller=Customer}/{action=Index}/{id?}",
+    defaults: new { area = "Customer" });
 
     app.MapControllerRoute(
        name: "area",
        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
        .WithStaticAssets();
-   
+
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")

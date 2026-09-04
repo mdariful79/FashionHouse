@@ -3,7 +3,7 @@
 namespace FashionHouse.Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    public class CustomerHomeController : Controller
+    public class CustomerController : Controller
     {
         public IActionResult Index()
         {

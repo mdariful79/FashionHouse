@@ -15,12 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Areas\Customer\Controllers\CustomerHomeController.cs" />
-    <Compile Include="Areas\Customer\Models\CustomerHomeModel.cs" />
+    <Compile Include="Areas\Customer\Controllers\CustomerController.cs" />
+    <Compile Include="Areas\Customer\Models\CustomerModel.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Areas\Customer\Views\CustomerHome\Index.cshtml" />
+    <Content Include="Areas\Customer\Views\Customer\Index.cshtml" />
     <Content Include="Areas\Customer\Views\Shared\_CustomerLayout.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
+    <PackageReference Include="Cortex.Mediator" Version="3.1.2" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />

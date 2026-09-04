@@ -124,10 +124,20 @@
     <!-- Main content injected by each view -->
     <main role="main">
         @RenderBody()
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
+            </form>
+        }
+        else
+        {
+            <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+        }
     </main>
 
     <!-- Footer Section Begin -->
-   @*  <footer class="footer">
+    @*  <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-6">
