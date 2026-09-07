@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>@ViewData["Title"] - FashionHouse.Web</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Fashion House</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
@@ -22,7 +21,8 @@
 
     <!-- App-specific Css -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FashionHouse.Web.styles.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
@@ -49,7 +49,9 @@
         <div class="offcanvas__nav__option">
             <a href="#" class="search-switch"><img src="~/FrontLayout/img/icon/search.png" alt=""></a>
             <a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a>
-            <a href="#"><img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>0</span></a>
+            <a asp-area="" asp-controller="Cart" asp-action="Index">
+                <img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>0</span>
+            </a>
             <div class="price">$0.00</div>
         </div>
         <div id="mobile-menu-wrap"></div>
@@ -90,29 +92,33 @@
                 <div class="col-lg-6 col-md-6">
                     <nav class="header__menu mobile-menu">
                         <ul>
-                            <li class="active">
+                            <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && string.IsNullOrEmpty(ViewContext.RouteData.Values["area"]?.ToString()) ? "active" : "")">
                                 <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
-                            <li><a asp-area="Admin" asp-controller="" asp-action="Index">Admin</a></li>
-                            <li><a asp-area="Customer" asp-controller="" asp-action="Index">Customer</a></li>
+                            <li class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Shop" ? "active" : "")">
+                                <a asp-area="" asp-controller="Shop" asp-action="Index">Shop</a>
+                            </li>
                             <li>
                                 <a href="#">Pages</a>
                                 <ul class="dropdown">
-                                    <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-                                    <li><a href="#">Shop Details</a></li>
-                                    <li><a href="#">Shopping Cart</a></li>
-                                    <li><a href="#">Check Out</a></li>
+                                    <li><a asp-area="" asp-controller="Home" asp-action="About">About Us</a></li>
+                                    <li><a asp-area="" asp-controller="Cart" asp-action="Index">Shopping Cart</a></li>
+                                    <li><a asp-area="" asp-controller="Checkout" asp-action="Index">Check Out</a></li>
                                 </ul>
                             </li>
-                            <li><a href="#">Contacts</a></li>
+                            <li><a asp-area="" asp-controller="Blog" asp-action="Index">Blogs</a></li>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contacts</a></li>
                         </ul>
                     </nav>
                 </div>
+
                 <div class="col-lg-3 col-md-3">
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="~/FrontLayout/img/icon/search.png" alt=""></a>
                         <a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>0</span></a>
+                        <a asp-area="" asp-controller="Cart" asp-action="Index">
+                            <img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>0</span>
+                        </a>
                         <div class="price">$0.00</div>
                     </div>
                 </div>
@@ -124,20 +130,10 @@
     <!-- Main content injected by each view -->
     <main role="main">
         @RenderBody()
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
-                <button type="submit" class="btn btn-link nav-link">Logout</button>
-            </form>
-        }
-        else
-        {
-            <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-        }
     </main>
 
     <!-- Footer Section Begin -->
-    @*  <footer class="footer">
+    <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -154,7 +150,7 @@
                     <div class="footer__widget">
                         <h6>Shopping</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
+                            <li><a asp-area="" asp-controller="Shop" asp-action="Index">Clothing Store</a></li>
                             <li><a href="#">Trending Shoes</a></li>
                             <li><a href="#">Accessories</a></li>
                             <li><a href="#">Sale</a></li>
@@ -165,7 +161,7 @@
                     <div class="footer__widget">
                         <h6>Support</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact Us</a></li>
                             <li><a href="#">Payment Methods</a></li>
                             <li><a href="#">Delivery</a></li>
                             <li><a href="#">Return &amp; Exchanges</a></li>
@@ -196,17 +192,17 @@
                 </div>
             </div>
         </div>
-    </footer> *@
+    </footer>
     <!-- Footer Section End -->
     <!-- Search Begin -->
-    @* <div class="search-model">
+    <div class="search-model">
         <div class="h-100 d-flex align-items-center justify-content-center">
             <div class="search-close-switch">+</div>
             <form class="search-model-form">
                 <input type="text" id="search-input" placeholder="Search here.....">
             </form>
         </div>
-    </div> *@
+    </div>
     <!-- Search End -->
     <!-- Js Plugins (template) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -226,4 +222,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

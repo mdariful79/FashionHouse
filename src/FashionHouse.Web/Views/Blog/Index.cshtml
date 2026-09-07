@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Our Blog";
+    ViewBag.ActiveNav = "Blog";
+    Layout = "_Layout";
+}
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-blog set-bg" data-setbg="@Url.Content("~/FrontLayout/img/breadcrumb-bg.jpg")">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Our Blog</h2>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+<!-- Blog Section Begin -->
+<section class="blog spad">
+    <div class="container">
+        @* TODO: replace this static block with a foreach over Model.Posts
+           (from IBlogRepository / a paged post query) once blog listing is
+           wired up. Each post needs a stable Id so "Read More" can link to
+           /Blog/Details/{id}. *@
+        @{
+            var posts = new[]
+            {
+                new { Id = 1, Img = "blog-1.jpg", Date = "16 February 2020", Title = "What Curling Irons Are The Best Ones" },
+                new { Id = 2, Img = "blog-2.jpg", Date = "21 February 2020", Title = "Eternity Bands Do Last Forever" },
+                new { Id = 3, Img = "blog-3.jpg", Date = "28 February 2020", Title = "The Health Benefits Of Sunglasses" },
+                new { Id = 4, Img = "blog-4.jpg", Date = "16 February 2020", Title = "Aiming For Higher The Mastopexy" },
+                new { Id = 5, Img = "blog-5.jpg", Date = "21 February 2020", Title = "Wedding Rings A Gift For A Lifetime" },
+                new { Id = 6, Img = "blog-6.jpg", Date = "28 February 2020", Title = "The Different Methods Of Hair Removal" },
+                new { Id = 7, Img = "blog-7.jpg", Date = "16 February 2020", Title = "Hoop Earrings A Style From History" },
+                new { Id = 8, Img = "blog-8.jpg", Date = "21 February 2020", Title = "Lasik Eye Surgery Are You Ready" },
+                new { Id = 9, Img = "blog-9.jpg", Date = "28 February 2020", Title = "Lasik Eye Surgery Are You Ready" },
+            };
+        }
+        <div class="row">
+            @foreach (var post in posts)
+            {
+                <div class="col-lg-4 col-md-6 col-sm-6">
+                    <div class="blog__item">
+                        <div class="blog__item__pic set-bg" data-setbg="@Url.Content($"~/FrontLayout/img/blog/{post.Img}")">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id"
+                               aria-label="Read @post.Title"
+                               style="position:absolute; inset:0; z-index:1;"></a>
+                        </div>
+                        <div class="blog__item__text">
+                            <span><img src="~/FrontLayout/img/icon/calendar.png" alt=""> @post.Date</span>
+                            <h5>@post.Title</h5>
+                            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<!-- Blog Section End -->
