@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Cortex.Mediator.DependencyInjection;
+using FashionHouse.Application.Features.Categories.Command;
 using FashionHouse.Infrastructure.Data;
 using FashionHouse.Infrastructure.Extensions;
 using Mapster;
@@ -49,10 +50,10 @@ try
 
     #region Cortex Mediator Configuration
 
-    //builder.Services.AddCortexMediator(
-    //    new[] { typeof(Program), typeof(ProductAddCommand) },
-    //    options => options.AddDefaultBehaviors()
-    //);
+    builder.Services.AddCortexMediator(
+        new[] { typeof(Program), typeof(CategoryAddCommand) },
+        options => options.AddDefaultBehaviors()
+    );
 
     #endregion
 

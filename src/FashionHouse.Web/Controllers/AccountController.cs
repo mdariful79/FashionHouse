@@ -65,7 +65,7 @@ namespace FashionHouse.Web.Controllers
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "Member");
+                    await _userManager.AddToRoleAsync(user, "Customer");
 
                     var age = DateTime.Now.Year - model.DateOfBirth.Year;
                     await _userManager.AddClaimAsync(user, new Claim("age", age.ToString()));
