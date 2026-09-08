@@ -149,6 +149,14 @@ namespace FashionHouse.Web.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+
+                    if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Home", new { area = "Admin" });
+                    }
+
                     return LocalRedirect(model.ReturnUrl);
                 }
                 if (result.IsLockedOut)
