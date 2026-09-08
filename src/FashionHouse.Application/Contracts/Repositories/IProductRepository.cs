@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FashionHouse.Application.Contracts
+namespace FashionHouse.Application.Contracts.Repositories
 {
     public interface IProductRepository : IRepository<Product, Guid>
     {

@@ -6,7 +6,7 @@ namespace FashionHouse.Domain.Contracts
 {
     public interface IUnitOfWork
     {
-        //void Save();
-        //Task SaveAsync(CancellationToken cancellationToken);
+        void Save();
+        Task SaveAsync(CancellationToken cancellationToken);
     }
 }

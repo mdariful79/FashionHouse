@@ -1,4 +1,5 @@
 ﻿using FashionHouse.Application.Contracts;
+using FashionHouse.Application.Contracts.Repositories;
 using FashionHouse.Infrastructure.Data;
 using FashionHouse.Infrastructure.Data.Repositories;
 using Microsoft.Extensions.DependencyInjection;

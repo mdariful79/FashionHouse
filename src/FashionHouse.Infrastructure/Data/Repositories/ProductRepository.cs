@@ -1,4 +1,4 @@
-﻿using FashionHouse.Application.Contracts;
+﻿using FashionHouse.Application.Contracts.Repositories;
 using FashionHouse.Domain.Entites;
 using System;
 using System.Collections.Generic;

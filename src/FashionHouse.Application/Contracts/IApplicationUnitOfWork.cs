@@ -1,4 +1,5 @@
-﻿using FashionHouse.Domain.Contracts;
+﻿using FashionHouse.Application.Contracts.Repositories;
+using FashionHouse.Domain.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace FashionHouse.Application.Contracts
     {
 
         public IProductRepository ProductRepository { get; }
-       
+        public ICategoryRepository CategoryRepository { get; }
+
     }
 }

@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Cortex.Mediator" Version="3.1.2" />
     <PackageReference Include="Mapster" Version="10.0.12" />
   </ItemGroup>

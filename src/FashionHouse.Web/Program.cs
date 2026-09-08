@@ -104,10 +104,6 @@ try
 
     app.MapStaticAssets();
 
-    app.MapControllerRoute(
-    name: "Customer",
-    pattern: "Customer/{controller=Customer}/{action=Index}/{id?}",
-    defaults: new { area = "Customer" });
 
     app.MapControllerRoute(
        name: "area",

@@ -8,34 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\Customer\**" />
-    <Content Remove="Areas\Customer\**" />
-    <EmbeddedResource Remove="Areas\Customer\**" />
-    <None Remove="Areas\Customer\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Areas\Customer\Controllers\CustomerController.cs" />
-    <Compile Include="Areas\Customer\Models\CustomerModel.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Areas\Customer\Views\Customer\Index.cshtml" />
-    <Content Include="Areas\Customer\Views\Shared\_CustomerLayout.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Areas\Customer\Views\_ViewImports.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Areas\Customer\Views\_ViewStart.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageReference Include="Cortex.Mediator" Version="3.1.2" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.12" />
@@ -63,11 +35,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\Customer\Data\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Areas\Customer\Views\Shared\_CustomerLayout.cshtml.css" />
   </ItemGroup>
 
 </Project>
