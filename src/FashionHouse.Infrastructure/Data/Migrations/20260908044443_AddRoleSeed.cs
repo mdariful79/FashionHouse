@@ -19,7 +19,7 @@ namespace FashionHouse.Infrastructure.Data.Migrations
                 values: new object[,]
                 {
                     { new Guid("00000000-0000-0000-0000-000000000001"), "6E775D85-34FB-4329-9419-5F1A3BB6F306", "Admin", "ADMIN" },
-                    { new Guid("00000000-0000-0000-0000-000000000002"), "50776D0D-2460-48BC-93F3-6286E18C49D2", "Member", "MEMBER" }
+                    { new Guid("00000000-0000-0000-0000-000000000002"), "50776D0D-2460-48BC-93F3-6286E18C49D2", "Customer", "CUSTOMER" }
                 });
         }
 

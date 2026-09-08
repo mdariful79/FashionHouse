@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionHouse.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260903190604_AddRoleSeed")]
+    [Migration("20260908044443_AddRoleSeed")]
     partial class AddRoleSeed
     {
         /// <inheritdoc />
@@ -82,8 +82,8 @@ namespace FashionHouse.Infrastructure.Data.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             ConcurrencyStamp = "50776D0D-2460-48BC-93F3-6286E18C49D2",
-                            Name = "Member",
-                            NormalizedName = "MEMBER"
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
                         });
                 });
 

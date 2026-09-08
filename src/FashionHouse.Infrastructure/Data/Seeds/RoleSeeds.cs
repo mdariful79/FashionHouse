@@ -21,8 +21,8 @@ namespace FashionHouse.Infrastructure.Data.Seeds
                 new ApplicationRole
                 {
                     Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                    Name = "Member",
-                    NormalizedName = "MEMBER",
+                    Name = "Customer",
+                    NormalizedName = "CUSTOMER",
                     ConcurrencyStamp = "50776D0D-2460-48BC-93F3-6286E18C49D2"
                 }
             };
