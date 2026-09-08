@@ -1,0 +1,94 @@
+﻿@section Styles
+{
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-12">
+            <partial name="_ResponsePartial" />
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="card-title mb-0">View Categories</h5>
+                    <a asp-area="admin" asp-controller="categories" asp-action="create" class="btn btn-primary">
+                        Add Category
+                    </a>
+                </div>
+                <div class="card-body table-responsive pt-0">
+                    <partial name="_ModalPartial" />
+                    <table id="categories" class="table table-bordered table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Slug</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
+
+    <script>
+        $(function () {
+        $("#categories").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        autoWidth: true,
+        pagingType: "simple_numbers",
+        ajax: {
+        url: "/Admin/Categories/GetPagedCategories",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: function (d) { return JSON.stringify(d); }
+        },
+        columnDefs: [
+        {
+        orderable: false,
+        targets: -1,
+        render: function (data, type, row) {
+        return `
+        <div class="dropdown">
+        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Actions
+        </button>
+        <ul class="dropdown-menu">
+        <li><a class="dropdown-item text-warning" href="/Admin/Categories/Update/${data}">Edit</a></li>
+        <li><button class="dropdown-item text-danger show-bs-modal" data-id="${data}">Delete</button></li>
+        </ul>
+        </div>`;
+        }
+        }
+        ]
+        });
+
+        $("#categories").on('click', '.show-bs-modal', function () {
+        let id = $(this).data('id');
+        let deleteModal = $("#delete-modal");
+        deleteModal.find('#modelLabel').text("Delete Category");
+        deleteModal.find('.modal-body p').html('Are you sure you want to delete this category?');
+        $('#delete-id').val(id);
+        $('#delete-form').attr('action', '/admin/categories/delete');
+        deleteModal.modal('show');
+        });
+
+        $('#delete-btn').on('click', function () {
+        $('#delete-form').submit();
+        });
+        });
+    </script>
+}

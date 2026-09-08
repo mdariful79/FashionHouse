@@ -1,6 +1,8 @@
-﻿using FashionHouse.Domain.Entites;
+﻿using FashionHouse.Application.Features.Categories.Command;
+using FashionHouse.Application.Features.Categories.Query;
+using FashionHouse.Domain.Entities;
+using FashionHouse.Web.Areas.Admin.Models;
 using Mapster;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace FashionHouse.Web
 {
@@ -8,8 +10,10 @@ namespace FashionHouse.Web
     {
         public void Register(TypeAdapterConfig config)
         {
-            //config.NewConfig<ProductAddCommand, Product>();
-            //config.NewConfig<ProductModel, ProductAddCommand>();
+            config.NewConfig<CategoryModel, CategoryAddCommand>();
+            config.NewConfig<CategoryModel, CategoryUpdateCommand>();
+            config.NewConfig<Category, CategoryModel>();
+            config.NewConfig<CategoryListModel, GetAllCategoriesByPagingQuery>();
         }
     }
 }
