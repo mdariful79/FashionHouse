@@ -12,5 +12,12 @@ namespace FashionHouse.Web.Controllers
             // (with paging/filtering) is wired up.
             return View();
         }
+        public IActionResult ShopDetails()
+        {
+            // TODO: replace static placeholder products below with real data
+            // via IProductRepository / a Products query once product listing
+            // (with paging/filtering) is wired up.
+            return View();
+        }
     }
 }
