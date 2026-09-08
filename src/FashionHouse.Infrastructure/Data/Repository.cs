@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +128,39 @@ namespace FashionHouse.Infrastructure.Data
                 var entities = await _dbSet.Where(filter).ToListAsync(cancellationToken);
                 _dbSet.RemoveRange(entities);
             }
+        }
+        // Used by CategoryRepository/ProductRepository for DataTables-style dynamic paging
+        protected virtual async Task<(IList<TAggregateRoot> data, int total, int totalDisplay)> GetDynamicAsync(
+            Expression<Func<TAggregateRoot, bool>>? filter = null,
+            string? orderBy = null,
+            Func<IQueryable<TAggregateRoot>, IQueryable<TAggregateRoot>>? include = null,
+            int pageIndex = 1,
+            int pageSize = 10,
+            bool isTrackingOff = false,
+            CancellationToken cancellationToken = default)
+        {
+            IQueryable<TAggregateRoot> query = _dbSet;
+            var total = query.Count();
+            var totalDisplay = total;
+
+            if (filter is not null)
+            {
+                query = query.Where(filter);
+                totalDisplay = query.Count();
+            }
+
+            if (include is not null)
+                query = include(query);
+
+            var paged = string.IsNullOrWhiteSpace(orderBy)
+                ? query.Skip((pageIndex - 1) * pageSize).Take(pageSize)
+                : query.OrderBy(orderBy).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+
+            var data = isTrackingOff
+                ? await paged.AsNoTracking().ToListAsync(cancellationToken)
+                : await paged.ToListAsync(cancellationToken);
+
+            return (data, total, totalDisplay);
         }
 
         public void Dispose()

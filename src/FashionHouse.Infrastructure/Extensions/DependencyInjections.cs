@@ -15,6 +15,7 @@ namespace FashionHouse.Infrastructure.Extensions
         {
             services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
             return services;
         }
     }
