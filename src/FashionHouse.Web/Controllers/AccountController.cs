@@ -1,4 +1,5 @@
-﻿using FashionHouse.Infrastructure.Identity;
+﻿using FashionHouse.Application.Contracts.Services;
+using FashionHouse.Infrastructure.Identity;
 using FashionHouse.Web.Models.Account;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +18,7 @@ namespace FashionHouse.Web.Controllers
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        //private readonly IEmailService _emailService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
         public AccountController(
@@ -25,7 +26,7 @@ namespace FashionHouse.Web.Controllers
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            //IEmailService emailService,
+            IEmailService emailService,
             IMapper mapper)
         {
             _userManager = userManager;
@@ -33,7 +34,7 @@ namespace FashionHouse.Web.Controllers
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            //_emailService = emailService;
+            _emailService = emailService;
             _mapper = mapper
             ;
         }
@@ -81,8 +82,8 @@ namespace FashionHouse.Web.Controllers
 
                     var fullName = $"{user.FirstName} {user.LastName}";
 
-                    //await _emailService.SendEmailAsync(fullName, model.Email, "Confirm your email",
-                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailService.SendEmailAsync(fullName, model.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -218,8 +219,8 @@ namespace FashionHouse.Web.Controllers
                     values: new { area = "", code, email = model.Email },
                     protocol: Request.Scheme)!;
 
-                //await _emailService.SendEmailAsync(model.Email, model.Email, "Reset Password",
-                //    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                await _emailService.SendEmailAsync(model.Email, model.Email, "Reset Password",
+                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                 _logger.LogInformation("Password reset link: {CallbackUrl}", callbackUrl);
 
