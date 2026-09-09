@@ -148,15 +148,19 @@ namespace FashionHouse.Web.Controllers
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-
                     var user = await _userManager.FindByEmailAsync(model.Email);
 
+                    if (user != null && !user.IsActive)
+                    {
+                        await _signInManager.SignOutAsync();
+                        ModelState.AddModelError(string.Empty, "This account has been deactivated. Please contact support.");
+                        return View(model);
+                    }
                     if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
                     {
                         return RedirectToAction("Index", "Home", new { area = "Admin" });
                     }
-
+                    _logger.LogInformation("User logged in.");
                     return LocalRedirect(model.ReturnUrl);
                 }
                 if (result.IsLockedOut)

@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" href="~/sneat/assets/vendor/css/core.css" />
     <link rel="stylesheet" href="~/sneat/assets/css/demo.css" />
+    <link rel="stylesheet" href="~/sneat/assets/css/admin-theme.css" />
 
     <link rel="stylesheet" href="~/sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
@@ -34,7 +35,7 @@
                         <span class="app-brand-logo demo text-primary">
                             <i class="icon-base bx bx-store icon-lg"></i>
                         </span>
-                        <span class="app-brand-text demo menu-text fw-bold ms-2">FashionHouse</span>
+                        <span class="ml-auto fw-bold ms-2">Fashion House</span>
                     </a>
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
                         <i class="bx bx-chevron-left d-block d-xl-none align-middle"></i>
@@ -77,8 +78,8 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Other</span>
                     </li>
-                    <li class="menu-item">
-                        <a asp-area="" asp-controller="Team" asp-action="Index" class="menu-link">
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customers" ? "active" : "")">
+                        <a asp-area="Admin" asp-controller="Customers" asp-action="Index" class="menu-link">
                             <i class="menu-icon icon-base bx bx-group"></i>
                             <div data-i18n="Customer">Customer Management</div>
                         </a>

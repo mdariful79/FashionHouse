@@ -1,0 +1,210 @@
+﻿@model List<FashionHouse.Web.Areas.Admin.Models.CustomerListItemModel>
+@{
+    ViewData["Title"] = "Customer Management";
+    var total = Model.Count;
+    var confirmed = Model.Count(c => c.EmailConfirmed);
+    var pending = total - confirmed;
+    var active = Model.Count(c => c.IsActive);
+
+    string[] avatarColors = { "primary", "success", "info", "warning", "danger" };
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- Stat cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar avatar-lg me-3">
+                        <span class="avatar-initial rounded-circle bg-label-primary">
+                            <i class="bx bx-group icon-lg"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="d-block text-body-secondary small">Total Customers</span>
+                        <h4 class="mb-0">@total</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar avatar-lg me-3">
+                        <span class="avatar-initial rounded-circle bg-label-success">
+                            <i class="bx bx-check-circle icon-lg"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="d-block text-body-secondary small">Active</span>
+                        <h4 class="mb-0">@active</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar avatar-lg me-3">
+                        <span class="avatar-initial rounded-circle bg-label-info">
+                            <i class="bx bx-envelope icon-lg"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="d-block text-body-secondary small">Email Confirmed</span>
+                        <h4 class="mb-0">@confirmed</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar avatar-lg me-3">
+                        <span class="avatar-initial rounded-circle bg-label-warning">
+                            <i class="bx bx-time icon-lg"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="d-block text-body-secondary small">Pending Confirmation</span>
+                        <h4 class="mb-0">@pending</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    <!-- Customer table -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h5 class="card-title mb-0">Customers</h5>
+                <small class="text-body-secondary">@total registered customer@(total == 1 ? "" : "s")</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="input-group input-group-merge" style="width: 260px;">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" id="customerSearch" class="form-control" placeholder="Search customer..." />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover" id="customerTable">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Date of Birth</th>
+                        <th>Email Status</th>
+                        <th>Account Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-body-secondary">
+                                <i class="bx bx-user-x icon-lg mb-2 d-block"></i>
+                                No customers found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var customer = Model[i];
+                            var initials = $"{(customer.FirstName.Length > 0 ? customer.FirstName[0] : '?')}{(customer.LastName.Length > 0 ? customer.LastName[0] : '?')}".ToUpper();
+                            var color = avatarColors[i % avatarColors.Length];
+
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-sm me-3">
+                                            <span class="avatar-initial rounded-circle bg-label-@color">@initials</span>
+                                        </div>
+                                        <div>
+                                            <span class="fw-medium d-block">@customer.FirstName @customer.LastName</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@customer.Email</td>
+                                <td>@customer.DateOfBirth.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if (customer.EmailConfirmed)
+                                    {
+                                        <span class="badge rounded-pill bg-label-success">
+                                            <i class="bx bx-check-circle me-1"></i>Confirmed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-label-warning">
+                                            <i class="bx bx-time me-1"></i>Pending
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="ToggleActive" asp-route-id="@customer.Id" method="post"
+                                          onsubmit="return confirm('@(customer.IsActive ? "Deactivate" : "Activate") @customer.FirstName @customer.LastName?');">
+                                        @Html.AntiForgeryToken()
+                                        @if (customer.IsActive)
+                                        {
+                                            <button type="submit" class="badge rounded-pill bg-label-success border-0" title="Click to deactivate">Active</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="badge rounded-pill bg-label-danger border-0" title="Click to activate">Inactive</button>
+                                        }
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a asp-action="Edit" asp-route-id="@customer.Id" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@customer.Id" method="post"
+                                              onsubmit="return confirm('Delete @customer.FirstName @customer.LastName? This cannot be undone.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="Delete">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('customerSearch').addEventListener('input', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#customerTable tbody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        });
+    </script>
+}

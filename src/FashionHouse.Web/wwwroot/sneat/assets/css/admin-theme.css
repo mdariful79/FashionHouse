@@ -1,0 +1,87 @@
+:root {
+    --bs-primary: #1a1a1a;
+    --bs-primary-rgb: 26, 26, 26;
+    --brand-accent: #ff3e1d; /* placeholder — grab your exact red via devtools, see note below */
+}
+
+/* Sidebar brand: bold text + small red accent dot, like "fashion." on the storefront */
+.app-brand-text {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+    .app-brand-text::after {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: var(--brand-accent);
+        margin-left: 4px;
+        border-radius: 1px;
+        vertical-align: super;
+    }
+
+/* Active menu item: red left-accent instead of default purple glow */
+.menu-vertical .menu-item.active > .menu-link,
+.menu-vertical .menu-item.active > .menu-link:hover {
+    background: #f8f8f8;
+    color: #1a1a1a;
+    border-left: 3px solid var(--brand-accent);
+    border-radius: 0;
+}
+
+    .menu-vertical .menu-item.active > .menu-link .menu-icon {
+        color: #1a1a1a;
+    }
+
+.menu-header-text {
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+
+/* CTA buttons: bold, uppercase, sharp corners — matches "SHOP NOW" style */
+.btn-primary {
+    background-color: #1a1a1a;
+    border-color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active {
+        background-color: var(--brand-accent) !important;
+        border-color: var(--brand-accent) !important;
+    }
+
+/* Top navbar: slim, minimal — no heavy shadow */
+.layout-navbar {
+    box-shadow: none;
+    border-bottom: 1px solid #eee;
+}
+
+/* Cards: subtle border instead of heavy default shadow */
+.card {
+    border-radius: 6px;
+    border: 1px solid #eee;
+    box-shadow: none;
+}
+
+/* Badges: sharper corners, small uppercase tracking */
+.badge.rounded-pill {
+    border-radius: 3px !important;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+}
+
+.badge.border-0 {
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+    .badge.border-0:hover {
+        opacity: 0.8;
+    }
