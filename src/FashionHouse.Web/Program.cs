@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Cortex.Mediator.DependencyInjection;
 using FashionHouse.Application.Features.Categories.Command;
+using FashionHouse.Domain.Utilities;
 using FashionHouse.Infrastructure.Data;
 using FashionHouse.Infrastructure.Extensions;
 using Mapster;
@@ -24,7 +25,7 @@ try
 
     #region Dependency Injection
 
-    builder.Services.AddInfrastructureDependency();
+    builder.Services.AddInfrastructureDependency(builder.Environment.WebRootPath);
 
     #endregion
 
@@ -78,6 +79,10 @@ try
 
     #region Identity Configuration
     builder.Services.AddIdentity();
+    #endregion
+
+    #region AppSettings Configuration
+    builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
     #endregion
 
     builder.Services.AddControllersWithViews();

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using FashionHouse.Application.Contracts.Services;
 
-namespace Demo.Infrastructure.Services;
+namespace FashionHouse.Infrastructure.Services;
 
 public class FileStorageService : IFileStorageService
 {
