@@ -1,17 +1,36 @@
-﻿@using FashionHouse.Infrastructure.Identity
-@using Microsoft.AspNetCore.Identity
+﻿@using Microsoft.AspNetCore.Identity
+@using FashionHouse.Infrastructure.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <a asp-area="Admin" asp-controller="Manage" asp-action="Index" title="Manage">Hello, @User.Identity?.Name!</a>
-    <form class="d-inline" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-        <button type="submit" class="header-link-btn">Logout</button>
-    </form>
+    <div class="account-dropdown">
+        <a href="#" class="account-dropdown__toggle" id="accountDropdownToggle">
+            <i class="fa fa-user-o"></i> Hello, @User.Identity?.Name <i class="fa fa-angle-down"></i>
+        </a>
+        <ul class="account-dropdown__menu" id="accountDropdownMenu">
+            @if (User.IsInRole("Customer"))
+            {
+                <li><a asp-area="" asp-controller="AccountDashboard" asp-action="Index"><i class="fa fa-th-large"></i> Dashboard</a></li>
+                <li><a asp-area="" asp-controller="AccountDashboard" asp-action="Orders"><i class="fa fa-shopping-bag"></i> My Orders</a></li>
+                <li><a href="#" onclick="return false;"><i class="fa fa-truck"></i> Track Order</a></li>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <li><a asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="fa fa-tachometer"></i> Admin Panel</a></li>
+            }
+            <li>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="account-dropdown__logout-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="account-dropdown__logout"><i class="fa fa-sign-out"></i> Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
 }
 else
 {
-    <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
     <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+    <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
 }

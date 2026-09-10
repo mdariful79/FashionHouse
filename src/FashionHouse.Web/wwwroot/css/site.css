@@ -29,3 +29,50 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.account-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.account-dropdown__toggle {
+    color: inherit;
+    text-decoration: none;
+}
+
+.account-dropdown__menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    min-width: 190px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border-radius: 4px;
+    padding: 8px 0;
+    margin-top: 10px;
+    z-index: 999;
+    list-style: none;
+}
+
+    .account-dropdown__menu.show {
+        display: block;
+    }
+
+    .account-dropdown__menu li a,
+    .account-dropdown__logout {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 8px 16px;
+        color: #333;
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-size: 14px;
+    }
+
+        .account-dropdown__menu li a:hover,
+        .account-dropdown__logout:hover {
+            background: #f8f8f8;
+        }

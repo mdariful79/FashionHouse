@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Fashion House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/FrontLayout/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/FrontLayout/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/account-dashboard.css" asp-append-version="true" />
+</head>
+<body style="background:#FAF8F5; font-family:'Nunito Sans', sans-serif;">
+    <nav class="acct-nav">
+        <div class="container acct-nav__inner">
+            <a class="acct-nav__brand" asp-area="" asp-controller="Home" asp-action="Index">Fashion House</a>
+            <div class="acct-nav__links">
+                <a class="acct-nav__link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "acct-nav__link--active" : "")"
+                   asp-controller="AccountDashboard" asp-action="Index">Dashboard</a>
+                <a class="acct-nav__link @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "acct-nav__link--active" : "")"
+                   asp-controller="AccountDashboard" asp-action="Orders">Orders</a>
+                <a class="acct-nav__link @(ViewContext.RouteData.Values["action"]?.ToString() == "Addresses" ? "acct-nav__link--active" : "")"
+                   asp-controller="AccountDashboard" asp-action="Addresses">Addresses</a>
+                <a class="acct-nav__shop" asp-area="" asp-controller="Home" asp-action="Index">Go to shop</a>
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/FrontLayout/js/bootstrap.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/account-dropdown.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
