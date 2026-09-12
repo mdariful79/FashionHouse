@@ -3,26 +3,25 @@
     ViewData["Title"] = "Dashboard";
 }
 
-
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row mb-6 gy-6">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title text-primary mb-2">Welcome to Fashion House, Admin 👋</h5>
-                    <p class="mb-0">Manage your catalog: categories, products, and stock levels.</p>
+                    <p class="mb-0">Manage your catalog: categories, sub categories, products, and stock levels.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row gy-6">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <p class="mb-1">Categories</p>
-                       @*  <h4 class="mb-0">@Model.CategoryCount</h4> *@
+                     @*    <h4 class="mb-0">@Model.CategoryCount</h4> *@
                     </div>
                     <div class="avatar">
                         <span class="avatar-initial rounded bg-label-primary">
@@ -35,12 +34,32 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1">Sub Categories</p>
+                      @*   <h4 class="mb-0">@Model.SubCategoryCount</h4> *@
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="icon-base bx bx-collection icon-lg"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-area="Admin" asp-controller="SubCategories" asp-action="Index" class="btn btn-sm btn-outline-info w-100">View Sub Categories</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <p class="mb-1">Products</p>
-                       @*  <h4 class="mb-0">@Model.ProductCount</h4> *@
+                      @*   <h4 class="mb-0">@Model.ProductCount</h4> *@
                     </div>
                     <div class="avatar">
                         <span class="avatar-initial rounded bg-label-success">
@@ -53,7 +72,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -73,4 +93,3 @@
         </div>
     </div>
 </div>
-

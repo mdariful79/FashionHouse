@@ -1,8 +1,6 @@
-﻿@section Styles
-{
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
-    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+﻿
+@{
+    ViewData["Title"] = "Categories";
 }
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -21,10 +19,11 @@
                     <table id="categories" class="table table-bordered table-hover w-100">
                         <thead>
                             <tr>
+                                <th>SL</th>
                                 <th>Name</th>
                                 <th>Slug</th>
                                 <th>Status</th>
-                                <th></th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -41,6 +40,10 @@
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
     <script>
         $(function () {
         $("#categories").DataTable({
@@ -56,24 +59,43 @@
         dataType: "json",
         data: function (d) { return JSON.stringify(d); }
         },
-        columnDefs: [
+        columns: [
         {
+        data: null,
         orderable: false,
-        targets: -1,
+        searchable: false,
+        render: function (data, type, row, meta) {
+        return meta.row + meta.settings._iDisplayStart + 1;
+        }
+        },
+        { data: 0 }, // Name
+        { data: 1 }, // Slug
+        {
+        data: 2, // IsActive
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        return data === 'Active'
+        ? '<span class="badge rounded-pill bg-label-success">Active</span>'
+        : '<span class="badge rounded-pill bg-label-danger">Inactive</span>';
+        }
+        },
+        {
+        data: 3,
+        orderable: false,
+        searchable: false,
         render: function (data, type, row) {
         return `
-        <div class="dropdown">
-        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        Actions
-        </button>
-        <ul class="dropdown-menu">
-        <li><a class="dropdown-item text-warning" href="/Admin/Categories/Update/${data}">Edit</a></li>
-        <li><button class="dropdown-item text-danger show-bs-modal" data-id="${data}">Delete</button></li>
-        </ul>
-        </div>`;
+        <a href="/Admin/Categories/Update/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
+        <i class="bx bx-edit"></i>
+        </a>
+        <button type="button" class="btn btn-sm btn-icon btn-outline-danger show-bs-modal" data-id="${data}" title="Delete">
+        <i class="bx bx-trash"></i>
+        </button>`;
         }
         }
         ]
+    
         });
 
         $("#categories").on('click', '.show-bs-modal', function () {

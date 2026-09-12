@@ -1,5 +1,7 @@
 ﻿using FashionHouse.Application.Features.Categories.Command;
 using FashionHouse.Application.Features.Categories.Query;
+using FashionHouse.Application.Features.SubCategories.Command;
+using FashionHouse.Application.Features.SubCategories.Query;
 using FashionHouse.Domain.Entities;
 using FashionHouse.Web.Areas.Admin.Models;
 using Mapster;
@@ -14,6 +16,11 @@ namespace FashionHouse.Web
             config.NewConfig<CategoryModel, CategoryUpdateCommand>();
             config.NewConfig<Category, CategoryModel>();
             config.NewConfig<CategoryListModel, GetAllCategoriesByPagingQuery>();
+
+            config.NewConfig<SubCategoryModel, SubCategoryAddCommand>();
+            config.NewConfig<SubCategoryModel, SubCategoryUpdateCommand>();
+            config.NewConfig<SubCategory, SubCategoryModel>();
+            config.NewConfig<SubCategoryListModel, GetAllSubCategoriesByPagingQuery>();
         }
     }
 }

@@ -11,6 +11,8 @@ namespace FashionHouse.Application.Contracts
 
         public IProductRepository ProductRepository { get; }
         public ICategoryRepository CategoryRepository { get; }
+        public ISubCategoryRepository SubCategoryRepository { get; }
+
 
     }
 }

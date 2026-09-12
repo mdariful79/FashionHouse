@@ -19,6 +19,7 @@ namespace FashionHouse.Infrastructure.Extensions
             services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
             services.AddSingleton<IFileStorageService, FileStorageService>(x => new FileStorageService(rootPath));
             services.AddSingleton<IServerTime, ServerTime>();
             services.AddScoped<IEmailService, EmailService>();

@@ -62,6 +62,12 @@
                             <div data-i18n="Categories">Categories</div>
                         </a>
                     </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SubCategories" ? "active" : "")">
+                        <a asp-area="Admin" asp-controller="SubCategories" asp-action="Index" class="menu-link">
+                                <i class="icon-base bx bx-collection icon-lg"> </i>
+                            <div data-i18n="SubCategories">Sub Categories</div>
+                        </a>
+                    </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")">
                         <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="menu-link">
                             <i class="menu-icon icon-base bx bx-package"></i>
