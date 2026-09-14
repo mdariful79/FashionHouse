@@ -8,11 +8,10 @@ namespace FashionHouse.Application.Contracts
 {
     public interface IApplicationUnitOfWork : IUnitOfWork
     {
-
-        public IProductRepository ProductRepository { get; }
         public ICategoryRepository CategoryRepository { get; }
         public ISubCategoryRepository SubCategoryRepository { get; }
-
+        public IProductRepository ProductRepository { get; }
+        public IProductImageRepository ProductImageRepository { get; }
 
     }
 }

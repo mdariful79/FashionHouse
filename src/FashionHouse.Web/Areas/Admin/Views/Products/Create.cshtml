@@ -1,0 +1,105 @@
+﻿@model FashionHouse.Web.Areas.Admin.Models.ProductModel
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card">
+        <h5 class="card-header">Add Product</h5>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" id="categorySelect" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            @foreach (var cat in Model.CategoryOptions)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SubCategoryId" class="form-label"></label>
+                        <select asp-for="SubCategoryId" id="subCategorySelect" class="form-select">
+                            <option value="">-- Select Category First --</option>
+                        </select>
+                        <span asp-validation-for="SubCategoryId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProductName" class="form-label"></label>
+                    <input asp-for="ProductName" class="form-control" />
+                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SKU" class="form-label"></label>
+                        <input asp-for="SKU" class="form-control" />
+                        <span asp-validation-for="SKU" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Price" class="form-label"></label>
+                        <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="DiscountedPrice" class="form-label"></label>
+                        <input asp-for="DiscountedPrice" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-check form-switch mb-4">
+                    <input asp-for="IsActive" class="form-check-input" role="switch" />
+                    <label asp-for="IsActive" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Save</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+            <hr class="my-4" />
+            <h6>Product Images</h6>
+            <div class="alert alert-info mb-0">
+                <i class="bx bx-info-circle"></i> Save the product first — you'll be able to upload images once it's created.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(function () {
+            $('#categorySelect').on('change', function () {
+                var categoryId = $(this).val();
+                var $subCategory = $('#subCategorySelect');
+                $subCategory.empty().append('<option value="">Loading...</option>');
+
+                if (!categoryId) {
+                    $subCategory.empty().append('<option value="">-- Select Category First --</option>');
+                    return;
+                }
+
+                $.getJSON('@Url.Action("GetSubCategoriesByCategory", "Products")', { categoryId: categoryId }, function (data) {
+                    $subCategory.empty().append('<option value="">-- Select Sub Category --</option>');
+                    $.each(data, function (i, item) {
+                        $subCategory.append(`<option value="${item.id}">${item.name}</option>`);
+                    });
+                });
+            });
+        });
+    </script>
+}

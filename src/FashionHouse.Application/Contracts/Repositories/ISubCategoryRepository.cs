@@ -10,5 +10,7 @@ namespace FashionHouse.Application.Contracts.Repositories
         Task<(IList<SubCategory>, int, int)> GetPagedSubCategories(
             Features.SubCategories.Query.GetAllSubCategoriesByPagingQuery query,
             CancellationToken cancellationToken);
+
+        Task<IList<SubCategory>> GetByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken);
     }
 }

@@ -30,5 +30,19 @@ namespace FashionHouse.Infrastructure.Data.Repositories
             else
                 return (await GetCountAsync(x => x.Name == name && x.CategoryId == categoryId && x.Id != id.Value, cancellationToken)) > 0;
         }
+
+        public async Task<IList<SubCategory>> GetByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken)
+        {
+            var (items, _, _) = await GetDynamicAsync(
+                x => x.CategoryId == categoryId && x.IsActive,
+                "Name",
+                null,
+                1,
+                int.MaxValue,
+                false,
+                cancellationToken);
+
+            return items;
+        }
     }
 }

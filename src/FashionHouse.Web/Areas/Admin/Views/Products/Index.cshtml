@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-12">
+            <partial name="_ResponsePartial" />
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="card-title mb-0">Products</h5>
+                    <a asp-area="admin" asp-controller="products" asp-action="create" class="btn btn-primary">
+                        <i class="bx bx-plus"></i> Add Product
+                    </a>
+                </div>
+                <div class="card-body table-responsive pt-0">
+                    <partial name="_ModalPartial" />
+                    <table id="productTable" class="table table-bordered table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Price (Tk)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
+    <script>
+        $(function () {
+        $("#productTable").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        autoWidth: true,
+        pagingType: "simple_numbers",
+        ajax: {
+        url: "/Admin/Products/GetPagedProducts",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: function (d) { return JSON.stringify(d); }
+        },
+        columns: [
+        {
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: function (data, type, row, meta) {
+        return meta.row + meta.settings._iDisplayStart + 1;
+        }
+        },
+        {
+        data: 0, // Image URL
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        return data
+        ? `<img src="${data}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" />`
+        : `<span class="badge bg-label-secondary">No image</span>`;
+        }
+        },
+        { data: 1 }, // ProductName
+        { data: 2 }, // SKU
+        { data: 3 }, // Price
+        {
+        data: 4, // IsActive
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        return data === 'Active'
+        ? '<span class="badge rounded-pill bg-label-success">Active</span>'
+        : '<span class="badge rounded-pill bg-label-danger">Inactive</span>';
+        }
+        },
+        {
+        data: 5, // Id
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        return `
+        <a href="/Admin/Products/Update/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
+        <i class="bx bx-edit"></i>
+        </a>
+        <button type="button" class="btn btn-sm btn-icon btn-outline-danger show-bs-modal" data-id="${data}" title="Delete">
+        <i class="bx bx-trash"></i>
+        </button>`;
+        }
+        }
+        ]
+        });
+
+        $("#productTable").on('click', '.show-bs-modal', function () {
+        let id = $(this).data('id');
+        let deleteModal = $("#delete-modal");
+        deleteModal.find('#modelLabel').text("Delete Product");
+        deleteModal.find('.modal-body p').html('Are you sure you want to delete this product?');
+        $('#delete-id').val(id);
+        $('#delete-form').attr('action', '/admin/products/delete');
+        deleteModal.modal('show');
+        });
+
+        $('#delete-btn').on('click', function () {
+        $('#delete-form').submit();
+        });
+        });
+    </script>
+}

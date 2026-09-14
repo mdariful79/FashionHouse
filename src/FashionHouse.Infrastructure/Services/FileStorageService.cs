@@ -1,93 +1,100 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using FashionHouse.Application.Contracts.Services;
+﻿using FashionHouse.Application.Contracts.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace FashionHouse.Infrastructure.Services;
-
-public class FileStorageService : IFileStorageService
+namespace FashionHouse.Infrastructure.Services
 {
-    private readonly string _rootPath;
-
-    private static readonly string[] AllowedExtensions =
+    public class FileStorageService : IFileStorageService
     {
+        private readonly string _rootPath;
+
+        private static readonly string[] AllowedExtensions =
+        {
         ".jpg",
         ".jpeg",
         ".png",
         ".webp"
     };
 
-    private const long MaxFileSize = 5 * 1024 * 1024;
+        private const long MaxFileSize = 5 * 1024 * 1024;
 
-    public FileStorageService(string rootPath)
-    {
-        _rootPath = rootPath;
-    }
+        public FileStorageService(string rootPath)
+        {
+            _rootPath = rootPath;
+        }
 
-    public async Task<string> SaveImageAsync(
-        Stream stream,
-        string originalFileName,
-        string folder,
-        CancellationToken cancellationToken = default)
-    {
-        if (stream == null || stream.Length == 0)
-            throw new Exception("Empty file.");
+        public async Task<string> SaveImageAsync(
+            Stream stream,
+            string originalFileName,
+            string folder,
+            CancellationToken cancellationToken = default)
+        {
+            if (stream == null || stream.Length == 0)
+                throw new Exception("Empty file.");
 
-        if (stream.Length > MaxFileSize)
-            throw new Exception("File too large.");
+            if (stream.Length > MaxFileSize)
+                throw new Exception("File too large.");
 
-        var extension = Path.GetExtension(originalFileName)
-            .ToLowerInvariant();
+            var extension = Path.GetExtension(originalFileName)
+                .ToLowerInvariant();
 
-        if (!AllowedExtensions.Contains(extension))
-            throw new Exception("Invalid file type.");
+            if (!AllowedExtensions.Contains(extension))
+                throw new Exception("Invalid file type.");
 
-        var fileName = $"{Guid.NewGuid():N}{extension}";
+            var fileName = $"{Guid.NewGuid():N}{extension}";
 
-        var uploadFolder = Path.Combine(
-            _rootPath,
-            "uploads",
-            folder.ToLower());
+            var uploadFolder = Path.Combine(
+                _rootPath,
+                "uploads",
+                folder.ToLower());
 
-        Directory.CreateDirectory(uploadFolder);
+            Directory.CreateDirectory(uploadFolder);
 
-        var filePath = Path.Combine(
-            uploadFolder,
-            fileName);
+            var filePath = Path.Combine(
+                uploadFolder,
+                fileName);
 
-        await using var fileStream = new FileStream(
-            filePath,
-            FileMode.Create);
+            await using var fileStream = new FileStream(
+                filePath,
+                FileMode.Create);
 
-        stream.Position = 0;
+            stream.Position = 0;
 
-        await stream.CopyToAsync(
-            fileStream,
-            cancellationToken);
+            await stream.CopyToAsync(
+                fileStream,
+                cancellationToken);
 
-        return fileName;
-    }
+            return fileName;
+        }
 
-    public Task DeleteImageAsync(string imageName, string folder, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(imageName))
+        public Task DeleteImageAsync(string imageName, string folder, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(imageName))
+                return Task.CompletedTask;
+
+            // Prevent path traversal
+            imageName = Path.GetFileName(imageName);
+
+            var uploadFolder = Path.Combine(
+                _rootPath,
+                "uploads",
+                folder.ToLowerInvariant());
+
+            var filePath = Path.Combine(
+                uploadFolder,
+                imageName);
+
+            if (!File.Exists(filePath))
+                return Task.CompletedTask;
+
+            File.Delete(filePath);
+
             return Task.CompletedTask;
-
-        // Prevent path traversal
-        imageName = Path.GetFileName(imageName);
-
-        var uploadFolder = Path.Combine(
-            _rootPath,
-            "uploads",
-            folder.ToLowerInvariant());
-
-        var filePath = Path.Combine(
-            uploadFolder,
-            imageName);
-
-        if (!File.Exists(filePath))
-            return Task.CompletedTask;
-
-        File.Delete(filePath);
-
-        return Task.CompletedTask;
+        }
     }
 }
