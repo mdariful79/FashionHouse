@@ -1,40 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-FashionHouse.Web-8e7028f0-0915-4952-b3ac-dde96dd6cfaa</UserSecretsId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-FashionHouse.Web-8e7028f0-0915-4952-b3ac-dde96dd6cfaa</UserSecretsId>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
-    <PackageReference Include="Cortex.Mediator" Version="3.1.2" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.12" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
-    <PackageReference Include="NuGet.Packaging" Version="7.9.0" />
-    <PackageReference Include="NuGet.Protocol" Version="7.9.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
+		<PackageReference Include="Cortex.Mediator" Version="3.1.2" />
+		<PackageReference Include="Mapster.DependencyInjection" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
+		<PackageReference Include="NuGet.Packaging" Version="7.9.0" />
+		<PackageReference Include="NuGet.Protocol" Version="7.9.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FashionHouse.Application\FashionHouse.Application.csproj" />
-    <ProjectReference Include="..\FashionHouse.Infrastructure\FashionHouse.Infrastructure.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FashionHouse.Application\FashionHouse.Application.csproj" />
+		<ProjectReference Include="..\FashionHouse.Infrastructure\FashionHouse.Infrastructure.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Areas\Admin\Data\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Areas\Admin\Data\" />
+	</ItemGroup>
+
+	<!--
+    User-uploaded files land in wwwroot/uploads at runtime. Without this,
+    Hot Reload / dotnet watch treats every uploaded image as a project file
+    change and force-restarts the app mid-request (looks like a crash).
+  -->
+	<ItemGroup>
+		<Content Update="wwwroot/uploads/**/*" Watch="false" />
+		<Watch Remove="wwwroot/uploads/**/*.*" />
+	</ItemGroup>
 
 </Project>

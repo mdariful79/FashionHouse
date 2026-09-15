@@ -78,7 +78,23 @@
                         <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Save Changes</button>
                         <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
                     </form>
-                    
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <h5 class="card-header">
+                    Product Images
+                    <span id="imageCountBadge" class="badge bg-label-secondary ms-2">0 / 3 minimum</span>
+                </h5>
+                <div class="card-body">
+                    <div id="imageAlert" class="alert alert-warning d-none">
+                        Add at least 3 images before activating this product.
+                    </div>
+
+                    <div id="imageGrid" class="row g-3 mb-3"></div>
+
+                    <input type="file" id="imageUploadInput" class="form-control" multiple accept="image/jpeg,image/jpg,image/png,image/webp" />
+                    <small class="text-muted">You can select multiple files at once (jpg, jpeg, png, webp — max 5MB each).</small>
                 </div>
             </div>
         </div>
@@ -106,6 +122,81 @@
                         $subCategory.append(`<option value="${item.id}">${item.name}</option>`);
                     });
                 });
+            });
+
+            // ---- Image manager ----
+            const productId = '@Model.Id';
+            const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+
+            function loadImages() {
+                $.getJSON('@Url.Action("GetProductImages")', { productId: productId }, function (images) {
+                    renderImages(images);
+                });
             }
+
+            function renderImages(images) {
+                const $grid = $('#imageGrid').empty();
+
+                images.forEach(function (img) {
+                    $grid.append(`
+                        <div class="col-3 position-relative" data-id="${img.id}">
+                            <img src="${img.url}" class="img-fluid rounded ${img.isPrimary ? 'border border-primary border-3' : ''}" />
+                            <div class="mt-1 d-flex justify-content-between">
+                                <button type="button" class="btn btn-sm btn-outline-primary set-primary-btn" ${img.isPrimary ? 'disabled' : ''}>
+                                    ${img.isPrimary ? 'Primary' : 'Set Primary'}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-image-btn">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                $('#imageCountBadge').text(`${images.length} / 3 minimum`);
+                $('#imageAlert').toggleClass('d-none', images.length >= 3);
+            }
+
+            $('#imageUploadInput').on('change', function () {
+                const files = this.files;
+                if (!files.length) return;
+
+                const formData = new FormData();
+                formData.append('productId', productId);
+                $.each(files, function (i, file) {
+                    formData.append('files', file);
+                });
+                formData.append('__RequestVerificationToken', antiForgeryToken);
+
+                $.ajax({
+                    url: '@Url.Action("UploadProductImages")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        loadImages();
+                        $('#imageUploadInput').val('');
+                    },
+                    error: function (xhr) {
+                        alert(xhr.responseText || 'Failed to upload one or more images.');
+                    }
+                });
+            });
+
+            $('#imageGrid').on('click', '.delete-image-btn', function () {
+                const id = $(this).closest('[data-id]').data('id');
+                if (!confirm('Delete this image?')) return;
+
+                $.post('@Url.Action("DeleteProductImage")', { id: id, __RequestVerificationToken: antiForgeryToken }, loadImages);
+            });
+
+            $('#imageGrid').on('click', '.set-primary-btn', function () {
+                const id = $(this).closest('[data-id]').data('id');
+                $.post('@Url.Action("SetPrimaryProductImage")', { id: id, productId: productId, __RequestVerificationToken: antiForgeryToken }, loadImages);
+            });
+
+            loadImages();
+        });
     </script>
 }
