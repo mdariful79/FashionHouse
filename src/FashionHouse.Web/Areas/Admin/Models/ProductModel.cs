@@ -31,7 +31,8 @@ namespace FashionHouse.Web.Areas.Admin.Models
         public decimal? DiscountedPrice { get; set; }
 
         public bool IsActive { get; set; } = true;
-
+        [Display(Name = "Pictures")]
+        public List<IFormFile>? Images { get; set; }
         public List<CategoryOptionModel> CategoryOptions { get; set; } = new();
         public List<SubCategoryOptionModel> SubCategoryOptions { get; set; } = new();
     }

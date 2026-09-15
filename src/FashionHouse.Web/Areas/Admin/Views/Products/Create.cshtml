@@ -4,100 +4,153 @@
 }
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card">
-        <h5 class="card-header">Add Product</h5>
-        <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CategoryId" class="form-label"></label>
-                        <select asp-for="CategoryId" id="categorySelect" class="form-select">
-                            <option value="">-- Select Category --</option>
-                            @foreach (var cat in Model.CategoryOptions)
-                            {
-                                <option value="@cat.Id">@cat.Name</option>
-                            }
-                        </select>
-                        <span asp-validation-for="CategoryId" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="SubCategoryId" class="form-label"></label>
-                        <select asp-for="SubCategoryId" id="subCategorySelect" class="form-select">
-                            <option value="">-- Select Category First --</option>
-                        </select>
-                        <span asp-validation-for="SubCategoryId" class="text-danger"></span>
-                    </div>
+    <div class="row mb-6 gy-6">
+        <div class="col-xl">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Add Product</h5>
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                        Back to list
+                    </a>
                 </div>
+                <div class="card-body">
+                    <partial name="_ResponsePartial" />
 
-                <div class="mb-3">
-                    <label asp-for="ProductName" class="form-label"></label>
-                    <input asp-for="ProductName" class="form-control" />
-                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                    <form asp-area="Admin" asp-controller="Products" asp-action="Create" asp-antiforgery="true"
+                          enctype="multipart/form-data" method="post">
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="CategoryId">Category</label>
+                                <select class="form-select" asp-for="CategoryId" id="categorySelect">
+                                    <option value="">-- Select Category --</option>
+                                    @foreach (var cat in Model.CategoryOptions)
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="SubCategoryId">Sub Category</label>
+                                <select class="form-select" asp-for="SubCategoryId" id="subCategorySelect">
+                                    <option value="">-- Select Category First --</option>
+                                    @foreach (var sub in Model.SubCategoryOptions)
+                                    {
+                                        <option value="@sub.Id">@sub.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="SubCategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="ProductName">Name</label>
+                                <input type="text" class="form-control" asp-for="ProductName" placeholder="Cotton Panjabi" />
+                                <span asp-validation-for="ProductName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="SKU">SKU</label>
+                                <input type="text" class="form-control" asp-for="SKU" placeholder="PNJ-1001" />
+                                <span asp-validation-for="SKU" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="Price">Price</label>
+                                <input type="number" step="0.01" class="form-control" asp-for="Price" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="DiscountedPrice">Discounted Price</label>
+                                <input type="number" step="0.01" class="form-control" asp-for="DiscountedPrice" />
+                                <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="form-label" asp-for="Description">Description</label>
+                                <textarea class="form-control" rows="3" asp-for="Description"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label asp-for="Images" class="form-label">Product Images</label>
+                                <input asp-for="Images" name="Images" id="imageFilesInput" class="form-control" type="file"
+                                       accept=".jpg,.jpeg,.png,.webp" multiple />
+                                <small class="text-muted">
+                                    You can select multiple images. Allowed: JPG, JPEG, PNG, WEBP (max 5MB each).
+                                    The first image becomes the primary image.
+                                </small>
+                                <div id="imagePreviewGrid" class="row g-2 mt-2"></div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsActive" class="form-check-input" role="switch" />
+                                    <label asp-for="IsActive" class="form-check-label">Active</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="SKU" class="form-label"></label>
-                        <input asp-for="SKU" class="form-control" />
-                        <span asp-validation-for="SKU" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="Price" class="form-label"></label>
-                        <input asp-for="Price" class="form-control" type="number" step="0.01" />
-                        <span asp-validation-for="Price" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="DiscountedPrice" class="form-label"></label>
-                        <input asp-for="DiscountedPrice" class="form-control" type="number" step="0.01" />
-                        <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label"></label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <div class="form-check form-switch mb-4">
-                    <input asp-for="IsActive" class="form-check-input" role="switch" />
-                    <label asp-for="IsActive" class="form-check-label"></label>
-                </div>
-
-                <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Save</button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-            </form>
-            <hr class="my-4" />
-            <h6>Product Images</h6>
-            <div class="alert alert-info mb-0">
-                <i class="bx bx-info-circle"></i> Save the product first — you'll be able to upload images once it's created.
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
+    @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(function () {
+            // ---- Cascading Category -> SubCategory dropdown ----
             $('#categorySelect').on('change', function () {
                 var categoryId = $(this).val();
                 var $subCategory = $('#subCategorySelect');
-                $subCategory.empty().append('<option value="">Loading...</option>');
 
                 if (!categoryId) {
                     $subCategory.empty().append('<option value="">-- Select Category First --</option>');
                     return;
                 }
 
-                $.getJSON('@Url.Action("GetSubCategoriesByCategory", "Products")', { categoryId: categoryId }, function (data) {
-                    $subCategory.empty().append('<option value="">-- Select Sub Category --</option>');
-                    $.each(data, function (i, item) {
-                        $subCategory.append(`<option value="${item.id}">${item.name}</option>`);
+                $subCategory.empty().append('<option value="">Loading...</option>');
+
+                $.getJSON('@Url.Action("GetSubCategoriesByCategory", "Products", new { area = "Admin" })',
+                    { categoryId: categoryId },
+                    function (data) {
+                        $subCategory.empty().append('<option value="">-- Select Sub Category --</option>');
+                        $.each(data, function (i, item) {
+                            $subCategory.append($('<option>').val(item.id).text(item.name));
+                        });
                     });
+            });
+
+            // ---- Local preview of selected images before upload ----
+            $('#imageFilesInput').on('change', function () {
+                var $grid = $('#imagePreviewGrid').empty();
+                var files = this.files;
+
+                if (!files.length) return;
+
+                $.each(files, function (i, file) {
+                    if (!file.type.startsWith('image/')) return;
+
+                    var url = URL.createObjectURL(file);
+                    var $col = $(`
+                        <div class="col-3">
+                            <img class="img-fluid rounded ${i === 0 ? 'border border-primary border-3' : ''}" />
+                            ${i === 0 ? '<div class="text-primary small mt-1">Primary</div>' : ''}
+                        </div>
+                    `);
+                    $col.find('img').attr('src', url).one('load', function () {
+                        URL.revokeObjectURL(url);
+                    });
+                    $grid.append($col);
                 });
             });
         });

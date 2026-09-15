@@ -1,4 +1,5 @@
 ﻿using FashionHouse.Application.Contracts.Services;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,21 +12,15 @@ namespace FashionHouse.Infrastructure.Services
 {
     public class FileStorageService : IFileStorageService
     {
-        private readonly string _rootPath;
+        private readonly IWebHostEnvironment _environment;
 
-        private static readonly string[] AllowedExtensions =
-        {
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".webp"
-    };
+        private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
 
         private const long MaxFileSize = 5 * 1024 * 1024;
 
-        public FileStorageService(string rootPath)
+        public FileStorageService(IWebHostEnvironment environment)
         {
-            _rootPath = rootPath;
+            _environment = environment;
         }
 
         public async Task<string> SaveImageAsync(
@@ -34,41 +29,20 @@ namespace FashionHouse.Infrastructure.Services
             string folder,
             CancellationToken cancellationToken = default)
         {
-            if (stream == null || stream.Length == 0)
-                throw new Exception("Empty file.");
+            var fileName = $"{Guid.NewGuid():N}{ValidateAndGetExtension(stream, originalFileName)}";
+            await WriteFileAsync(stream, folder, fileName, cancellationToken);
+            return fileName;
+        }
 
-            if (stream.Length > MaxFileSize)
-                throw new Exception("File too large.");
-
-            var extension = Path.GetExtension(originalFileName)
-                .ToLowerInvariant();
-
-            if (!AllowedExtensions.Contains(extension))
-                throw new Exception("Invalid file type.");
-
-            var fileName = $"{Guid.NewGuid():N}{extension}";
-
-            var uploadFolder = Path.Combine(
-                _rootPath,
-                "uploads",
-                folder.ToLower());
-
-            Directory.CreateDirectory(uploadFolder);
-
-            var filePath = Path.Combine(
-                uploadFolder,
-                fileName);
-
-            await using var fileStream = new FileStream(
-                filePath,
-                FileMode.Create);
-
-            stream.Position = 0;
-
-            await stream.CopyToAsync(
-                fileStream,
-                cancellationToken);
-
+        public async Task<string> SaveImageWithNameAsync(
+            Stream stream,
+            string desiredFileNameWithoutExtension,
+            string originalFileName,
+            string folder,
+            CancellationToken cancellationToken = default)
+        {
+            var fileName = $"{desiredFileNameWithoutExtension}{ValidateAndGetExtension(stream, originalFileName)}";
+            await WriteFileAsync(stream, folder, fileName, cancellationToken);
             return fileName;
         }
 
@@ -77,24 +51,43 @@ namespace FashionHouse.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(imageName))
                 return Task.CompletedTask;
 
-            // Prevent path traversal
             imageName = Path.GetFileName(imageName);
 
-            var uploadFolder = Path.Combine(
-                _rootPath,
-                "uploads",
-                folder.ToLowerInvariant());
+            var uploadFolder = Path.Combine(_environment.WebRootPath, "uploads", folder.ToLowerInvariant());
+            var filePath = Path.Combine(uploadFolder, imageName);
 
-            var filePath = Path.Combine(
-                uploadFolder,
-                imageName);
-
-            if (!File.Exists(filePath))
-                return Task.CompletedTask;
-
-            File.Delete(filePath);
+            if (File.Exists(filePath))
+                File.Delete(filePath);
 
             return Task.CompletedTask;
+        }
+
+        private static string ValidateAndGetExtension(Stream stream, string originalFileName)
+        {
+            if (stream == null || stream.Length == 0)
+                throw new Exception("Empty file.");
+
+            if (stream.Length > MaxFileSize)
+                throw new Exception("File too large.");
+
+            var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
+
+            if (!AllowedExtensions.Contains(extension))
+                throw new Exception("Invalid file type.");
+
+            return extension;
+        }
+
+        private async Task WriteFileAsync(Stream stream, string folder, string fileName, CancellationToken cancellationToken)
+        {
+            var uploadFolder = Path.Combine(_environment.WebRootPath, "uploads", folder.ToLowerInvariant());
+            Directory.CreateDirectory(uploadFolder);
+
+            var filePath = Path.Combine(uploadFolder, fileName);
+
+            await using var fileStream = new FileStream(filePath, FileMode.Create);
+            stream.Position = 0;
+            await stream.CopyToAsync(fileStream, cancellationToken);
         }
     }
 }

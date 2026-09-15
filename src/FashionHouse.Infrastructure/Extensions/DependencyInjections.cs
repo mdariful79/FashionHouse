@@ -14,14 +14,14 @@ namespace FashionHouse.Infrastructure.Extensions
 {
     public static class DependencyInjections
     {
-        public static IServiceCollection AddInfrastructureDependency(this IServiceCollection services, string rootPath)
+        public static IServiceCollection AddInfrastructureDependency(this IServiceCollection services)
         {
             services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
-            services.AddSingleton<IFileStorageService, FileStorageService>(x => new FileStorageService(rootPath));
+            services.AddSingleton<IFileStorageService, FileStorageService>();
             services.AddSingleton<IServerTime, ServerTime>();
             services.AddScoped<IEmailService, EmailService>();
 
