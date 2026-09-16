@@ -77,21 +77,28 @@
                             </div>
 
                             <div class="col-12 mb-4">
-                                <label asp-for="Images" class="form-label">Product Images</label>
-                                <input asp-for="Images" name="Images" id="imageFilesInput" class="form-control" type="file"
-                                       accept=".jpg,.jpeg,.png,.webp" multiple />
-                                <small class="text-muted">
-                                    You can select multiple images. Allowed: JPG, JPEG, PNG, WEBP (max 5MB each).
-                                    The first image becomes the primary image.
-                                </small>
-                                <div id="imagePreviewGrid" class="row g-2 mt-2"></div>
-                            </div>
-
-                            <div class="col-12 mb-4">
                                 <div class="form-check form-switch">
                                     <input asp-for="IsActive" class="form-check-input" role="switch" />
                                     <label asp-for="IsActive" class="form-check-label">Active</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-2 mb-4">
+                            <h5 class="card-header">
+                                Product Images
+                                <span id="imageCountBadge" class="badge bg-label-secondary ms-2">0 / 3 minimum</span>
+                            </h5>
+                            <div class="card-body">
+                                <div id="imageAlert" class="alert alert-warning d-none">
+                                    Add at least 3 images before activating this product.
+                                </div>
+
+                                <div id="imageGrid" class="row g-3 mb-3"></div>
+
+                                <input type="file" id="imageUploadInput" name="imageFiles" class="form-control" multiple
+                                       accept="image/jpeg,image/jpg,image/png,image/webp" />
+                                <small class="text-muted">You can select multiple files at once (jpg, jpeg, png, webp — max 5MB each). Click "Set Primary" on any thumbnail to choose the main image.</small>
                             </div>
                         </div>
 
@@ -104,7 +111,7 @@
     </div>
 </div>
 
-    @section Scripts {
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(function () {
@@ -130,28 +137,79 @@
                     });
             });
 
-            // ---- Local preview of selected images before upload ----
-            $('#imageFilesInput').on('change', function () {
-                var $grid = $('#imagePreviewGrid').empty();
-                var files = this.files;
+            // ---- Accumulate + preview selected images before submit ----
+            // The FIRST file in this array becomes the primary image server-side
+            // (see ProductsController.SaveProductImages: first saved file with no
+            // existing primary is marked isPrimary = true). "Set Primary" just
+            // reorders this array so the chosen file is at index 0.
+            var selectedFiles = [];
+            var maxSizeBytes = 5 * 1024 * 1024;
 
-                if (!files.length) return;
+            function renderImagePreview() {
+                var $grid = $('#imageGrid').empty();
 
-                $.each(files, function (i, file) {
-                    if (!file.type.startsWith('image/')) return;
-
+                selectedFiles.forEach(function (file, idx) {
                     var url = URL.createObjectURL(file);
-                    var $col = $(`
-                        <div class="col-3">
-                            <img class="img-fluid rounded ${i === 0 ? 'border border-primary border-3' : ''}" />
-                            ${i === 0 ? '<div class="text-primary small mt-1">Primary</div>' : ''}
-                        </div>
-                    `);
+                    var isPrimary = idx === 0;
+                    var $col = $(
+                        '<div class="col-3 position-relative" data-idx="' + idx + '">' +
+                            '<img class="img-fluid rounded ' + (isPrimary ? 'border border-primary border-3' : '') + '" />' +
+                            '<div class="mt-1 d-flex justify-content-between align-items-center">' +
+                                (isPrimary
+                                    ? '<span class="small text-primary fw-semibold">Primary</span>'
+                                    : '<button type="button" class="btn btn-sm btn-outline-primary set-primary-btn">Set Primary</button>') +
+                                '<button type="button" class="btn btn-sm btn-outline-danger remove-image-btn">' +
+                                    '<i class="bx bx-trash"></i>' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>'
+                    );
                     $col.find('img').attr('src', url).one('load', function () {
                         URL.revokeObjectURL(url);
                     });
                     $grid.append($col);
                 });
+
+                $('#imageCountBadge').text(selectedFiles.length + ' / 3 minimum');
+                $('#imageAlert').toggleClass('d-none', selectedFiles.length >= 3);
+
+                syncFileInput();
+            }
+
+            // Rebuild the real <input>'s FileList so the accumulated/reordered
+            // files actually post with the form, in the current array order.
+            function syncFileInput() {
+                var dt = new DataTransfer();
+                selectedFiles.forEach(function (file) { dt.items.add(file); });
+                $('#imageUploadInput')[0].files = dt.files;
+            }
+
+            $('#imageUploadInput').on('change', function () {
+                var newFiles = Array.prototype.slice.call(this.files || []);
+
+                newFiles.forEach(function (file) {
+                    if (!file.type.startsWith('image/')) return;
+                    if (file.size > maxSizeBytes) {
+                        alert('"' + file.name + '" exceeds the 5MB size limit and was skipped.');
+                        return;
+                    }
+                    selectedFiles.push(file);
+                });
+
+                renderImagePreview();
+            });
+
+            $('#imageGrid').on('click', '.remove-image-btn', function () {
+                var idx = $(this).closest('[data-idx]').data('idx');
+                selectedFiles.splice(idx, 1);
+                renderImagePreview();
+            });
+
+            $('#imageGrid').on('click', '.set-primary-btn', function () {
+                var idx = $(this).closest('[data-idx]').data('idx');
+                var chosen = selectedFiles.splice(idx, 1)[0];
+                selectedFiles.unshift(chosen);
+                renderImagePreview();
             });
         });
     </script>

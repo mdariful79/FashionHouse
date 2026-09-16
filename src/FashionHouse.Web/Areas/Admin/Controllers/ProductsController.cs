@@ -71,7 +71,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                     TempData.Put(Constants.ResponseTempKey,
                         new ResponseModel { Message = message, Type = ResponseTypes.Success });
 
-                    return RedirectToAction(nameof(Update), new { id = createdProduct.Id });
+                    return RedirectToAction(nameof(Index)); // was: RedirectToAction(nameof(Update), new { id = createdProduct.Id });
                 }
                 catch (DuplicateDataException oex)
                 {
