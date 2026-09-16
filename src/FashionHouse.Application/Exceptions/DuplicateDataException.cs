@@ -8,6 +8,7 @@ namespace FashionHouse.Application.Exceptions
     {
         public DuplicateDataException(string message) : base(message)
         {
+           
         }
     }
 }

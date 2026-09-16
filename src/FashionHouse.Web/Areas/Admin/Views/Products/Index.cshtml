@@ -53,6 +53,7 @@
         responsive: true,
         autoWidth: true,
         pagingType: "simple_numbers",
+        order: [], // disable default sort — was implicitly sorting column 0 (SL)
         ajax: {
         url: "/Admin/Products/GetPagedProducts",
         type: "POST",
@@ -84,7 +85,7 @@
         { data: 3 }, // Price
         {
         data: 4, // IsActive
-        orderable: false,
+        orderable: true, // was false
         searchable: false,
         render: function (data) {
         return data === 'Active'

@@ -23,12 +23,20 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 cancellationToken);
         }
 
-        public async Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken)
+        //public async Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken)
+        //{
+        //    if (!id.HasValue)
+        //        return (await GetCountAsync(x => x.ProductName == productName, cancellationToken)) > 0;
+        //    else
+        //        return (await GetCountAsync(x => x.ProductName == productName && x.Id != id.Value, cancellationToken)) > 0;
+        //}
+
+        public async Task<bool> IsDuplicateSku(string sku, Guid? id, CancellationToken cancellationToken)
         {
             if (!id.HasValue)
-                return (await GetCountAsync(x => x.ProductName == productName, cancellationToken)) > 0;
+                return (await GetCountAsync(x => x.SKU == sku, cancellationToken)) > 0;
             else
-                return (await GetCountAsync(x => x.ProductName == productName && x.Id != id.Value, cancellationToken)) > 0;
+                return (await GetCountAsync(x => x.SKU == sku && x.Id != id.Value, cancellationToken)) > 0;
         }
     }
 }

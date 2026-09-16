@@ -20,16 +20,27 @@
 
         public string? FormatSortExpression(params string[] columns)
         {
+            if (Order == null || Order.Length == 0)
+                return null;
+
             var columnBuilder = new System.Text.StringBuilder();
+            var appended = false;
 
             for (int i = 0; i < Order.Length; i++)
             {
-                columnBuilder.Append(columns[Order[i].Column])
+                var columnIndex = Order[i].Column;
+
+                if (columnIndex < 0 || columnIndex >= columns.Length || string.IsNullOrWhiteSpace(columns[columnIndex]))
+                    continue;
+
+                if (appended)
+                    columnBuilder.Append(", ");
+
+                columnBuilder.Append(columns[columnIndex])
                     .Append(" ")
                     .Append(Order[i].Dir);
 
-                if (i < Order.Length - 1)
-                    columnBuilder.Append(", ");
+                appended = true;
             }
 
             var orderString = columnBuilder.ToString();

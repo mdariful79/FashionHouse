@@ -8,7 +8,9 @@ namespace FashionHouse.Application.Contracts.Repositories
 {
     public interface IProductRepository : IRepository<Product, Guid>
     {
-        Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken);
+        //Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken);
+
+        Task<bool> IsDuplicateSku(string sku, Guid? id, CancellationToken cancellationToken);
 
         Task<(IList<Product>, int, int)> GetPagedProducts(
             Features.Products.Query.GetAllProductsByPagingQuery query,

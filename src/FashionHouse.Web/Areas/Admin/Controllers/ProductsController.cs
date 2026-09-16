@@ -55,36 +55,41 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var skuExists = await _mediator.SendQueryAsync(
+                    new CheckSkuExistsQuery { SKU = model.SKU, ExcludeId = null }, cancellationToken);
+
+                if (skuExists)
                 {
-                    var command = _mapper.Map<ProductAddCommand>(model);
-                    var createdProduct = await _mediator.SendCommandAsync(command, cancellationToken);
-
-                    var (savedCount, skippedCount) = await SaveProductImages(createdProduct.Id, imageFiles, cancellationToken);
-
-                    var message = "Product successfully created.";
-                    if (savedCount > 0)
-                        message += $" {savedCount} image(s) uploaded.";
-                    if (skippedCount > 0)
-                        message += $" {skippedCount} file(s) skipped (invalid type or too large).";
-
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = message, Type = ResponseTypes.Success });
-
-                    return RedirectToAction(nameof(Index)); // was: RedirectToAction(nameof(Update), new { id = createdProduct.Id });
+                    ModelState.AddModelError(nameof(model.SKU), $"SKU '{model.SKU}' already exists.");
                 }
-                catch (DuplicateDataException oex)
+                else
                 {
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = oex.Message, Type = ResponseTypes.Danger });
-                }
-                catch (Exception ex)
-                {
-                    const string errorMessage = "Failed to create product.";
-                    _logger.LogError(ex, errorMessage);
+                    try
+                    {
+                        var command = _mapper.Map<ProductAddCommand>(model);
+                        var createdProduct = await _mediator.SendCommandAsync(command, cancellationToken);
 
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = errorMessage, Type = ResponseTypes.Danger });
+                        var (savedCount, skippedCount) = await SaveProductImages(createdProduct.Id, imageFiles, cancellationToken);
+
+                        var message = "Product successfully created.";
+                        if (savedCount > 0)
+                            message += $" {savedCount} image(s) uploaded.";
+                        if (skippedCount > 0)
+                            message += $" {skippedCount} file(s) skipped (invalid type or too large).";
+
+                        TempData.Put(Constants.ResponseTempKey,
+                            new ResponseModel { Message = message, Type = ResponseTypes.Success });
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (Exception ex)
+                    {
+                        const string errorMessage = "Failed to create product.";
+                        _logger.LogError(ex, errorMessage);
+
+                        TempData.Put(Constants.ResponseTempKey,
+                            new ResponseModel { Message = errorMessage, Type = ResponseTypes.Danger });
+                    }
                 }
             }
             else
@@ -97,7 +102,6 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
             model.SubCategoryOptions = await GetSubCategoryOptions(model.CategoryId, cancellationToken);
             return View(model);
         }
-
         public async Task<IActionResult> Update(Guid id, CancellationToken cancellationToken)
         {
             try
@@ -126,34 +130,38 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(ProductModel model, CancellationToken cancellationToken)
         {
             if (ModelState.IsValid)
             {
-                try
+                var skuExists = await _mediator.SendQueryAsync(
+                    new CheckSkuExistsQuery { SKU = model.SKU, ExcludeId = model.Id }, cancellationToken);
+
+                if (skuExists)
                 {
-                    var command = _mapper.Map<ProductUpdateCommand>(model);
-                    await _mediator.SendCommandAsync(command, cancellationToken);
-
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = "Product successfully updated.", Type = ResponseTypes.Success });
-
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError(nameof(model.SKU), $"SKU '{model.SKU}' already exists.");
                 }
-                catch (DuplicateDataException oex)
+                else
                 {
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = oex.Message, Type = ResponseTypes.Danger });
-                }
-                catch (Exception ex)
-                {
-                    const string errorMessage = "Failed to update product.";
-                    _logger.LogError(ex, errorMessage);
+                    try
+                    {
+                        var command = _mapper.Map<ProductUpdateCommand>(model);
+                        await _mediator.SendCommandAsync(command, cancellationToken);
 
-                    TempData.Put(Constants.ResponseTempKey,
-                        new ResponseModel { Message = errorMessage, Type = ResponseTypes.Danger });
+                        TempData.Put(Constants.ResponseTempKey,
+                            new ResponseModel { Message = "Product successfully updated.", Type = ResponseTypes.Success });
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (Exception ex)
+                    {
+                        const string errorMessage = "Failed to update product.";
+                        _logger.LogError(ex, errorMessage);
+
+                        TempData.Put(Constants.ResponseTempKey,
+                            new ResponseModel { Message = errorMessage, Type = ResponseTypes.Danger });
+                    }
                 }
             }
             else
@@ -174,7 +182,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
             {
                 var query = _mapper.Map<GetAllProductsByPagingQuery>(model);
                 query.SearchText = model.Search.Value;
-                query.SortText = model.FormatSortExpression("ProductName", "ProductName", "SKU", "Price", "IsActive");
+               query.SortText = model.FormatSortExpression(null, null, "ProductName", "SKU", "Price", "IsActive");
 
                 var (items, total, totalDisplay) = await _mediator.SendQueryAsync<GetAllProductsByPagingQuery,
                     (IList<Product>, int, int)>(query, cancellationToken);
