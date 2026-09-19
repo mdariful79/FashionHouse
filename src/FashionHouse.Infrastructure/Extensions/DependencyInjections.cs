@@ -24,7 +24,7 @@ namespace FashionHouse.Infrastructure.Extensions
             services.AddSingleton<IFileStorageService, FileStorageService>();
             services.AddSingleton<IServerTime, ServerTime>();
             services.AddScoped<IEmailService, EmailService>();
-
+            services.AddScoped<IInventoryRepository, InventoryRepository>();
 
             return services;
         }

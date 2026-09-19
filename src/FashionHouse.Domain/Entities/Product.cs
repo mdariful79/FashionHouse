@@ -23,7 +23,7 @@ namespace FashionHouse.Domain.Entities
         //Navigation
         public Category Category { get; set; }
         public SubCategory SubCategory { get; set; }
-        //public Inventory? Inventory { get; set; }
+        public Inventory? Inventory { get; set; }
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
         //public ICollection<StockTransaction> StockTransactions { get; set; } = new List<StockTransaction>();
     }

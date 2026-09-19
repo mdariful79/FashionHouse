@@ -18,6 +18,7 @@ namespace FashionHouse.Infrastructure.Data
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -39,6 +40,16 @@ namespace FashionHouse.Infrastructure.Data
                 .WithMany(x => x.ProductImages)
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Inventory>()
+                .HasOne(x => x.Product)
+                .WithOne(x => x.Inventory)
+                .HasForeignKey<Inventory>(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Inventory>()
+                .HasIndex(x => x.ProductId)
+                .IsUnique();
 
             builder.Entity<ApplicationRole>().HasData(Seeds.RoleSeeds.GetRoles());
         }

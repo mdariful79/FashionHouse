@@ -1,5 +1,6 @@
 ﻿using FashionHouse.Application.Features.Categories.Command;
 using FashionHouse.Application.Features.Categories.Query;
+using FashionHouse.Application.Features.Inventories.Command;
 using FashionHouse.Application.Features.Products.Command;
 using FashionHouse.Application.Features.Products.Query;
 using FashionHouse.Application.Features.SubCategories.Command;
@@ -29,6 +30,12 @@ namespace FashionHouse.Web
             config.NewConfig<ProductModel, ProductUpdateCommand>();
             config.NewConfig<Product, ProductModel>();
             config.NewConfig<ProductListModel, GetAllProductsByPagingQuery>();
+
+            // Inventory
+            config.NewConfig<InventoryModel, InventoryAddCommand>();
+            config.NewConfig<InventoryModel, InventoryUpdateCommand>();
+            config.NewConfig<Inventory, InventoryModel>()
+                .Map(dest => dest.ProductName, src => src.Product != null ? src.Product.ProductName : "");
         }
     }
 }

@@ -22,7 +22,6 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 true,
                 cancellationToken);
         }
-
         //public async Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken)
         //{
         //    if (!id.HasValue)
@@ -37,6 +36,14 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 return (await GetCountAsync(x => x.SKU == sku, cancellationToken)) > 0;
             else
                 return (await GetCountAsync(x => x.SKU == sku && x.Id != id.Value, cancellationToken)) > 0;
+        }
+        public async Task<IList<Product>> GetActiveWithoutInventoryAsync(CancellationToken cancellationToken)
+        {
+            var (items, _, _) = await GetDynamicAsync(
+                x => x.IsActive && x.Inventory == null,
+                "ProductName", null, 1, int.MaxValue, false, cancellationToken);
+
+            return items;
         }
     }
 }

@@ -14,16 +14,18 @@ namespace FashionHouse.Infrastructure.Data
         public ISubCategoryRepository SubCategoryRepository { get; private set; }
         public IProductRepository ProductRepository { get; private set; }
         public IProductImageRepository ProductImageRepository { get; private set; }
+        public IInventoryRepository InventoryRepository { get; private set; }
 
         public ApplicationUnitOfWork(ApplicationDbContext dbContext, IProductRepository productRepository,
            ICategoryRepository categoryRepository, ISubCategoryRepository subCategoryRepository,
-           IProductImageRepository productImageRepository)
+           IProductImageRepository productImageRepository, IInventoryRepository inventoryRepository)
            : base(dbContext)
         {
             CategoryRepository = categoryRepository;
             SubCategoryRepository = subCategoryRepository;
             ProductRepository = productRepository;
             ProductImageRepository = productImageRepository;
+            InventoryRepository = inventoryRepository;
         }
     }
 }

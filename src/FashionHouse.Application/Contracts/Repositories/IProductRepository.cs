@@ -11,6 +11,7 @@ namespace FashionHouse.Application.Contracts.Repositories
         //Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken);
 
         Task<bool> IsDuplicateSku(string sku, Guid? id, CancellationToken cancellationToken);
+        Task<IList<Product>> GetActiveWithoutInventoryAsync(CancellationToken cancellationToken);
 
         Task<(IList<Product>, int, int)> GetPagedProducts(
             Features.Products.Query.GetAllProductsByPagingQuery query,
