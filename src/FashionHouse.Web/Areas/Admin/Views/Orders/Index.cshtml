@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-12">
+            <partial name="_ResponsePartial" />
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="card-title mb-0">Orders</h5>
+                    <select id="statusFilter" class="form-select" style="width:auto;">
+                        <option value="">All statuses</option>
+                        <option value="1">Pending</option>
+                        <option value="2">Confirmed</option>
+                        <option value="3">Processing</option>
+                        <option value="4">Shipped</option>
+                        <option value="5">Delivered</option>
+                        <option value="6">Cancelled</option>
+                        <option value="7">Returned</option>
+                    </select>
+                </div>
+                <div class="card-body table-responsive pt-0">
+                    <table id="orderTable" class="table table-bordered table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Placed On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
+    <script>
+        $(function () {
+        var table = $("#orderTable").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        autoWidth: true,
+        pagingType: "simple_numbers",
+        order: [[6, 'desc']],
+        ajax: {
+        url: "/Admin/Orders/GetPagedOrders",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: function (d) {
+        d.StatusFilter = $("#statusFilter").val() || null;
+        return JSON.stringify(d);
+        }
+        },
+        columns: [
+        { data: 0 }, // Order #
+        { data: 1 }, // Customer
+        { data: 2 }, // Items
+        {
+        data: 3, // Total
+        render: function (data) { return 'Tk ' + data; }
+        },
+        {
+        data: 4, // Status
+        render: function (data) {
+        var map = { Pending: 'secondary', Confirmed: 'info', Processing: 'primary',
+        Shipped: 'warning', Delivered: 'success', Cancelled: 'danger', Returned: 'dark' };
+        return `<span class="badge bg-label-${map[data] || 'secondary'}">${data}</span>`;
+        }
+        },
+        {
+        data: 5, // Payment
+        render: function (data) {
+        var map = { Pending: 'secondary', Paid: 'success', Failed: 'danger', Refunded: 'warning' };
+        return `<span class="badge bg-label-${map[data] || 'secondary'}">${data}</span>`;
+        }
+        },
+        { data: 6, orderable: false }, // Placed On
+        {
+        data: 7, // Id
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        return `<a href="/Admin/Orders/Details/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="View">
+        <i class="bx bx-show"></i>
+        </a>`;
+        }
+        }
+        ]
+        });
+
+        $("#statusFilter").on('change', function () {
+        table.ajax.reload();
+        });
+        });
+    </script>
+}

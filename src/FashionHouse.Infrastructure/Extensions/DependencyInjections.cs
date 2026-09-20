@@ -25,6 +25,10 @@ namespace FashionHouse.Infrastructure.Extensions
             services.AddSingleton<IServerTime, ServerTime>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IInventoryRepository, InventoryRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IAddressRepository, AddressRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
             return services;
         }

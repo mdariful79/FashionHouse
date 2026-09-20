@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Order Placed";
+}
+
+<section class="checkout spad">
+    <div class="container text-center">
+        <h3>Thank you for your order!</h3>
+        <p>Your order number is <strong>@ViewBag.OrderNumber</strong>.</p>
+        <a asp-controller="AccountDashboard" asp-action="Orders" class="primary-btn">View My Orders</a>
+    </div>
+</section>

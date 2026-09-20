@@ -1,0 +1,73 @@
+﻿@model FashionHouse.Web.Models.Checkout.CheckoutModel
+@{
+    ViewData["Title"] = "Checkout";
+    var subTotal = Model.Cart.CartItems.Sum(x => (x.Product.DiscountedPrice ?? x.Product.Price) * x.Quantity);
+}
+
+<section class="checkout spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7">
+                <h5>Shipping Address</h5>
+
+                @if (Model.Addresses.Any())
+                {
+                    <form asp-action="PlaceOrder" method="post" id="placeOrderForm">
+                        @foreach (var address in Model.Addresses)
+                        {
+                            <label class="address-option">
+                                <input type="radio" name="addressId" value="@address.Id"
+                                @(address.Id == Model.SelectedAddressId ? "checked" : "") required />
+                                <strong>@address.FullName</strong> — @address.Phone<br />
+                                @address.FullAddress, @address.District @address.PostalCode
+                                @if (address.IsDefault)
+                                {
+                                    <span class="badge">Default</span>
+                                }
+                            </label>
+                        }
+
+                        <h6 class="mt-4">Payment Method</h6>
+                        <select name="paymentMethod">
+                            <option value="Cash on Delivery">Cash on Delivery</option>
+                        </select>
+
+                        <h6 class="mt-4">Order Notes</h6>
+                        <textarea name="notes" placeholder="Any notes about your order"></textarea>
+
+                        <button type="submit" class="primary-btn mt-4">Place Order</button>
+                    </form>
+                }
+                else
+                {
+                    <p>You don't have any saved addresses yet. Add one to continue.</p>
+                }
+
+                <h6 class="mt-5">Add a new address</h6>
+                <form asp-action="AddAddress" method="post">
+                    <input type="text" name="FullName" placeholder="Full Name" required />
+                    <input type="text" name="Phone" placeholder="Phone Number" required />
+                    <input type="text" name="FullAddress" placeholder="Full Address" required />
+                    <input type="text" name="District" placeholder="District" required />
+                    <input type="text" name="PostalCode" placeholder="Postal Code" />
+                    <label><input type="checkbox" name="IsDefault" value="true" /> Set as default</label>
+                    <button type="submit" class="primary-btn">Save Address</button>
+                </form>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="checkout__order">
+                    <h6>Your Order</h6>
+                    <ul>
+                        @foreach (var item in Model.Cart.CartItems)
+                        {
+                            var lineTotal = (item.Product.DiscountedPrice ?? item.Product.Price) * item.Quantity;
+                            <li>@item.Product.ProductName × @item.Quantity <span>Tk @lineTotal.ToString("N0")</span></li>
+                        }
+                        <li class="total"><strong>Total</strong> <span>Tk @subTotal.ToString("N0")</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

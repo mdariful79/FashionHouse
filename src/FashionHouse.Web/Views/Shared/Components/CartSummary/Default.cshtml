@@ -1,0 +1,5 @@
+﻿@model FashionHouse.Web.ViewComponents.CartSummaryModel
+<a asp-area="" asp-controller="Cart" asp-action="Index">
+    <img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>@Model.ItemCount</span>
+</a>
+<div class="price">Tk @Model.Total.ToString("N0")</div>

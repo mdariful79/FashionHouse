@@ -1,24 +1,68 @@
-﻿@{
+﻿@model FashionHouse.Web.Models.Shop.ShopIndexModel
+@{
     ViewData["Title"] = "Shop";
 }
+<style>
+    .product__item .fh-namecart {
+        display: block !important;
+        min-height: 22px;
+        margin: 0 0 8px 0 !important;
+    }
 
-<!-- Breadcrumb Section Begin -->
-<section class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb__text">
-                    <h4>Shop</h4>
-                    <div class="breadcrumb__links">
-                        <a asp-controller="Home" asp-action="Index">Home</a>
-                        <span>Shop</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Breadcrumb Section End -->
+        .product__item .fh-namecart .fh-name {
+            display: block !important;
+            position: static !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: none !important;
+            color: #111111 !important;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 22px;
+            text-decoration: none;
+        }
+
+        .product__item .fh-namecart .fh-cart {
+            display: none !important;
+            margin: 0 !important;
+        }
+
+        .product__item .fh-namecart .fh-cart-btn {
+            position: static !important;
+            opacity: 1 !important;
+            background: none;
+            border: 0;
+            padding: 0;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 22px;
+            color: #e53637 !important;
+            cursor: pointer;
+        }
+
+    /* Hover: swap name for Add To Cart */
+    .product__item:hover .fh-namecart .fh-name {
+        display: none !important;
+    }
+
+    .product__item:hover .fh-namecart .fh-cart {
+        display: block !important;
+    }
+
+    /* Touch devices have no hover: show both */
+    @@media (hover: none) {
+        .product__item:hover .fh-namecart .fh-name,
+        .product__item .fh-namecart .fh-name {
+            display: block !important;
+        }
+
+        .product__item .fh-namecart .fh-cart,
+        .product__item:hover .fh-namecart .fh-cart {
+            display: block !important;
+            margin-top: 4px !important;
+        }
+    }
+</style>
 <!-- Shop Section Begin -->
 <section class="shop spad">
     <div class="container">
@@ -31,9 +75,6 @@
                             <button type="submit"><span class="icon_search"></span></button>
                         </form>
                     </div>
-                    @* TODO: wire Categories/Branding/Price/Size/Colors/Tags filters
-                       to real Category/Product data once catalog browsing (filter + query)
-                       is implemented. Left static for now. *@
                     <div class="shop__sidebar__accordion">
                         <div class="accordion" id="accordionExample">
                             <div class="card">
@@ -159,7 +200,14 @@
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__left">
-                                <p>Showing 1–12 of 126 results</p>
+                                @if (Model.TotalItems > 0)
+                                {
+                                    <p>Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1)–@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalItems)) of @Model.TotalItems results</p>
+                                }
+                                else
+                                {
+                                    <p>No results found</p>
+                                }
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-6">
@@ -175,45 +223,44 @@
                     </div>
                 </div>
 
-                @* TODO: replace this static block with a foreach over Model.Products
-                   (from IProductRepository / a paged product query) once catalog
-                   listing is wired up. *@
                 <div class="row">
-                    @{
-                        var products = new[]
-                        {
-                            new { Img = "product-2.jpg",  Name = "Piqué Biker Jacket",      Price = "$67.24", Sale = false },
-                            new { Img = "product-3.jpg",  Name = "Multi-pocket Chest Bag",  Price = "$43.48", Sale = true  },
-                            new { Img = "product-4.jpg",  Name = "Diagonal Textured Cap",   Price = "$60.9",  Sale = false },
-                            new { Img = "product-6.jpg",  Name = "Ankle Boots",             Price = "$98.49", Sale = true  },
-                            new { Img = "product-7.jpg",  Name = "T-shirt Contrast Pocket", Price = "$49.66", Sale = false },
-                            new { Img = "product-8.jpg",  Name = "Basic Flowing Scarf",     Price = "$26.28", Sale = false },
-                            new { Img = "product-9.jpg",  Name = "Piqué Biker Jacket",      Price = "$67.24", Sale = false },
-                            new { Img = "product-10.jpg", Name = "Multi-pocket Chest Bag",  Price = "$43.48", Sale = true  },
-                            new { Img = "product-11.jpg", Name = "Diagonal Textured Cap",   Price = "$60.9",  Sale = false },
-                            new { Img = "product-12.jpg", Name = "Ankle Boots",             Price = "$98.49", Sale = true  },
-                            new { Img = "product-13.jpg", Name = "T-shirt Contrast Pocket", Price = "$49.66", Sale = false },
-                            new { Img = "product-14.jpg", Name = "Basic Flowing Scarf",     Price = "$26.28", Sale = false },
-                        };
-                    }
-                    @foreach (var p in products)
+                    @if (!Model.Products.Any())
                     {
+                        <div class="col-lg-12">
+                            <p>No products found.</p>
+                        </div>
+                    }
+                    @foreach (var p in Model.Products)
+                    {
+                        var primaryImage = p.ProductImages.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.DisplayOrder).FirstOrDefault();
+                        var onSale = p.DiscountedPrice.HasValue && p.DiscountedPrice < p.Price;
+
                         <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item @(p.Sale ? "sale" : "")">
-                                <div class="product__item__pic set-bg" data-setbg="@Url.Content($"~/FrontLayout/img/product/{p.Img}")">
-                                    @if (p.Sale)
+                            <div class="product__item @(onSale ? "sale" : "")">
+                                <div class="product__item__pic set-bg"
+                                     data-setbg="@(primaryImage != null ? Url.Content($"~/uploads/products/{primaryImage.ImageUrl}") : Url.Content("~/FrontLayout/img/product/product-2.jpg"))">
+                                    @if (onSale)
                                     {
                                         <span class="label">Sale</span>
                                     }
                                     <ul class="product__hover">
                                         <li><a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a></li>
                                         <li><a href="#"><img src="~/FrontLayout/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                        <li><a href="#"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
+                                        <li><a asp-action="ShopDetails" asp-route-id="@p.Id"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
                                     </ul>
                                 </div>
                                 <div class="product__item__text">
-                                    <h6>@p.Name</h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
+                                    <div class="fh-namecart">
+                                        <a class="fh-name" asp-action="ShopDetails" asp-route-id="@p.Id">@(string.IsNullOrWhiteSpace(p.ProductName) ? "(No name)" : p.ProductName)</a>
+
+                                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="fh-cart">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@p.Id" />
+                                            <input type="hidden" name="quantity" value="1" />
+                                            <button type="submit" class="fh-cart-btn">+ Add To Cart</button>
+                                        </form>
+                                    </div>
+
                                     <div class="rating">
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
@@ -221,24 +268,37 @@
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
                                     </div>
-                                    <h5>@p.Price</h5>
+
+                                    @if (onSale)
+                                    {
+                                        <h5>
+                                            Tk @p.DiscountedPrice!.Value.ToString("N0")
+                                            <span style="text-decoration:line-through; opacity:.5; margin-left:6px;">Tk @p.Price.ToString("N0")</span>
+                                        </h5>
+                                    }
+                                    else
+                                    {
+                                        <h5>Tk @p.Price.ToString("N0")</h5>
+                                    }
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="product__pagination">
-                            <a class="active" href="#">1</a>
-                            <a href="#">2</a>
-                            <a href="#">3</a>
-                            <span>...</span>
-                            <a href="#">21</a>
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="product__pagination">
+                                @for (var i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <a class="@(i == Model.CurrentPage ? "active" : "")" asp-action="Index" asp-route-page="@i">@i</a>
+                                }
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </div>

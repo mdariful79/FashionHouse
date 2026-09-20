@@ -50,9 +50,9 @@
             <a href="#" class="search-switch"><img src="~/FrontLayout/img/icon/search.png" alt=""></a>
             <a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a>
             <a asp-area="" asp-controller="Cart" asp-action="Index">
-                <img src="~/FrontLayout/img/icon/cart.png" alt=""> <span>0</span>
+                @await Component.InvokeAsync("CartSummary")
             </a>
-            <div class="price">$0.00</div>
+            <div class="price">Tk @(await Component.InvokeAsync("CartSummary")) ...</div>
         </div>
         <div id="mobile-menu-wrap"></div>
         <div class="offcanvas__text">

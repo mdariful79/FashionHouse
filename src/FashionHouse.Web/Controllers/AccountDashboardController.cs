@@ -1,9 +1,11 @@
-﻿using FashionHouse.Infrastructure.Identity;
+﻿using Cortex.Mediator;
+using FashionHouse.Application.Features.Addresses.Command;
+using FashionHouse.Application.Features.Addresses.Query;
+using FashionHouse.Infrastructure.Identity;
 using FashionHouse.Web.Models.AccountDashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 
 namespace FashionHouse.Web.Controllers
 {
@@ -12,14 +14,16 @@ namespace FashionHouse.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IMediator _mediator;
 
-        public AccountDashboardController(UserManager<ApplicationUser> userManager, 
-            SignInManager<ApplicationUser> signInManager)
+        public AccountDashboardController(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager, IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _mediator = mediator;
         }
-        
+
 
         public async Task<IActionResult> Index()
         {
@@ -115,8 +119,117 @@ namespace FashionHouse.Web.Controllers
             TempData["StatusMessage"] = "Your profile has been updated.";
             return RedirectToAction(nameof(Index));
         }
-        public IActionResult Orders() => View();
+        
+        public async Task<IActionResult> Addresses(CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
-        public IActionResult Addresses() => View();
+            var addresses = await _mediator.SendQueryAsync(new GetAddressesByCustomerIdQuery { CustomerId = user.Id }, cancellationToken);
+
+            return View(addresses);
+        }
+
+        [HttpGet]
+        public IActionResult AddAddress()
+        {
+            return View(new AddressFormModel());
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAddress(AddressFormModel model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            await _mediator.SendCommandAsync(new AddressAddCommand
+            {
+                CustomerId = user.Id,
+                FullName = model.FullName,
+                Phone = model.Phone,
+                FullAddress = model.FullAddress,
+                District = model.District,
+                PostalCode = model.PostalCode,
+                IsDefault = model.IsDefault
+            }, cancellationToken);
+
+            TempData["StatusMessage"] = "Address added.";
+            return RedirectToAction(nameof(Addresses));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditAddress(Guid id, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var address = await _mediator.SendQueryAsync(new GetAddressByIdQuery { Id = id }, cancellationToken);
+
+            if (address is null || address.CustomerId != user.Id)
+                return NotFound();
+
+            var model = new AddressFormModel
+            {
+                Id = address.Id,
+                FullName = address.FullName,
+                Phone = address.Phone,
+                FullAddress = address.FullAddress,
+                District = address.District,
+                PostalCode = address.PostalCode,
+                IsDefault = address.IsDefault
+            };
+
+            return View(model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAddress(AddressFormModel model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            try
+            {
+                await _mediator.SendCommandAsync(new AddressUpdateCommand
+                {
+                    Id = model.Id,
+                    CustomerId = user.Id,
+                    FullName = model.FullName,
+                    Phone = model.Phone,
+                    FullAddress = model.FullAddress,
+                    District = model.District,
+                    PostalCode = model.PostalCode,
+                    IsDefault = model.IsDefault
+                }, cancellationToken);
+
+                TempData["StatusMessage"] = "Address updated.";
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError(string.Empty, "Could not update this address.");
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Addresses));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAddress(Guid id, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            await _mediator.SendCommandAsync(new AddressDeleteCommand { Id = id, CustomerId = user.Id }, cancellationToken);
+
+            TempData["StatusMessage"] = "Address removed.";
+            return RedirectToAction(nameof(Addresses));
+        }
+        public IActionResult Orders() => View();
     }
 }

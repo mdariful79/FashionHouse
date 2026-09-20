@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MaleFashion.Controllers
+namespace FashionHouse.Controllers
 {
     public class BlogController : Controller
     {

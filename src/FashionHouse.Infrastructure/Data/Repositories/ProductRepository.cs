@@ -1,6 +1,7 @@
 ﻿using FashionHouse.Application.Contracts.Repositories;
 using FashionHouse.Application.Features.Products.Query;
 using FashionHouse.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace FashionHouse.Infrastructure.Data.Repositories
 {
@@ -44,6 +45,19 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 "ProductName", null, 1, int.MaxValue, false, cancellationToken);
 
             return items;
+        }
+        public async Task<(IList<Product>, int, int)> GetActiveForShopAsync(GetActiveProductsForShopQuery query, CancellationToken cancellationToken)
+        {
+            return await GetDynamicAsync(
+                x => x.IsActive
+                     && (!query.CategoryId.HasValue || x.CategoryId == query.CategoryId.Value)
+                     && (string.IsNullOrEmpty(query.SearchText) || x.ProductName.Contains(query.SearchText)),
+                "ProductName",
+                q => q.Include(p => p.ProductImages),
+                query.PageIndex,
+                query.PageSize,
+                true,
+                cancellationToken);
         }
     }
 }

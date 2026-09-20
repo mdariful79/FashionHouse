@@ -1,22 +1,44 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Cortex.Mediator;
+using FashionHouse.Application.Features.Products.Query;
+using FashionHouse.Web.Models.Shop;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FashionHouse.Web.Controllers
 {
     public class ShopController : Controller
     {
-        // GET: /Shop
-        public IActionResult Index()
+        private readonly IMediator _mediator;
+
+        public ShopController(IMediator mediator)
         {
-            // TODO: replace static placeholder products below with real data
-            // via IProductRepository / a Products query once product listing
-            // (with paging/filtering) is wired up.
-            return View();
+            _mediator = mediator;
         }
-        public IActionResult ShopDetails()
+
+        public async Task<IActionResult> Index(int page = 1, CancellationToken cancellationToken = default)
         {
-            // TODO: replace static placeholder products below with real data
-            // via IProductRepository / a Products query once product listing
-            // (with paging/filtering) is wired up.
+            const int pageSize = 12;
+
+            var (products, total, _) = await _mediator.SendQueryAsync(new GetActiveProductsForShopQuery
+            {
+                PageIndex = page,
+                PageSize = pageSize
+            }, cancellationToken);
+
+            var model = new ShopIndexModel
+            {
+                Products = products,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(total / (double)pageSize),
+                TotalItems = total,
+                PageSize = pageSize
+            };
+
+            return View(model);
+        }
+
+        public IActionResult ShopDetails(Guid id)
+        {
+            // TODO: load the single product by id (next step)
             return View();
         }
     }

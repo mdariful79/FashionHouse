@@ -1,4 +1,6 @@
-﻿using FashionHouse.Application.Contracts.Services;
+﻿using Cortex.Mediator;
+using FashionHouse.Application.Contracts.Services;
+using FashionHouse.Application.Features.Customers.Command;
 using FashionHouse.Infrastructure.Identity;
 using FashionHouse.Web.Models.Account;
 using MapsterMapper;
@@ -20,14 +22,15 @@ namespace FashionHouse.Web.Controllers
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
-
+        private readonly IMediator _mediator;
         public AccountController(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             //IEmailService emailService,
-            IMapper mapper)
+            IMapper mapper,
+            IMediator mediator)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -35,8 +38,8 @@ namespace FashionHouse.Web.Controllers
             _signInManager = signInManager;
             _logger = logger;
             //_emailService = emailService;
-            _mapper = mapper
-            ;
+            _mapper = mapper;
+            _mediator = mediator;
         }
         public async Task<IActionResult> Register(string? returnUrl = null)
         {
@@ -67,6 +70,14 @@ namespace FashionHouse.Web.Controllers
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, "Customer");
+
+                    await _mediator.SendCommandAsync(new CustomerAddCommand
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = model.Email
+                    }, CancellationToken.None);
 
                     var age = DateTime.Now.Year - model.DateOfBirth.Year;
                     await _userManager.AddClaimAsync(user, new Claim("age", age.ToString()));

@@ -13,6 +13,10 @@ namespace FashionHouse.Application.Contracts
         public IProductRepository ProductRepository { get; }
         public IProductImageRepository ProductImageRepository { get; }
         public IInventoryRepository InventoryRepository { get; }
+        public ICustomerRepository CustomerRepository { get; }
+        public IAddressRepository AddressRepository { get; }
+        public ICartRepository CartRepository { get; }
+        public IOrderRepository OrderRepository { get; }   
 
     }
 }

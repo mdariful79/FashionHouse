@@ -1,4 +1,5 @@
-﻿using FashionHouse.Domain.Contracts;
+﻿using FashionHouse.Application.Features.Products.Query;
+using FashionHouse.Domain.Contracts;
 using FashionHouse.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace FashionHouse.Application.Contracts.Repositories
 
         Task<bool> IsDuplicateSku(string sku, Guid? id, CancellationToken cancellationToken);
         Task<IList<Product>> GetActiveWithoutInventoryAsync(CancellationToken cancellationToken);
+        Task<(IList<Product>, int, int)> GetActiveForShopAsync(GetActiveProductsForShopQuery query, CancellationToken cancellationToken);
 
         Task<(IList<Product>, int, int)> GetPagedProducts(
             Features.Products.Query.GetAllProductsByPagingQuery query,
