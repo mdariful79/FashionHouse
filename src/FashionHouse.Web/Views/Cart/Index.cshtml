@@ -2,84 +2,523 @@
 @{
     ViewData["Title"] = "Shopping Cart";
     var subTotal = Model.CartItems.Sum(x => (x.Product.DiscountedPrice ?? x.Product.Price) * x.Quantity);
+    var itemCount = Model.CartItems.Count;
 }
 
-<section class="shopping-cart spad">
+<style>
+    .fh-cart-page {
+        --fh-accent: #e53637;
+        --fh-ink: #111111;
+        --fh-muted: #6b6f76;
+        --fh-line: #eceef1;
+        --fh-soft: #f7f8fa;
+        --fh-radius: 18px;
+    }
+
+    .fh-cart-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 28px;
+    }
+
+        .fh-cart-head h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+        .fh-cart-head span {
+            color: var(--fh-muted);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+    .fh-cart-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* Line items */
+    .fh-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .fh-line {
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 20px;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: var(--fh-radius);
+        transition: box-shadow .25s ease, border-color .2s ease;
+    }
+
+        .fh-line:hover {
+            border-color: #dfe2e7;
+            box-shadow: 0 12px 28px rgba(17, 17, 17, .06);
+        }
+
+    .fh-line__img {
+        width: 104px;
+        height: 104px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--fh-soft);
+        display: grid;
+        place-items: center;
+        color: #b6bbc2;
+    }
+
+        .fh-line__img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .fh-line__img svg {
+            width: 34px;
+            height: 34px;
+        }
+
+    .fh-line__info h6 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+    .fh-line__unit {
+        margin: 0 0 10px;
+        color: var(--fh-muted);
+        font-size: 14px;
+    }
+
+    .fh-remove {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--fh-muted) !important;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: color .2s ease;
+    }
+
+        .fh-remove:hover {
+            color: #c62828 !important;
+        }
+
+        .fh-remove svg {
+            width: 15px;
+            height: 15px;
+        }
+
+    /* Quantity stepper */
+    .fh-qty {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--fh-line);
+        border-radius: 999px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+        .fh-qty button {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            background: transparent;
+            color: var(--fh-ink);
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+
+            .fh-qty button:hover:not(:disabled) {
+                background: var(--fh-ink);
+                color: #fff;
+            }
+
+            .fh-qty button:disabled {
+                opacity: .35;
+                cursor: not-allowed;
+            }
+
+        .fh-qty .qty-value {
+            min-width: 34px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--fh-ink);
+        }
+
+    .fh-line__total {
+        min-width: 110px;
+        text-align: right;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--fh-ink);
+    }
+
+    /* Note */
+    .fh-note {
+        margin-top: 24px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: var(--fh-radius);
+    }
+
+        .fh-note h6 {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--fh-ink);
+        }
+
+        .fh-note textarea {
+            width: 100%;
+            min-height: 92px;
+            padding: 12px 14px;
+            border: 1px solid var(--fh-line);
+            border-radius: 12px;
+            background: var(--fh-soft);
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+            .fh-note textarea:focus {
+                outline: none;
+                border-color: var(--fh-ink);
+                background: #fff;
+            }
+
+    /* Summary */
+    .fh-summary {
+        position: sticky;
+        top: 24px;
+        padding: 26px;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px rgba(17, 17, 17, .06);
+    }
+
+        .fh-summary h3 {
+            margin: 0 0 20px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+    .fh-coupon {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 22px;
+        padding: 6px;
+        border: 1px solid var(--fh-line);
+        border-radius: 999px;
+        background: var(--fh-soft);
+    }
+
+        .fh-coupon input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            background: transparent;
+            padding: 0 14px;
+            font-size: 14px;
+        }
+
+            .fh-coupon input:focus {
+                outline: none;
+            }
+
+        .fh-coupon button {
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 18px;
+            background: var(--fh-ink);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+            .fh-coupon button:hover {
+                background: var(--fh-accent);
+            }
+
+    .fh-sum-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: var(--fh-muted);
+        font-size: 15px;
+    }
+
+        .fh-sum-row strong {
+            color: var(--fh-ink);
+            font-weight: 700;
+        }
+
+    .fh-sum-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin: 18px 0 22px;
+        padding-top: 18px;
+        border-top: 1px dashed var(--fh-line);
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+        .fh-sum-total span:last-child {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+    .fh-checkout {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        border-radius: 999px;
+        background: var(--fh-accent);
+        color: #fff !important;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-align: center;
+        text-transform: uppercase;
+        text-decoration: none !important;
+        transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+        .fh-checkout:hover {
+            background: var(--fh-ink);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(17, 17, 17, .25);
+        }
+
+    .fh-continue {
+        display: block;
+        margin-top: 14px;
+        text-align: center;
+        color: var(--fh-muted) !important;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none !important;
+    }
+
+        .fh-continue:hover {
+            color: var(--fh-ink) !important;
+        }
+
+    /* Empty */
+    .fh-empty-cart {
+        max-width: 520px;
+        margin: 20px auto;
+        padding: 56px 28px;
+        text-align: center;
+        background: var(--fh-soft);
+        border: 2px dashed #d9dce1;
+        border-radius: 24px;
+    }
+
+    .fh-empty-cart__icon {
+        display: grid;
+        place-items: center;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--fh-accent);
+        box-shadow: 0 8px 24px rgba(17, 17, 17, .08);
+    }
+
+        .fh-empty-cart__icon svg {
+            width: 36px;
+            height: 36px;
+        }
+
+    .fh-empty-cart h2 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--fh-ink);
+    }
+
+    .fh-empty-cart p {
+        margin: 0 0 24px;
+        color: var(--fh-muted);
+    }
+
+    .fh-empty-cart a {
+        display: inline-block;
+        padding: 14px 28px;
+        border-radius: 999px;
+        background: var(--fh-ink);
+        color: #fff !important;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        text-decoration: none !important;
+        transition: background .2s ease;
+    }
+
+        .fh-empty-cart a:hover {
+            background: var(--fh-accent);
+        }
+
+    /* Responsive */
+    @@media (max-width: 991px) {
+        .fh-cart-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .fh-summary {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .fh-line {
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .fh-line__img {
+            width: 84px;
+            height: 84px;
+        }
+
+        .fh-line .fh-qty {
+            grid-column: 1 / 2;
+            justify-self: start;
+        }
+
+        .fh-line__total {
+            grid-column: 2 / 3;
+            text-align: right;
+        }
+
+        .fh-cart-head h1 {
+            font-size: 26px;
+        }
+    }
+</style>
+
+<section class="fh-cart-page spad">
     <div class="container">
+        @Html.AntiForgeryToken()
+
         @if (!Model.CartItems.Any())
         {
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <p>Your cart is empty.</p>
-                    <a asp-controller="Shop" asp-action="Index" class="primary-btn">Continue Shopping</a>
+            <div class="fh-empty-cart">
+                <div class="fh-empty-cart__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                 </div>
+                <h2>Your cart is empty</h2>
+                <p>Looks like you haven't added anything yet.</p>
+                <a asp-controller="Shop" asp-action="Index">Continue Shopping</a>
             </div>
         }
         else
         {
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="shopping__cart__table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cart-items-body">
-                                @foreach (var item in Model.CartItems)
-                                {
-                                    var unitPrice = item.Product.DiscountedPrice ?? item.Product.Price;
-                                    var image = item.Product.ProductImages?.OrderByDescending(x => x.IsPrimary).FirstOrDefault()?.ImageUrl;
-                                    <tr data-cart-item-id="@item.Id">
-                                        <td class="cart__product__item">
-                                            @if (!string.IsNullOrEmpty(image))
-                                            {
-                                                <img src="~/uploads/products/@image" alt="@item.Product.ProductName">
-                                            }
-                                            <div class="cart__product__item__title">
-                                                <h6>@item.Product.ProductName</h6>
-                                                <a href="#" class="remove-item" data-cart-item-id="@item.Id">Remove</a>
-                                            </div>
-                                        </td>
-                                        <td class="cart__price">Tk @unitPrice.ToString("N0")</td>
-                                        <td class="cart__quantity">
-                                            <div class="quantity">
-                                                <button class="qty-decrease" data-cart-item-id="@item.Id">-</button>
-                                                <span class="qty-value">@item.Quantity</span>
-                                                <button class="qty-increase" data-cart-item-id="@item.Id">+</button>
-                                            </div>
-                                        </td>
-                                        <td class="cart__total line-total">Tk @((unitPrice * item.Quantity).ToString("N0"))</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+            <div class="fh-cart-head">
+                <h1>Shopping Cart</h1>
+                <span><b id="cart-count">@itemCount</b> <span id="cart-count-label">@(itemCount == 1 ? "item" : "items")</span></span>
+            </div>
+
+            <div class="fh-cart-layout">
+                <div>
+                    <div class="fh-lines" id="cart-items-body">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            var unitPrice = item.Product.DiscountedPrice ?? item.Product.Price;
+                            var image = item.Product.ProductImages?.OrderByDescending(x => x.IsPrimary).FirstOrDefault()?.ImageUrl;
+
+                            <div class="fh-line" data-cart-item-id="@item.Id">
+                                <div class="fh-line__img">
+                                    @if (!string.IsNullOrEmpty(image))
+                                    {
+                                        <img src="~/uploads/products/@image" alt="@item.Product.ProductName">
+                                    }
+                                    else
+                                    {
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+                                    }
+                                </div>
+
+                                <div class="fh-line__info">
+                                    <h6>@item.Product.ProductName</h6>
+                                    <p class="fh-line__unit">Tk @unitPrice.ToString("N0") each</p>
+                                    <a href="#" class="fh-remove remove-item" data-cart-item-id="@item.Id">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>
+                                        Remove
+                                    </a>
+                                </div>
+
+                                <div class="fh-qty">
+                                    <button type="button" class="qty-decrease" data-cart-item-id="@item.Id" aria-label="Decrease quantity" @(item.Quantity <= 1 ? "disabled" : "")>−</button>
+                                    <span class="qty-value">@item.Quantity</span>
+                                    <button type="button" class="qty-increase" data-cart-item-id="@item.Id" aria-label="Increase quantity">+</button>
+                                </div>
+
+                                <div class="fh-line__total line-total">Tk @((unitPrice * item.Quantity).ToString("N0"))</div>
+                            </div>
+                        }
                     </div>
 
-                    <div class="add__order__note">
+                    <div class="fh-note">
                         <h6>Add Order Note</h6>
                         <textarea id="orderNote" placeholder="How can we help you?"></textarea>
                     </div>
                 </div>
 
-                <div class="col-lg-4">
-                    <div class="cart__discount">
-                        <h6>Discount code</h6>
-                        <form>
-                            <input type="text" placeholder="Enter discount code">
-                            <button type="submit">Apply</button>
-                        </form>
+                <aside class="fh-summary">
+                    <h3>Order Summary</h3>
+
+                    <form class="fh-coupon">
+                        <input type="text" placeholder="Discount code">
+                        <button type="submit">Apply</button>
+                    </form>
+
+                    <div class="fh-sum-row">
+                        <span>Subtotal</span>
+                        <strong id="cart-subtotal">Tk @subTotal.ToString("N0")</strong>
+                    </div>
+                    <div class="fh-sum-row">
+                        <span>Shipping</span>
+                        <span>Calculated at checkout</span>
                     </div>
 
-                    <div class="cart__total__procced">
-                        <h6>Subtotal <span id="cart-subtotal">Tk @subTotal.ToString("N0")</span></h6>
-                        <a asp-controller="Checkout" asp-action="Index" class="primary-btn">Check out</a>
+                    <div class="fh-sum-total">
+                        <span>Total</span>
+                        <span id="cart-total">Tk @subTotal.ToString("N0")</span>
                     </div>
-                </div>
+
+                    <a asp-controller="Checkout" asp-action="Index" class="fh-checkout">Check out</a>
+                    <a asp-controller="Shop" asp-action="Index" class="fh-continue">← Continue shopping</a>
+                </aside>
             </div>
         }
     </div>
@@ -87,10 +526,8 @@
 
 @section Scripts {
     <script>
-        var antiForgeryToken = '@Html.AntiForgeryToken()';
-
         function getToken() {
-            return $('input[name="__RequestVerificationToken"]').val();
+            return $('input[name="__RequestVerificationToken"]').first().val();
         }
 
         function postJson(url, data) {
@@ -101,39 +538,57 @@
             });
         }
 
+        function money(n) {
+            return 'Tk ' + Math.round(n).toLocaleString('en-US');
+        }
+
+        function setSubtotal(value) {
+            $('#cart-subtotal').text(money(value));
+            $('#cart-total').text(money(value));
+        }
+
         $(function () {
             $('.qty-increase, .qty-decrease').on('click', function () {
-                var $row = $(this).closest('tr');
-                var cartItemId = $(this).data('cart-item-id');
+                var $btn = $(this);
+                var $row = $btn.closest('.fh-line');
+                var cartItemId = $btn.data('cart-item-id');
                 var $qtyEl = $row.find('.qty-value');
                 var qty = parseInt($qtyEl.text());
-                qty = $(this).hasClass('qty-increase') ? qty + 1 : qty - 1;
+                qty = $btn.hasClass('qty-increase') ? qty + 1 : qty - 1;
 
                 if (qty < 1) return;
+
+                var $buttons = $row.find('.qty-increase, .qty-decrease').prop('disabled', true);
 
                 postJson('/Cart/UpdateQuantity', { cartItemId: cartItemId, quantity: qty })
                     .done(function (res) {
                         if (res.success) {
                             $qtyEl.text(qty);
-                            $row.find('.line-total').text('Tk ' + Math.round(res.lineTotal));
-                            $('#cart-subtotal').text('Tk ' + Math.round(res.subTotal));
+                            $row.find('.line-total').text(money(res.lineTotal));
+                            setSubtotal(res.subTotal);
                         } else {
                             alert(res.message || 'Could not update quantity.');
                         }
+                    })
+                    .always(function () {
+                        $buttons.prop('disabled', false);
+                        $row.find('.qty-decrease').prop('disabled', parseInt($qtyEl.text()) <= 1);
                     });
             });
 
             $('.remove-item').on('click', function (e) {
                 e.preventDefault();
                 var cartItemId = $(this).data('cart-item-id');
-                var $row = $(this).closest('tr');
+                var $row = $(this).closest('.fh-line');
 
                 postJson('/Cart/RemoveItem', { cartItemId: cartItemId })
                     .done(function (res) {
                         if (res.success) {
                             $row.fadeOut(200, function () {
                                 $(this).remove();
-                                $('#cart-subtotal').text('Tk ' + Math.round(res.subTotal));
+                                setSubtotal(res.subTotal);
+                                $('#cart-count').text(res.itemCount);
+                                $('#cart-count-label').text(res.itemCount === 1 ? 'item' : 'items');
                                 if (res.itemCount === 0) location.reload();
                             });
                         }

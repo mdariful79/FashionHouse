@@ -1,5 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Shop/ShopDetails";
+﻿@model FashionHouse.Web.Models.Shop.ShopDetailsModel
+@{
+    ViewData["Title"] = Model.Product.ProductName;
+    var images = Model.Product.ProductImages.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.DisplayOrder).ToList();
+    var onSale = Model.Product.DiscountedPrice.HasValue && Model.Product.DiscountedPrice < Model.Product.Price;
 }
 
 <!-- Shop Details Section Begin -->
@@ -11,48 +14,46 @@
                     <div class="product__details__breadcrumb">
                         <a asp-controller="Home" asp-action="Index">Home</a>
                         <a asp-controller="Shop" asp-action="Index">Shop</a>
-                        <span>Product Details</span>
+                        <span>@Model.Product.ProductName</span>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-md-3">
-                    <ul class="nav nav-tabs" role="tablist">
-                        @for (int i = 0; i < Model.ThumbnailImages.Count; i++)
-                        {
-                            var tabId = $"tabs-{i + 1}";
-                            var isLast = i == Model.ThumbnailImages.Count - 1;
-                            <li class="nav-item">
-                                <a class="nav-link @(i == 0 ? "active" : "")" data-toggle="tab" href="#@tabId" role="tab">
-                                    <div class="product__thumb__pic set-bg" data-setbg="@Url.Content("~/" + Model.ThumbnailImages[i])">
-                                        @if (isLast)
-                                        {
-                                            <i class="fa fa-play"></i>
-                                        }
-                                    </div>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-                <div class="col-lg-6 col-md-9">
-                    <div class="tab-content">
-                        @for (int i = 0; i < Model.FullSizeImages.Count; i++)
-                        {
-                            var tabId = $"tabs-{i + 1}";
-                            var isLast = i == Model.FullSizeImages.Count - 1;
-                            <div class="tab-pane @(i == 0 ? "active" : "")" id="@tabId" role="tabpanel">
-                                <div class="product__details__pic__item">
-                                    <img src="~/@Model.FullSizeImages[i]" alt="">
-                                    @if (isLast)
-                                    {
-                                        <a href="@Model.VideoUrl" class="video-popup"><i class="fa fa-play"></i></a>
-                                    }
-                                </div>
-                            </div>
-                        }
+                @if (images.Any())
+                {
+                    <div class="col-lg-3 col-md-3">
+                        <ul class="nav nav-tabs" role="tablist">
+                            @for (var i = 0; i < images.Count; i++)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(i == 0 ? "active" : "")" data-toggle="tab" href="#tabs-@(i + 1)" role="tab">
+                                        <div class="product__thumb__pic set-bg" data-setbg="@Url.Content($"~/uploads/products/{images[i].ImageUrl}")"></div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
                     </div>
-                </div>
+                    <div class="col-lg-6 col-md-9">
+                        <div class="tab-content">
+                            @for (var i = 0; i < images.Count; i++)
+                            {
+                                <div class="tab-pane @(i == 0 ? "active" : "")" id="tabs-@(i + 1)" role="tabpanel">
+                                    <div class="product__details__pic__item">
+                                        <img src="~/uploads/products/@images[i].ImageUrl" alt="@Model.Product.ProductName">
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-lg-9 offset-lg-3">
+                        <div class="product__details__pic__item">
+                            <img src="~/FrontLayout/img/product/product-2.jpg" alt="@Model.Product.ProductName">
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -61,98 +62,49 @@
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-8">
                     <div class="product__details__text">
-                        <h4>@Model.Name</h4>
-                        <div class="rating">
-                            @for (int i = 0; i < 5; i++)
-                            {
-                                <i class="fa @(i < Model.RatingOutOfFive ? "fa-star" : "fa-star-o")"></i>
-                            }
-                            <span> - @Model.ReviewCount Reviews</span>
-                        </div>
-                        <h3>
-                            @Model.Price.ToString("C")
-                            @if (Model.SalePrice.HasValue)
-                            {
-                                <span>@Model.SalePrice.Value.ToString("N2")</span>
-                            }
-                        </h3>
-                        <p>@Model.Description</p>
-                        <div class="product__details__option">
-                            <div class="product__details__option__size">
-                                <span>Size:</span>
-                                @foreach (var size in Model.Sizes)
-                                {
-                                    <label class="@(size == Model.SelectedSize ? "active" : "")" for="size-@size">
-                                        @size
-                                        <input type="radio" id="size-@size" name="size" value="@size" checked="@(size == Model.SelectedSize)">
-                                    </label>
-                                }
-                            </div>
-                            <div class="product__details__option__color">
-                                <span>Color:</span>
-                                @foreach (var colorClass in Model.ColorSwatchClasses)
-                                {
-                                    <label class="@colorClass" for="color-@colorClass">
-                                        <input type="radio" id="color-@colorClass" name="color" value="@colorClass">
-                                    </label>
-                                }
-                            </div>
-                        </div>
-                        <form asp-controller="Cart" asp-action="Add" method="post">
-                            <input type="hidden" name="sku" value="@Model.Sku" />
-                            <div class="product__details__cart__option">
-                                <div class="quantity">
-                                    <div class="pro-qty">
-                                        <input type="text" name="quantity" value="1">
+                        <h4>@Model.Product.ProductName</h4>
+
+                        @if (onSale)
+                        {
+                            <h3>
+                                Tk @Model.Product.DiscountedPrice!.Value.ToString("N0")
+                                <span style="text-decoration:line-through; opacity:.5; font-size:.7em; margin-left:8px;">Tk @Model.Product.Price.ToString("N0")</span>
+                            </h3>
+                        }
+                        else
+                        {
+                            <h3>Tk @Model.Product.Price.ToString("N0")</h3>
+                        }
+
+                        <p>@Model.Product.Description</p>
+
+                        @if (Model.AvailableStock > 0)
+                        {
+                            <p class="text-success">In stock (@Model.AvailableStock available)</p>
+
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@Model.Product.Id" />
+                                <div class="product__details__cart__option">
+                                    <div class="quantity">
+                                        <div class="pro-qty">
+                                            <input type="number" name="quantity" value="1" min="1" max="@Model.AvailableStock">
+                                        </div>
                                     </div>
+                                    <button type="submit" class="primary-btn">Add to Cart</button>
                                 </div>
-                                <button type="submit" class="primary-btn">add to cart</button>
-                            </div>
-                        </form>
-                        <div class="product__details__btns__option">
-                            <a asp-controller="Wishlist" asp-action="Add" asp-route-sku="@Model.Sku">
-                                <i class="fa fa-heart"></i> add to wishlist
-                            </a>
-                            <a asp-controller="Compare" asp-action="Add" asp-route-sku="@Model.Sku">
-                                <i class="fa fa-exchange"></i> Add To Compare
-                            </a>
-                        </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <p class="text-danger">Out of stock</p>
+                        }
+
                         <div class="product__details__last__option">
-                            <h5><span>Guaranteed Safe Checkout</span></h5>
-                            <img src="~/img/shop-details/details-payment.png" alt="">
                             <ul>
-                                <li><span>SKU:</span> @Model.Sku</li>
-                                <li><span>Categories:</span> @Model.Categories</li>
-                                <li><span>Tag:</span> @Model.Tags</li>
+                                <li><span>SKU:</span> @Model.Product.SKU</li>
+                                <li><span>Category:</span> @Model.Product.Category?.Name</li>
                             </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="product__details__tab">
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" data-toggle="tab" href="#tabs-5" role="tab">Description</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#tabs-6" role="tab">Customer Previews(@Model.ReviewCount)</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#tabs-7" role="tab">Additional information</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <div class="tab-pane active" id="tabs-5" role="tabpanel">
-                                @await Html.PartialAsync("_ProductDescriptionTab")
-                            </div>
-                            <div class="tab-pane" id="tabs-6" role="tabpanel">
-                                @await Html.PartialAsync("_ProductDescriptionTab")
-                            </div>
-                            <div class="tab-pane" id="tabs-7" role="tabpanel">
-                                @await Html.PartialAsync("_ProductDescriptionTab")
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -161,56 +113,60 @@
     </div>
 </section>
 <!-- Shop Details Section End -->
-<!-- Related Section Begin -->
-<section class="related spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h3 class="related-title">Related Product</h3>
+@if (Model.RelatedProducts.Any())
+{
+    <!-- Related Section Begin -->
+    <section class="related spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="related-title">Related Products</h3>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            @foreach (var product in Model.RelatedProducts)
-            {
-                <div class="col-lg-3 col-md-6 col-sm-6 col-sm-6">
-                    <div class="product__item @(product.IsOnSale ? "sale" : "")">
-                        <div class="product__item__pic set-bg" data-setbg="@Url.Content("~/" + product.ImageUrl)">
-                            @if (!string.IsNullOrEmpty(product.Label))
-                            {
-                                <span class="label">@product.Label</span>
-                            }
-                            <ul class="product__hover">
-                                <li><a href="#"><img src="~/img/icon/heart.png" alt=""></a></li>
-                                <li><a href="#"><img src="~/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                <li><a href="#"><img src="~/img/icon/search.png" alt=""></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6>@product.Name</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
-                            <div class="rating">
-                                @for (int i = 0; i < 5; i++)
+            <div class="row">
+                @foreach (var p in Model.RelatedProducts)
+                {
+                    var primaryImage = p.ProductImages.OrderByDescending(x => x.IsPrimary).FirstOrDefault();
+                    var pOnSale = p.DiscountedPrice.HasValue && p.DiscountedPrice < p.Price;
+
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="product__item @(pOnSale ? "sale" : "")">
+                            <div class="product__item__pic set-bg"
+                                 data-setbg="@(primaryImage != null ? Url.Content($"~/uploads/products/{primaryImage.ImageUrl}") : Url.Content("~/FrontLayout/img/product/product-2.jpg"))">
+                                @if (pOnSale)
                                 {
-                                    <i class="fa @(i < product.RatingOutOfFive ? "fa-star" : "fa-star-o")"></i>
+                                    <span class="label">Sale</span>
                                 }
+                                <ul class="product__hover">
+                                    <li><a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a></li>
+                                    <li><a href="#"><img src="~/FrontLayout/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                                    <li><a asp-action="ShopDetails" asp-route-id="@p.Id"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
+                                </ul>
                             </div>
-                            <h5>@product.Price.ToString("C")</h5>
-                            <div class="product__color__select">
-                                <label for="pc-@product.Name-1">
-                                    <input type="radio" id="pc-@product.Name-1">
-                                </label>
-                                <label class="active black" for="pc-@product.Name-2">
-                                    <input type="radio" id="pc-@product.Name-2">
-                                </label>
-                                <label class="grey" for="pc-@product.Name-3">
-                                    <input type="radio" id="pc-@product.Name-3">
-                                </label>
+                            <div class="product__item__text">
+                                <h6><a asp-action="ShopDetails" asp-route-id="@p.Id">@p.ProductName</a></h6>
+
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="add-cart">+ Add To Cart</button>
+                                </form>
+
+                                @if (pOnSale)
+                                {
+                                    <h5>Tk @p.DiscountedPrice!.Value.ToString("N0")</h5>
+                                }
+                                else
+                                {
+                                    <h5>Tk @p.Price.ToString("N0")</h5>
+                                }
                             </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
-    </div>
-</section>
-<!-- Related Section End -->
+    </section>
+    <!-- Related Section End -->
+}

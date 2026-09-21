@@ -35,11 +35,33 @@ namespace FashionHouse.Web.Controllers
 
             return View(model);
         }
-
-        public IActionResult ShopDetails(Guid id)
+        public async Task<IActionResult> ShopDetails(Guid id, CancellationToken cancellationToken)
         {
-            // TODO: load the single product by id (next step)
-            return View();
+            var product = await _mediator.SendQueryAsync(new GetProductDetailsForShopQuery { Id = id }, cancellationToken);
+
+            if (product is null || !product.IsActive)
+                return NotFound();
+
+            var inventory = await _mediator.SendQueryAsync(new FashionHouse.Application.Features.Inventories.Query.GetInventoryByProductIdQuery
+            {
+                ProductId = id
+            }, cancellationToken);
+
+            var related = await _mediator.SendQueryAsync(new GetRelatedProductsQuery
+            {
+                CategoryId = product.CategoryId,
+                ExcludeProductId = product.Id,
+                Take = 4
+            }, cancellationToken);
+
+            var model = new ShopDetailsModel
+            {
+                Product = product,
+                AvailableStock = inventory?.Quantity ?? 0,
+                RelatedProducts = related
+            };
+
+            return View(model);
         }
     }
 }

@@ -2,72 +2,833 @@
 @{
     ViewData["Title"] = "Checkout";
     var subTotal = Model.Cart.CartItems.Sum(x => (x.Product.DiscountedPrice ?? x.Product.Price) * x.Quantity);
+    var hasAddresses = Model.Addresses.Any();
 }
 
-<section class="checkout spad">
+<style>
+    .fh-co {
+        --fh-accent: #e53637;
+        --fh-ink: #111111;
+        --fh-muted: #6b6f76;
+        --fh-line: #eceef1;
+        --fh-soft: #f7f8fa;
+        --fh-radius: 18px;
+    }
+
+    .fh-co__head {
+        margin-bottom: 28px;
+    }
+
+        .fh-co__head h1 {
+            margin: 0 0 4px;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+        .fh-co__head p {
+            margin: 0;
+            color: var(--fh-muted);
+            font-size: 15px;
+        }
+
+    .fh-co__layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 400px;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* Step panels */
+    .fh-step {
+        margin-bottom: 20px;
+        padding: 26px;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: var(--fh-radius);
+    }
+
+    .fh-step__title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--fh-ink);
+    }
+
+    .fh-step__num {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--fh-ink);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    /* Selectable cards (address / payment) */
+    .fh-choice {
+        position: relative;
+        display: block;
+        margin: 0 0 12px;
+        cursor: pointer;
+    }
+
+        .fh-choice input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+
+    .fh-choice__card {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 16px 18px;
+        border: 1.5px solid var(--fh-line);
+        border-radius: 14px;
+        background: #fff;
+        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .fh-choice:hover .fh-choice__card {
+        border-color: #cfd3d9;
+    }
+
+    .fh-choice input:focus-visible + .fh-choice__card {
+        box-shadow: 0 0 0 3px rgba(229, 54, 55, .25);
+    }
+
+    .fh-choice input:checked + .fh-choice__card {
+        border-color: var(--fh-accent);
+        background: #fff6f6;
+        box-shadow: 0 8px 20px rgba(229, 54, 55, .10);
+    }
+
+    .fh-radio-dot {
+        flex: none;
+        width: 20px;
+        height: 20px;
+        margin-top: 2px;
+        border: 2px solid #c7cbd1;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        transition: border-color .2s ease;
+    }
+
+        .fh-radio-dot::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--fh-accent);
+            transform: scale(0);
+            transition: transform .15s ease;
+        }
+
+    .fh-choice input:checked + .fh-choice__card .fh-radio-dot {
+        border-color: var(--fh-accent);
+    }
+
+        .fh-choice input:checked + .fh-choice__card .fh-radio-dot::after {
+            transform: scale(1);
+        }
+
+    .fh-choice__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .fh-choice__name {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+    .fh-choice__line {
+        margin-top: 4px;
+        color: var(--fh-muted);
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .fh-pill {
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--fh-accent);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    /* Inputs */
+    .fh-field {
+        display: block;
+        width: 100%;
+        padding: 13px 16px;
+        border: 1.5px solid var(--fh-line);
+        border-radius: 12px;
+        background: var(--fh-soft);
+        color: var(--fh-ink);
+        font-size: 14px;
+        transition: border-color .2s ease, background .2s ease;
+    }
+
+        .fh-field:focus {
+            outline: none;
+            border-color: var(--fh-ink);
+            background: #fff;
+        }
+
+    textarea.fh-field {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .fh-grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .fh-span2 {
+        grid-column: 1 / -1;
+    }
+
+    .fh-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--fh-muted);
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+        .fh-check input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--fh-accent);
+        }
+
+    /* Buttons */
+    .fh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 13px 24px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--fh-ink);
+        color: #fff !important;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+    }
+
+        .fh-btn:hover {
+            background: var(--fh-accent);
+            transform: translateY(-1px);
+        }
+
+    .fh-btn--lg {
+        width: 100%;
+        padding: 17px;
+        background: var(--fh-accent);
+        font-size: 14px;
+    }
+
+        .fh-btn--lg:hover {
+            background: var(--fh-ink);
+            box-shadow: 0 12px 26px rgba(17, 17, 17, .25);
+        }
+
+    .fh-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Add address (collapsible) */
+    .fh-new > summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        list-style: none;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--fh-ink);
+    }
+
+        .fh-new > summary::-webkit-details-marker {
+            display: none;
+        }
+
+    .fh-new__plus {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--fh-soft);
+        transition: transform .2s ease, background .2s ease;
+    }
+
+        .fh-new__plus svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    .fh-new[open] .fh-new__plus {
+        transform: rotate(45deg);
+        background: #ffe9e9;
+    }
+
+    .fh-new__form {
+        margin-top: 20px;
+    }
+
+    .fh-empty-note {
+        margin: 0 0 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: #fff6f6;
+        color: #a52a2b;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Summary */
+    .fh-sum {
+        position: sticky;
+        top: 24px;
+        padding: 26px;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px rgba(17, 17, 17, .06);
+    }
+
+        .fh-sum h3 {
+            margin: 0 0 18px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+    .fh-sum__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .fh-sum__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--fh-line);
+        font-size: 14px;
+        color: var(--fh-ink);
+    }
+
+    .fh-sum__name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        font-weight: 600;
+    }
+
+        .fh-sum__name span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .fh-sum__qty {
+        flex: none;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: var(--fh-soft);
+        color: var(--fh-muted);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .fh-sum__price {
+        flex: none;
+        font-weight: 700;
+    }
+
+    .fh-sum__total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin: 18px 0 22px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+        .fh-sum__total span:last-child {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+    .fh-sum__back {
+        display: block;
+        margin-top: 14px;
+        text-align: center;
+        color: var(--fh-muted) !important;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none !important;
+    }
+
+        .fh-sum__back:hover {
+            color: var(--fh-ink) !important;
+        }
+
+    /* Payment panels (demo) */
+    .fh-demo {
+        margin-left: auto;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: #fff4d6;
+        color: #8a5a00;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .fh-pay-panel {
+        margin: -2px 0 14px;
+        padding: 18px;
+        border: 1.5px dashed #d9dce1;
+        border-radius: 14px;
+        background: var(--fh-soft);
+    }
+
+        .fh-pay-panel[hidden] {
+            display: none;
+        }
+
+    .fh-pay-hint {
+        margin: 12px 0 0;
+        color: var(--fh-muted);
+        font-size: 12px;
+    }
+
+    .fh-pay-error {
+        margin: 12px 0 0;
+        color: #c62828;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+        .fh-pay-error[hidden] {
+            display: none;
+        }
+
+    .fh-cc {
+        max-width: 340px;
+        margin: 0 auto 16px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1b1b1f 0%, #3b3b45 60%, #e53637 140%);
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(17, 17, 17, .25);
+    }
+
+    .fh-cc__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .fh-cc__chip {
+        width: 36px;
+        height: 26px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #f2d27a, #c9a13b);
+    }
+
+    .fh-cc__brand {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        opacity: .8;
+    }
+
+    .fh-cc__num {
+        margin-bottom: 18px;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .fh-cc__bottom {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+        .fh-cc__bottom small {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            opacity: .65;
+        }
+
+    .fh-ssl {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+        .fh-ssl svg {
+            flex: none;
+            width: 34px;
+            height: 34px;
+            padding: 7px;
+            border-radius: 10px;
+            background: #fff;
+            color: var(--fh-accent);
+        }
+
+        .fh-ssl strong {
+            color: var(--fh-ink);
+            font-size: 14px;
+        }
+
+        .fh-ssl p {
+            margin: 2px 0 0;
+            color: var(--fh-muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+    @@media (max-width: 991px) {
+        .fh-co__layout {
+            grid-template-columns: 1fr;
+        }
+
+        .fh-sum {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .fh-grid2 {
+            grid-template-columns: 1fr;
+        }
+
+        .fh-step {
+            padding: 20px;
+        }
+
+        .fh-co__head h1 {
+            font-size: 26px;
+        }
+    }
+</style>
+
+<section class="fh-co spad">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-7">
-                <h5>Shipping Address</h5>
+        <div class="fh-co__head">
+            <h1>Checkout</h1>
+            <p>Choose where to send your order and how you'd like to pay.</p>
+        </div>
 
-                @if (Model.Addresses.Any())
-                {
-                    <form asp-action="PlaceOrder" method="post" id="placeOrderForm">
-                        @foreach (var address in Model.Addresses)
+        <div class="fh-co__layout">
+            <div>
+                @* 1. Shipping address + 2. Payment + 3. Notes (one form, submitted by the Place Order button in the summary) *@
+                <form asp-action="PlaceOrder" method="post" id="placeOrderForm">
+                    <div class="fh-step">
+                        <h2 class="fh-step__title"><span class="fh-step__num">1</span> Shipping Address</h2>
+
+                        @if (hasAddresses)
                         {
-                            <label class="address-option">
-                                <input type="radio" name="addressId" value="@address.Id"
-                                @(address.Id == Model.SelectedAddressId ? "checked" : "") required />
-                                <strong>@address.FullName</strong> — @address.Phone<br />
-                                @address.FullAddress, @address.District @address.PostalCode
-                                @if (address.IsDefault)
-                                {
-                                    <span class="badge">Default</span>
-                                }
-                            </label>
+                            foreach (var address in Model.Addresses)
+                            {
+                                <label class="fh-choice">
+                                    <input type="radio" name="addressId" value="@address.Id" @(address.Id == Model.SelectedAddressId ? "checked" : "") required />
+                                    <span class="fh-choice__card">
+                                        <span class="fh-radio-dot"></span>
+                                        <span class="fh-choice__body">
+                                            <span class="fh-choice__name">
+                                                @address.FullName
+                                                @if (address.IsDefault)
+                                                {
+                                                    <span class="fh-pill">Default</span>
+                                                }
+                                            </span>
+                                            <span class="fh-choice__line d-block">@address.Phone</span>
+                                            <span class="fh-choice__line d-block">@address.FullAddress, @address.District @address.PostalCode</span>
+                                        </span>
+                                    </span>
+                                </label>
+                            }
                         }
+                        else
+                        {
+                            <p class="fh-empty-note">You don't have any saved addresses yet. Add one below to continue.</p>
+                        }
+                    </div>
 
-                        <h6 class="mt-4">Payment Method</h6>
-                        <select name="paymentMethod">
-                            <option value="Cash on Delivery">Cash on Delivery</option>
-                        </select>
+                    <div class="fh-step">
+                        <h2 class="fh-step__title"><span class="fh-step__num">2</span> Payment Method <span class="fh-demo">Demo</span></h2>
 
-                        <h6 class="mt-4">Order Notes</h6>
-                        <textarea name="notes" placeholder="Any notes about your order"></textarea>
+                        <label class="fh-choice">
+                            <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
+                            <span class="fh-choice__card">
+                                <span class="fh-radio-dot"></span>
+                                <span class="fh-choice__body">
+                                    <span class="fh-choice__name">Cash on Delivery (COD)</span>
+                                    <span class="fh-choice__line d-block">Pay in cash when your order arrives.</span>
+                                </span>
+                            </span>
+                        </label>
 
-                        <button type="submit" class="primary-btn mt-4">Place Order</button>
-                    </form>
-                }
-                else
-                {
-                    <p>You don't have any saved addresses yet. Add one to continue.</p>
-                }
+                        <label class="fh-choice">
+                            <input type="radio" name="paymentMethod" value="Card" />
+                            <span class="fh-choice__card">
+                                <span class="fh-radio-dot"></span>
+                                <span class="fh-choice__body">
+                                    <span class="fh-choice__name">Credit / Debit Card</span>
+                                    <span class="fh-choice__line d-block">Visa, Mastercard and other major cards.</span>
+                                </span>
+                            </span>
+                        </label>
 
-                <h6 class="mt-5">Add a new address</h6>
-                <form asp-action="AddAddress" method="post">
-                    <input type="text" name="FullName" placeholder="Full Name" required />
-                    <input type="text" name="Phone" placeholder="Phone Number" required />
-                    <input type="text" name="FullAddress" placeholder="Full Address" required />
-                    <input type="text" name="District" placeholder="District" required />
-                    <input type="text" name="PostalCode" placeholder="Postal Code" />
-                    <label><input type="checkbox" name="IsDefault" value="true" /> Set as default</label>
-                    <button type="submit" class="primary-btn">Save Address</button>
+                        <div class="fh-pay-panel" id="panel-card" hidden>
+                            <div class="fh-cc">
+                                <div class="fh-cc__top">
+                                    <span class="fh-cc__chip"></span>
+                                    <span class="fh-cc__brand">CARD</span>
+                                </div>
+                                <div class="fh-cc__num" id="cc-preview-num">•••• •••• •••• ••••</div>
+                                <div class="fh-cc__bottom">
+                                    <div><small>Card holder</small><span id="cc-preview-name">FULL NAME</span></div>
+                                    <div><small>Expires</small><span id="cc-preview-exp">MM/YY</span></div>
+                                </div>
+                            </div>
+
+                            @* No "name" attributes on purpose: these demo card fields are never posted to the server. *@
+                            <div class="fh-grid2">
+                                <input type="text" id="cc-number" class="fh-field fh-span2" inputmode="numeric" autocomplete="cc-number" maxlength="23" placeholder="Card number" />
+                                <input type="text" id="cc-name" class="fh-field fh-span2" autocomplete="cc-name" placeholder="Name on card" />
+                                <input type="text" id="cc-exp" class="fh-field" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY" />
+                                <input type="password" id="cc-cvc" class="fh-field" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="CVC" />
+                            </div>
+                            <p class="fh-pay-error" id="cc-error" hidden></p>
+                            <p class="fh-pay-hint">Demo only: card details are not sent to or stored by the server.</p>
+                        </div>
+
+                        <label class="fh-choice">
+                            <input type="radio" name="paymentMethod" value="Online Payment (SSL)" />
+                            <span class="fh-choice__card">
+                                <span class="fh-radio-dot"></span>
+                                <span class="fh-choice__body">
+                                    <span class="fh-choice__name">Online Payment (SSL)</span>
+                                    <span class="fh-choice__line d-block">Pay through a secure SSL payment gateway (cards, mobile banking, net banking).</span>
+                                </span>
+                            </span>
+                        </label>
+
+                        <div class="fh-pay-panel" id="panel-ssl" hidden>
+                            <div class="fh-ssl">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                                <div>
+                                    <strong>Secure redirect</strong>
+                                    <p>After you place the order you'll be taken to the payment gateway to complete your payment, then brought back here.</p>
+                                </div>
+                            </div>
+                            <p class="fh-pay-hint">Demo only: no real payment is made yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="fh-step">
+                        <h2 class="fh-step__title"><span class="fh-step__num">3</span> Order Notes</h2>
+                        <textarea name="notes" class="fh-field" placeholder="Any notes about your order (optional)"></textarea>
+                    </div>
                 </form>
+
+                @* Add a new address (separate form, collapsed when the customer already has addresses) *@
+                <details class="fh-step fh-new" @(hasAddresses ? "" : "open")>
+                    <summary>
+                        <span class="fh-new__plus">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                        </span>
+                        Add a new address
+                    </summary>
+
+                    <form asp-action="AddAddress" method="post" class="fh-new__form">
+                        <div class="fh-grid2">
+                            <input type="text" name="FullName" class="fh-field" placeholder="Full Name" required />
+                            <input type="text" name="Phone" class="fh-field" placeholder="Phone Number" required />
+                            <input type="text" name="FullAddress" class="fh-field fh-span2" placeholder="Full Address" required />
+                            <input type="text" name="District" class="fh-field" placeholder="District" required />
+                            <input type="text" name="PostalCode" class="fh-field" placeholder="Postal Code" />
+                            <label class="fh-check fh-span2">
+                                <input type="checkbox" name="IsDefault" value="true" /> Set as default address
+                            </label>
+                            <div class="fh-span2">
+                                <button type="submit" class="fh-btn">Save Address</button>
+                            </div>
+                        </div>
+                    </form>
+                </details>
             </div>
 
-            <div class="col-lg-5">
-                <div class="checkout__order">
-                    <h6>Your Order</h6>
-                    <ul>
-                        @foreach (var item in Model.Cart.CartItems)
-                        {
-                            var lineTotal = (item.Product.DiscountedPrice ?? item.Product.Price) * item.Quantity;
-                            <li>@item.Product.ProductName × @item.Quantity <span>Tk @lineTotal.ToString("N0")</span></li>
-                        }
-                        <li class="total"><strong>Total</strong> <span>Tk @subTotal.ToString("N0")</span></li>
-                    </ul>
+            <aside class="fh-sum">
+                <h3>Your Order</h3>
+
+                <ul class="fh-sum__list">
+                    @foreach (var item in Model.Cart.CartItems)
+                    {
+                        var lineTotal = (item.Product.DiscountedPrice ?? item.Product.Price) * item.Quantity;
+                        <li class="fh-sum__item">
+                            <div class="fh-sum__name">
+                                <span>@item.Product.ProductName</span>
+                                <span class="fh-sum__qty">× @item.Quantity</span>
+                            </div>
+                            <span class="fh-sum__price">Tk @lineTotal.ToString("N0")</span>
+                        </li>
+                    }
+                </ul>
+
+                <div class="fh-sum__total">
+                    <span>Total</span>
+                    <span>Tk @subTotal.ToString("N0")</span>
                 </div>
-            </div>
+
+                <button type="submit" form="placeOrderForm" id="placeOrderBtn" class="fh-btn fh-btn--lg" @(hasAddresses ? "" : "disabled")><span id="placeOrderLabel">Place Order</span></button>
+                <a asp-controller="Cart" asp-action="Index" class="fh-sum__back">← Back to cart</a>
+            </aside>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('placeOrderForm');
+            if (!form) return;
+
+            var panelCard = document.getElementById('panel-card');
+            var panelSsl = document.getElementById('panel-ssl');
+            var label = document.getElementById('placeOrderLabel');
+            var errorEl = document.getElementById('cc-error');
+
+            var num = document.getElementById('cc-number');
+            var name = document.getElementById('cc-name');
+            var exp = document.getElementById('cc-exp');
+            var cvc = document.getElementById('cc-cvc');
+
+            function method() {
+                var checked = form.querySelector('input[name="paymentMethod"]:checked');
+                return checked ? checked.value : '';
+            }
+
+            function syncPanels() {
+                var m = method();
+                panelCard.hidden = m !== 'Card';
+                panelSsl.hidden = m !== 'Online Payment (SSL)';
+                label.textContent = m === 'Card' ? 'Pay & Place Order'
+                                  : m === 'Online Payment (SSL)' ? 'Continue to Payment'
+                                  : 'Place Order';
+                errorEl.hidden = true;
+            }
+
+            form.querySelectorAll('input[name="paymentMethod"]').forEach(function (r) {
+                r.addEventListener('change', syncPanels);
+            });
+            syncPanels();
+
+            // Live card preview + input formatting
+            num.addEventListener('input', function () {
+                var digits = num.value.replace(/\D/g, '').slice(0, 19);
+                num.value = digits.replace(/(.{4})/g, '$1 ').trim();
+                var padded = (digits + '••••••••••••••••').slice(0, 16);
+                document.getElementById('cc-preview-num').textContent = padded.replace(/(.{4})/g, '$1 ').trim();
+            });
+
+            name.addEventListener('input', function () {
+                document.getElementById('cc-preview-name').textContent = name.value.trim() || 'FULL NAME';
+            });
+
+            exp.addEventListener('input', function () {
+                var d = exp.value.replace(/\D/g, '').slice(0, 4);
+                exp.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+                document.getElementById('cc-preview-exp').textContent = exp.value || 'MM/YY';
+            });
+
+            cvc.addEventListener('input', function () {
+                cvc.value = cvc.value.replace(/\D/g, '').slice(0, 4);
+            });
+
+            function luhn(d) {
+                var sum = 0, alt = false;
+                for (var i = d.length - 1; i >= 0; i--) {
+                    var n = parseInt(d[i], 10);
+                    if (alt) { n *= 2; if (n > 9) n -= 9; }
+                    sum += n; alt = !alt;
+                }
+                return sum % 10 === 0;
+            }
+
+            function cardError() {
+                var d = num.value.replace(/\D/g, '');
+                if (d.length < 13 || d.length > 19 || !luhn(d)) return 'Please enter a valid card number.';
+                if (!name.value.trim()) return 'Please enter the name on the card.';
+                var m = /^(\d{2})\/(\d{2})$/.exec(exp.value);
+                if (!m || +m[1] < 1 || +m[1] > 12) return 'Please enter a valid expiry date (MM/YY).';
+                var now = new Date();
+                var expiry = new Date(2000 + +m[2], +m[1], 1);   // first day after the expiry month
+                if (expiry <= now) return 'This card has expired.';
+                if (cvc.value.length < 3) return 'Please enter the CVC.';
+                return '';
+            }
+
+            form.addEventListener('submit', function (e) {
+                if (method() !== 'Card') return;
+                var msg = cardError();
+                if (msg) {
+                    e.preventDefault();
+                    errorEl.textContent = msg;
+                    errorEl.hidden = false;
+                    panelCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        })();
+    </script>
+}

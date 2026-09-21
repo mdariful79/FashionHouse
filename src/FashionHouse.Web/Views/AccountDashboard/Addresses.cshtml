@@ -1,60 +1,411 @@
 ﻿@model IList<FashionHouse.Domain.Entities.Address>
 @{
     ViewData["Title"] = "My Addresses";
+    var addresses = Model.OrderByDescending(a => a.IsDefault).ToList();
 }
+
+<style>
+    .fh-addr {
+        --fh-accent: #e53637;
+        --fh-ink: #111111;
+        --fh-muted: #6b6f76;
+        --fh-line: #eceef1;
+        --fh-soft: #f7f8fa;
+        --fh-radius: 16px;
+    }
+
+    /* Alert */
+    .fh-addr__alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        background: #ecfaf1;
+        color: #146c3a;
+        border: 1px solid #c9eed8;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Toolbar */
+    .fh-addr__bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .fh-addr__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+    .fh-addr__count {
+        margin-left: 8px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        background: var(--fh-soft);
+        color: var(--fh-muted);
+        font-size: 12px;
+        font-weight: 700;
+        vertical-align: middle;
+    }
+
+    .fh-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+        .fh-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    .fh-btn--primary {
+        background: var(--fh-ink);
+        color: #fff !important;
+    }
+
+        .fh-btn--primary:hover {
+            background: var(--fh-accent);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(229, 54, 55, .28);
+        }
+
+    .fh-btn--ghost {
+        background: #fff;
+        color: var(--fh-ink) !important;
+        border-color: var(--fh-line);
+    }
+
+        .fh-btn--ghost:hover {
+            border-color: var(--fh-ink);
+        }
+
+    .fh-btn--danger {
+        background: #fff;
+        color: #c62828;
+        border-color: #f5d5d5;
+    }
+
+        .fh-btn--danger:hover {
+            background: #c62828;
+            color: #fff;
+            border-color: #c62828;
+        }
+
+    /* Grid */
+    .fh-addr__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    /* Card */
+    .fh-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: var(--fh-radius);
+        padding: 22px;
+        transition: transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+    }
+
+        .fh-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(17, 17, 17, .08);
+        }
+
+    .fh-card--default {
+        border-color: var(--fh-accent);
+        background: linear-gradient(180deg, #fff6f6 0%, #ffffff 55%);
+    }
+
+    .fh-card__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .fh-card__pin {
+        flex: none;
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: var(--fh-soft);
+        color: var(--fh-ink);
+    }
+
+    .fh-card--default .fh-card__pin {
+        background: var(--fh-accent);
+        color: #fff;
+    }
+
+    .fh-card__pin svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .fh-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: var(--fh-accent);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+        .fh-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+    .fh-card__name {
+        margin: 0 0 4px;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+    .fh-card__row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 8px;
+        color: var(--fh-muted);
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+        .fh-card__row svg {
+            flex: none;
+            width: 16px;
+            height: 16px;
+            margin-top: 3px;
+            color: #9aa0a8;
+        }
+
+    .fh-card__actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 18px;
+        border-top: 1px dashed var(--fh-line);
+        margin-top: 18px;
+    }
+
+        .fh-card__actions form {
+            margin: 0;
+        }
+
+    /* Add tile */
+    .fh-add {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 200px;
+        border: 2px dashed #d9dce1;
+        border-radius: var(--fh-radius);
+        color: var(--fh-muted);
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: border-color .2s ease, color .2s ease, background .2s ease;
+    }
+
+        .fh-add:hover {
+            border-color: var(--fh-accent);
+            color: var(--fh-accent);
+            background: #fff8f8;
+        }
+
+    .fh-add__plus {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--fh-soft);
+    }
+
+    .fh-add:hover .fh-add__plus {
+        background: #ffe9e9;
+    }
+
+    .fh-add__plus svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Empty state */
+    .fh-empty {
+        text-align: center;
+        padding: 56px 24px;
+        border: 2px dashed #d9dce1;
+        border-radius: 20px;
+        background: var(--fh-soft);
+    }
+
+    .fh-empty__icon {
+        display: grid;
+        place-items: center;
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--fh-accent);
+        box-shadow: 0 8px 24px rgba(17, 17, 17, .08);
+    }
+
+        .fh-empty__icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+    .fh-empty h3 {
+        margin: 0 0 6px;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--fh-ink);
+    }
+
+    .fh-empty p {
+        margin: 0 0 22px;
+        color: var(--fh-muted);
+        font-size: 14px;
+    }
+
+    @@media (max-width: 767px) {
+        .fh-addr__grid {
+            grid-template-columns: 1fr;
+        }
+
+        .fh-card {
+            padding: 18px;
+        }
+    }
+</style>
 
 <div class="acct-hero">
     <h1 class="acct-hero__title">My Addresses</h1>
     <p class="acct-hero__subtitle">Manage your saved shipping addresses</p>
 </div>
 
-@if (TempData["StatusMessage"] is string status)
-{
-    <div class="alert alert-success">@status</div>
-}
+<div class="fh-addr">
 
-<div class="acct-orders">
-    <div class="acct-orders__header d-flex justify-content-between align-items-center">
-        <span>Saved addresses</span>
-        <a asp-action="AddAddress" class="acct-orders__cta" style="text-decoration:none;">+ Add new address</a>
-    </div>
-
-    @if (!Model.Any())
+    @if (TempData["StatusMessage"] is string status)
     {
-        <div class="acct-orders__empty">
-            <p>You don't have any saved addresses yet.</p>
-            <a asp-action="AddAddress" class="acct-orders__cta">Add your first address</a>
+        <div class="fh-addr__alert" role="status">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+            <span>@status</span>
+        </div>
+    }
+
+    @if (!addresses.Any())
+    {
+        <div class="fh-empty">
+            <div class="fh-empty__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+            </div>
+            <h3>No saved addresses yet</h3>
+            <p>Add a shipping address to make checkout faster.</p>
+            <a asp-action="AddAddress" class="fh-btn fh-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                Add your first address
+            </a>
         </div>
     }
     else
     {
-        <div style="padding: 1.5rem;">
-            <div class="row g-3">
-                @foreach (var address in Model)
-                {
-                    <div class="col-md-6">
-                        <div class="card h-100 @(address.IsDefault ? "border-primary" : "")">
-                            <div class="card-body">
-                                @if (address.IsDefault)
-                                {
-                                    <span class="badge bg-primary mb-2">Default</span>
-                                }
-                                <h6 class="fw-bold mb-1">@address.FullName</h6>
-                                <p class="mb-1">@address.Phone</p>
-                                <p class="mb-1 text-secondary">@address.FullAddress, @address.District @address.PostalCode</p>
+        <div class="fh-addr__bar">
+            <h2 class="fh-addr__title">Saved addresses <span class="fh-addr__count">@addresses.Count</span></h2>
+            <a asp-action="AddAddress" class="fh-btn fh-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                Add new address
+            </a>
+        </div>
 
-                                <div class="mt-3 d-flex gap-2">
-                                    <a asp-action="EditAddress" asp-route-id="@address.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <form asp-action="DeleteAddress" asp-route-id="@address.Id" method="post"
-                                          onsubmit="return confirm('Delete this address?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
+        <div class="fh-addr__grid">
+            @foreach (var address in addresses)
+            {
+                <article class="fh-card @(address.IsDefault ? "fh-card--default" : "")">
+                    <div class="fh-card__head">
+                        <div class="fh-card__pin">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                         </div>
+                        @if (address.IsDefault)
+                        {
+                            <span class="fh-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                Default
+                            </span>
+                        }
                     </div>
-                }
-            </div>
+
+                    <h3 class="fh-card__name">@address.FullName</h3>
+
+                    <div class="fh-card__row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>
+                        <span>@address.Phone</span>
+                    </div>
+
+                    <div class="fh-card__row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /><path d="M9 21V12h6v9" /></svg>
+                        <span>@address.FullAddress, @address.District @address.PostalCode</span>
+                    </div>
+
+                    <div class="fh-card__actions">
+                        <a asp-action="EditAddress" asp-route-id="@address.Id" class="fh-btn fh-btn--ghost">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                            Edit
+                        </a>
+                        <form asp-action="DeleteAddress" asp-route-id="@address.Id" method="post"
+                              onsubmit="return confirm('Delete this address?');">
+                            <button type="submit" class="fh-btn fh-btn--danger">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" /><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            }
+
+            <a asp-action="AddAddress" class="fh-add">
+                <span class="fh-add__plus">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                </span>
+                Add new address
+            </a>
         </div>
     }
 </div>

@@ -77,6 +77,15 @@ namespace FashionHouse.Infrastructure.Data
                 .HasIndex(x => x.CustomerId)
                 .IsUnique();
 
+         
+            builder.Entity<Cart>()
+                .Property(x => x.Id)
+                .ValueGeneratedNever();
+
+            builder.Entity<CartItem>()
+                .Property(x => x.Id)
+                .ValueGeneratedNever();
+
             builder.Entity<CartItem>()
                 .HasOne(x => x.Cart)
                 .WithMany(x => x.CartItems)

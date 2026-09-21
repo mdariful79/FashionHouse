@@ -1,7 +1,59 @@
-﻿@{
+﻿@model IList<FashionHouse.Domain.Entities.Order>
+@{
     ViewData["Title"] = "My Orders";
 }
-<h2 class="fw-bold mb-4">My Orders</h2>
-<div class="card shadow-sm">
-    <div class="card-body text-center py-5 text-secondary">Order history will appear here once your Orders feature is built.</div>
+
+<div class="acct-hero">
+    <h1 class="acct-hero__title">My Orders</h1>
+    <p class="acct-hero__subtitle">Track and review your past orders</p>
+</div>
+
+<div class="acct-orders">
+    <div class="acct-orders__header">Order history</div>
+
+    @if (!Model.Any())
+    {
+        <div class="acct-orders__empty">
+            <p>You haven't placed any orders yet.</p>
+            <a asp-controller="Shop" asp-action="Index" class="acct-orders__cta">Start shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive" style="padding: 1rem 1.5rem;">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.OrderByDescending(x => x.CreatedAt))
+                    {
+                        var statusClass = order.Status switch
+                        {
+                            FashionHouse.Domain.Enums.OrderStatus.Delivered => "bg-success",
+                            FashionHouse.Domain.Enums.OrderStatus.Cancelled or FashionHouse.Domain.Enums.OrderStatus.Returned => "bg-danger",
+                            FashionHouse.Domain.Enums.OrderStatus.Pending => "bg-secondary",
+                            _ => "bg-primary"
+                        };
+
+                        <tr>
+                            <td class="fw-semibold">@order.OrderNumber</td>
+                            <td>@order.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>@order.OrderItems.Sum(x => x.Quantity) item(s)</td>
+                            <td>Tk @order.GrandTotal.ToString("N0")</td>
+                            <td><span class="badge @statusClass">@order.Status</span></td>
+                            <td>@order.PaymentStatus</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

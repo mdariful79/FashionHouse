@@ -1,6 +1,7 @@
 ﻿using Cortex.Mediator;
 using FashionHouse.Application.Features.Addresses.Command;
 using FashionHouse.Application.Features.Addresses.Query;
+using FashionHouse.Application.Features.Orders.Query;
 using FashionHouse.Infrastructure.Identity;
 using FashionHouse.Web.Models.AccountDashboard;
 using Microsoft.AspNetCore.Authorization;
@@ -25,14 +26,17 @@ namespace FashionHouse.Web.Controllers
         }
 
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
 
+            var orders = await _mediator.SendQueryAsync(new GetOrdersByCustomerIdQuery { CustomerId = user.Id }, cancellationToken);
+
             var model = new AccountDashboardModel
             {
-                FullName = $"{user.FirstName} {user.LastName}".Trim()
+                FullName = $"{user.FirstName} {user.LastName}",
+                RecentOrders = orders.OrderByDescending(x => x.CreatedAt).Take(3).ToList()
             };
 
             return View(model);
@@ -230,6 +234,14 @@ namespace FashionHouse.Web.Controllers
             TempData["StatusMessage"] = "Address removed.";
             return RedirectToAction(nameof(Addresses));
         }
-        public IActionResult Orders() => View();
+        public async Task<IActionResult> Orders(CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var orders = await _mediator.SendQueryAsync(new GetOrdersByCustomerIdQuery { CustomerId = user.Id }, cancellationToken);
+
+            return View(orders);
+        }
     }
 }

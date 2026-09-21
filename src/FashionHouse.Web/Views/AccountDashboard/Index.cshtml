@@ -27,11 +27,51 @@
         <span class="acct-action__label">Track order</span>
     </a>
 </div>
-
 <div class="acct-orders">
     <div class="acct-orders__header">Recent orders</div>
-    <div class="acct-orders__empty">
-        <p>Nothing here yet. Once you place an order, it'll show up in this space.</p>
-        <a asp-controller="Shop" asp-action="Index" class="acct-orders__cta">Browse the collection</a>
-    </div>
+
+    @if (!Model.RecentOrders.Any())
+    {
+        <div class="acct-orders__empty">
+            <p>Nothing here yet. Once you place an order, it'll show up in this space.</p>
+            <a asp-controller="Shop" asp-action="Index" class="acct-orders__cta">Browse the collection</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive" style="padding: 1rem 1.5rem;">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        var statusClass = order.Status switch
+                        {
+                            FashionHouse.Domain.Enums.OrderStatus.Delivered => "bg-success",
+                            FashionHouse.Domain.Enums.OrderStatus.Cancelled or FashionHouse.Domain.Enums.OrderStatus.Returned => "bg-danger",
+                            FashionHouse.Domain.Enums.OrderStatus.Pending => "bg-secondary",
+                            _ => "bg-primary"
+                        };
+
+                        <tr>
+                            <td class="fw-semibold">@order.OrderNumber</td>
+                            <td>@order.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>Tk @order.GrandTotal.ToString("N0")</td>
+                            <td><span class="badge @statusClass">@order.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="px-3 pb-2">
+                <a asp-controller="AccountDashboard" asp-action="Orders">View all orders →</a>
+            </div>
+        </div>
+    }
 </div>

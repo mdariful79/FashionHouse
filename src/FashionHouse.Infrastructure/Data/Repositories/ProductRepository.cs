@@ -59,5 +59,26 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 true,
                 cancellationToken);
         }
+        public async Task<Product?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var (items, _, _) = await GetDynamicAsync(
+                x => x.Id == id,
+                null,
+                q => q.Include(p => p.ProductImages).Include(p => p.Category),
+                1, 1, true, cancellationToken);
+
+            return items.FirstOrDefault();
+        }
+
+        public async Task<IList<Product>> GetRelatedAsync(Guid categoryId, Guid excludeProductId, int take, CancellationToken cancellationToken)
+        {
+            var (items, _, _) = await GetDynamicAsync(
+                x => x.IsActive && x.CategoryId == categoryId && x.Id != excludeProductId,
+                "ProductName",
+                q => q.Include(p => p.ProductImages),
+                1, take, true, cancellationToken);
+
+            return items;
+        }
     }
 }

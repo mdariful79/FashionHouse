@@ -18,5 +18,7 @@ namespace FashionHouse.Application.Contracts.Repositories
         Task<(IList<Product>, int, int)> GetPagedProducts(
             Features.Products.Query.GetAllProductsByPagingQuery query,
             CancellationToken cancellationToken);
+        Task<Product?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken);
+        Task<IList<Product>> GetRelatedAsync(Guid categoryId, Guid excludeProductId, int take, CancellationToken cancellationToken);
     }
 }
