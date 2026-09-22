@@ -11,12 +11,13 @@ namespace FashionHouse.Infrastructure.Data.Repositories
         {
         }
 
-        public async Task<(IList<Product>, int, int)> GetPagedProducts(GetAllProductsByPagingQuery query,
-            CancellationToken cancellationToken)
+        public async Task<(IList<Product>, int, int)> GetPagedProducts(GetAllProductsByPagingQuery query, CancellationToken cancellationToken)
         {
+            var sortText = string.IsNullOrWhiteSpace(query.SortText) ? "CreatedAt desc" : query.SortText;
+
             return await GetDynamicAsync(
                 x => query.SearchText == null || x.ProductName.Contains(query.SearchText),
-                query.SortText,
+                sortText,
                 null,
                 query.PageIndex,
                 query.PageSize,

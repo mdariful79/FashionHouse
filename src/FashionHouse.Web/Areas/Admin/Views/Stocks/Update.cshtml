@@ -3,36 +3,477 @@
     ViewData["Title"] = "Edit Stock Record";
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header border-bottom">
-                    <h5 class="card-title mb-0">Edit Stock — @Model.ProductName</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Update" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="Id" />
-                        <input type="hidden" asp-for="ProductId" />
+@section Styles {
+    <style>
+        .fh-form {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
 
-                        <div class="mb-3">
-                            <label class="form-label">Quantity</label>
-                            <input asp-for="Quantity" type="number" class="form-control" />
-                            <span asp-validation-for="Quantity" class="text-danger"></span>
-                        </div>
+        /* Header */
+        .fh-form__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
 
-                        <div class="mb-3">
-                            <label class="form-label">Reorder Level</label>
-                            <input asp-for="ReorderLevel" type="number" class="form-control" />
-                            <span asp-validation-for="ReorderLevel" class="text-danger"></span>
-                        </div>
+            .fh-form__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
 
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                    </form>
-                </div>
+            .fh-form__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+            .fh-back:hover {
+                background: rgb(var(--c));
+                border-color: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        /* Layout */
+        .fh-form__grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .fh-side {
+            position: sticky;
+            top: 90px;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Section cards */
+        .fh-sec {
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+        }
+
+        .fh-side .fh-sec {
+            margin-bottom: 0;
+        }
+
+        .fh-sec__head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        .fh-sec__icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 19px;
+        }
+
+        .fh-sec__head h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .fh-sec__head small {
+            display: block;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+
+        .fh-sec__body {
+            padding: 22px;
+        }
+
+        /* Fields */
+        .fh-form .form-label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .fh-form .form-control,
+        .fh-form .form-select {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 14px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-form .form-control:focus,
+            .fh-form .form-select:focus {
+                border-color: rgb(var(--c));
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        .fh-form .input-group-text {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px 0 0 12px;
+            background: rgba(128, 128, 128, .08);
+            font-weight: 700;
+        }
+
+        .fh-form .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .fh-form .text-danger {
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .fh-off {
+            display: none;
+            margin-top: 8px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-off.show {
+                display: inline-block;
+            }
+
+            .fh-off.bad {
+                background: rgba(255, 62, 29, .12);
+                color: #d8371a;
+            }
+
+        /* Status switch card */
+        .fh-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+            .fh-status strong {
+                display: block;
+                font-size: 14px;
+            }
+
+            .fh-status small {
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 12.5px;
+            }
+
+            .fh-status .form-check-input {
+                width: 2.6em;
+                height: 1.4em;
+                cursor: pointer;
+            }
+
+        /* Buttons */
+        .fh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        .fh-btn--primary {
+            background: rgb(var(--c));
+            color: #fff !important;
+            box-shadow: 0 10px 22px rgba(var(--c), .32);
+        }
+
+            .fh-btn--primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 14px 28px rgba(var(--c), .4);
+            }
+
+        .fh-btn--ghost {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+        }
+
+            .fh-btn--ghost:hover {
+                border-color: var(--bs-body-color);
+            }
+
+        /* Image dropzone */
+        .fh-drop {
+            display: block;
+            padding: 30px 20px;
+            border: 2px dashed #cfd3d9;
+            border-radius: 16px;
+            background: rgba(128, 128, 128, .04);
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+            .fh-drop:hover,
+            .fh-drop.is-drag {
+                border-color: rgb(var(--c));
+                background: rgba(var(--c), .07);
+            }
+
+        .fh-drop__icon {
+            display: grid;
+            place-items: center;
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 28px;
+        }
+
+        .fh-drop strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .fh-drop span {
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+        }
+
+        .fh-count {
+            margin-left: auto;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(128, 128, 128, .12);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-count.ok {
+                background: rgba(113, 221, 55, .16);
+                color: #4a9a1c;
+            }
+
+        .fh-imgalert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #fff6e0;
+            color: #8a5a00;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+            .fh-imgalert.d-none {
+                display: none !important;
+            }
+
+        .fh-imggrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+            .fh-imggrid:empty {
+                display: none;
+            }
+
+        .fh-tile {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(128, 128, 128, .08);
+            border: 2px solid transparent;
+            aspect-ratio: 1 / 1;
+        }
+
+            .fh-tile.is-primary {
+                border-color: rgb(var(--c));
+                box-shadow: 0 8px 20px rgba(var(--c), .25);
+            }
+
+            .fh-tile img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .fh-tile__badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgb(var(--c));
+            color: #fff;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .fh-tile__bar {
+            position: absolute;
+            inset: auto 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 8px;
+            background: linear-gradient(to top, rgba(0, 0, 0, .65), transparent);
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        .fh-tile:hover .fh-tile__bar,
+        .fh-tile:focus-within .fh-tile__bar {
+            opacity: 1;
+        }
+
+        .fh-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border: 0;
+            border-radius: 999px;
+            background: #fff;
+            color: #111;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .fh-chip--del {
+            padding: 5px 8px;
+            color: #d8371a;
+        }
+
+        .fh-chip i {
+            font-size: 14px;
+        }
+
+        .fh-tip {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @@media (max-width: 1199px) {
+            .fh-form__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fh-side {
+                position: static;
+            }
+        }
+
+        @@media (hover: none) {
+            .fh-tile__bar {
+                opacity: 1;
+            }
+        }
+
+        .fh-hint {
+            display: block;
+            margin-top: 6px;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-form">
+    <div class="fh-form__head">
+        <div>
+            <h4>Edit Stock Record</h4>
+            <p class="fh-sub" style="margin:2px 0 0; font-weight:600; color: rgb(var(--c));">@Model.ProductName</p>
+        </div>
+        <a asp-area="Admin" asp-controller="Stocks" asp-action="Index" class="fh-back">
+            <i class="icon-base bx bx-arrow-back"></i> Back to list
+        </a>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <div class="fh-sec" style="max-width: 640px;">
+        <div class="fh-sec__head">
+            <span class="fh-sec__icon"><i class="icon-base bx bx-archive"></i></span>
+            <div>
+                <h5>Stock details</h5>
+                <small>Adjust quantity and reorder point</small>
             </div>
+        </div>
+        <div class="fh-sec__body">
+            <form asp-action="Update" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ProductId" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">Quantity</label>
+                        <input asp-for="Quantity" type="number" class="form-control" />
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Reorder Level</label>
+                        <input asp-for="ReorderLevel" type="number" class="form-control" />
+                        <span asp-validation-for="ReorderLevel" class="text-danger"></span>
+                        <small class="fh-hint">The product is flagged "Low Stock" once quantity falls to this level or below.</small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="fh-btn fh-btn--primary" style="width: auto; padding-left: 28px; padding-right: 28px;">
+                        <i class="icon-base bx bx-save"></i> Save
+                    </button>
+                    <a asp-action="Index" class="fh-btn fh-btn--ghost" style="width: auto; margin-top: 0; padding-left: 24px; padding-right: 24px;">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>

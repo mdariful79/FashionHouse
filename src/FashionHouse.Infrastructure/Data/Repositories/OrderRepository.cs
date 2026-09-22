@@ -45,7 +45,8 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                          || x.OrderNumber.Contains(query.SearchText)
                          || x.ShippingFullName.Contains(query.SearchText)
                          || x.ShippingPhone.Contains(query.SearchText)),
-                query.SortText,
+               string.IsNullOrWhiteSpace(query.SortText) ? "CreatedAt desc" : query.SortText,
+                //query.SortText,
                 q => q.Include(o => o.OrderItems),
                 query.PageIndex,
                 query.PageSize,

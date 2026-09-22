@@ -1,77 +1,417 @@
 ﻿@model FashionHouse.Web.Models.AccountDashboard.AccountDashboardModel
+@using FashionHouse.Domain.Enums
 @{
     ViewData["Title"] = "Dashboard";
+    var hasOrders = Model.RecentOrders.Any();
 }
 
-<div class="acct-hero">
-    <h1 class="acct-hero__title">Welcome back, Mr. @Model.FullName</h1>
-    <p class="acct-hero__subtitle">Manage your orders, account, and preferences</p>
-</div>
-
-<div class="acct-actions">
-    <a asp-controller="AccountDashboard" asp-action="EditProfile" class="acct-action">
-        <i class="fa fa-user acct-action__icon"></i>
-        <span class="acct-action__label">Edit profile</span>
-    </a>
-    <a asp-controller="AccountDashboard" asp-action="ChangePassword" class="acct-action">
-        <i class="fa fa-lock acct-action__icon"></i>
-        <span class="acct-action__label">Change password</span>
-    </a>
-    <a asp-controller="AccountDashboard" asp-action="Addresses" class="acct-action">
-        <i class="fa fa-map-marker acct-action__icon"></i>
-        <span class="acct-action__label">Manage addresses</span>
-    </a>
-    <a href="#" class="acct-action acct-action--disabled" onclick="return false;">
-        <span class="acct-action__note">Coming soon</span>
-        <i class="fa fa-truck acct-action__icon"></i>
-        <span class="acct-action__label">Track order</span>
-    </a>
-</div>
-<div class="acct-orders">
-    <div class="acct-orders__header">Recent orders</div>
-
-    @if (!Model.RecentOrders.Any())
-    {
-        <div class="acct-orders__empty">
-            <p>Nothing here yet. Once you place an order, it'll show up in this space.</p>
-            <a asp-controller="Shop" asp-action="Index" class="acct-orders__cta">Browse the collection</a>
-        </div>
+<style>
+    .fh-acct {
+        --fh-accent: #e53637;
+        --fh-ink: #111111;
+        --fh-muted: #6b6f76;
+        --fh-line: #eceef1;
+        --fh-soft: #f7f8fa;
+        --fh-radius: 18px;
     }
-    else
-    {
-        <div class="table-responsive" style="padding: 1rem 1.5rem;">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Order #</th>
-                        <th>Date</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var order in Model.RecentOrders)
-                    {
-                        var statusClass = order.Status switch
-                        {
-                            FashionHouse.Domain.Enums.OrderStatus.Delivered => "bg-success",
-                            FashionHouse.Domain.Enums.OrderStatus.Cancelled or FashionHouse.Domain.Enums.OrderStatus.Returned => "bg-danger",
-                            FashionHouse.Domain.Enums.OrderStatus.Pending => "bg-secondary",
-                            _ => "bg-primary"
-                        };
 
+        /* Hero */
+        .fh-acct .acct-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 34px 36px;
+            margin-bottom: 26px;
+            border-radius: 20px;
+            color: #fff;
+            background: radial-gradient(560px 220px at 88% -20%, rgba(255, 255, 255, .16), transparent 60%), linear-gradient(120deg, #1c1c1f 0%, #2b2b30 55%, var(--fh-accent) 150%);
+        }
+
+            .fh-acct .acct-hero::after {
+                content: "";
+                position: absolute;
+                right: -50px;
+                bottom: -70px;
+                width: 220px;
+                height: 220px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, .08);
+            }
+
+        .fh-acct .acct-hero__title {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 6px;
+            color: #fff;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .fh-acct .acct-hero__subtitle {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 15px;
+        }
+
+        /* Quick actions */
+        .fh-acct .acct-actions {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .fh-acct .acct-action {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 20px;
+            border-radius: var(--fh-radius);
+            background: #fff;
+            border: 1px solid var(--fh-line);
+            color: var(--fh-ink) !important;
+            text-decoration: none !important;
+            transition: transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+        }
+
+            .fh-acct .acct-action:hover {
+                transform: translateY(-3px);
+                border-color: #f0d0d0;
+                box-shadow: 0 14px 30px rgba(229, 54, 55, .12);
+            }
+
+        .fh-acct .acct-action__icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--fh-soft);
+            color: var(--fh-accent);
+            font-size: 18px;
+            transition: transform .25s ease, background .2s ease;
+        }
+
+        .fh-acct .acct-action:hover .acct-action__icon {
+            background: var(--fh-accent);
+            color: #fff;
+            transform: rotate(-6deg) scale(1.06);
+        }
+
+        .fh-acct .acct-action__label {
+            font-size: 14.5px;
+            font-weight: 700;
+        }
+
+        .fh-acct .acct-action--disabled {
+            cursor: default;
+            opacity: .65;
+        }
+
+            .fh-acct .acct-action--disabled:hover {
+                transform: none;
+                box-shadow: none;
+                border-color: var(--fh-line);
+            }
+
+            .fh-acct .acct-action--disabled .acct-action__icon {
+                background: var(--fh-soft);
+                color: #9aa0a8;
+            }
+
+            .fh-acct .acct-action--disabled:hover .acct-action__icon {
+                background: var(--fh-soft);
+                color: #9aa0a8;
+                transform: none;
+            }
+
+        .fh-acct .acct-action__note {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--fh-soft);
+            color: var(--fh-muted);
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        /* Orders card */
+        .fh-acct .acct-orders {
+            border: 1px solid var(--fh-line);
+            border-radius: var(--fh-radius);
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .fh-acct .acct-orders__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--fh-line);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+        .fh-acct .acct-orders__empty {
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+            .fh-acct .acct-orders__empty::before {
+                content: "";
+                display: block;
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 16px;
+                border-radius: 50%;
+                background: var(--fh-soft);
+            }
+
+            .fh-acct .acct-orders__empty p {
+                margin: 0 0 18px;
+                color: var(--fh-muted);
+                font-size: 14.5px;
+            }
+
+        .fh-acct .acct-orders__cta {
+            display: inline-block;
+            padding: 12px 26px;
+            border-radius: 999px;
+            background: var(--fh-ink);
+            color: #fff !important;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-decoration: none !important;
+            transition: background .2s ease;
+        }
+
+            .fh-acct .acct-orders__cta:hover {
+                background: var(--fh-accent);
+            }
+
+        .fh-acct .acct-orders table {
+            margin: 0;
+        }
+
+        .fh-acct .acct-orders thead th {
+            padding: 12px 22px;
+            border: 0;
+            background: rgba(128, 128, 128, .05);
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--fh-muted);
+            white-space: nowrap;
+        }
+
+        .fh-acct .acct-orders tbody td {
+            padding: 15px 22px;
+            vertical-align: middle;
+            border-color: var(--fh-line);
+            font-size: 14.5px;
+        }
+
+        .fh-acct .acct-orders tbody tr {
+            transition: background .15s ease;
+        }
+
+            .fh-acct .acct-orders tbody tr:hover {
+                background: rgba(229, 54, 55, .035);
+            }
+
+        .fh-acct .fh-order-num {
+            color: var(--fh-accent) !important;
+            font-weight: 700;
+            text-decoration: none !important;
+        }
+
+            .fh-acct .fh-order-num:hover {
+                text-decoration: underline !important;
+            }
+
+        .fh-acct .fh-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+            .fh-acct .fh-status::before {
+                content: "";
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+
+        .fh-acct .fh-status--blue {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .fh-acct .fh-status--info {
+            background-color: #06b6d4;
+            color: white;
+        }
+
+        .fh-acct .fh-status--warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .fh-acct .fh-status--success {
+            background: rgba(74, 154, 28, .14);
+            color: #4a9a1c;
+        }
+
+        .fh-acct .fh-status--danger {
+            background: rgba(216, 55, 26, .12);
+            color: #d8371a;
+        }
+
+        .fh-acct .fh-status--secondary {
+            background: rgba(128, 128, 128, .14);
+            color: #6b6f76;
+        }
+
+        .fh-acct .fh-status--primary {
+            background: rgba(229, 54, 55, .12);
+            color: var(--fh-accent);
+        }
+
+        .fh-acct .acct-orders__footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--fh-line);
+            text-align: right;
+        }
+
+            .fh-acct .acct-orders__footer a {
+                color: var(--fh-ink) !important;
+                font-size: 13.5px;
+                font-weight: 700;
+                text-decoration: none !important;
+            }
+
+                .fh-acct .acct-orders__footer a:hover {
+                    color: var(--fh-accent) !important;
+                }
+
+    @@media (max-width: 991px) {
+        .fh-acct .acct-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .fh-acct .acct-hero {
+            padding: 26px 22px;
+        }
+
+        .fh-acct .acct-hero__title {
+            font-size: 23px;
+        }
+
+        .fh-acct .acct-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="fh-acct">
+    <div class="acct-hero">
+        <h1 class="acct-hero__title">Welcome back, Mr. @Model.FullName</h1>
+        <p class="acct-hero__subtitle">Manage your orders, account, and preferences</p>
+    </div>
+
+    <div class="acct-actions">
+        <a asp-controller="AccountDashboard" asp-action="EditProfile" class="acct-action">
+            <span class="acct-action__icon"><i class="fa fa-user"></i></span>
+            <span class="acct-action__label">Edit profile</span>
+        </a>
+        <a asp-controller="AccountDashboard" asp-action="ChangePassword" class="acct-action">
+            <span class="acct-action__icon"><i class="fa fa-lock"></i></span>
+            <span class="acct-action__label">Change password</span>
+        </a>
+        <a asp-controller="AccountDashboard" asp-action="Addresses" class="acct-action">
+            <span class="acct-action__icon"><i class="fa fa-map-marker"></i></span>
+            <span class="acct-action__label">Manage addresses</span>
+        </a>
+        <a href="#" class="acct-action acct-action--disabled" onclick="return false;">
+            <span class="acct-action__note">Coming soon</span>
+            <span class="acct-action__icon"><i class="fa fa-truck"></i></span>
+            <span class="acct-action__label">Track order</span>
+        </a>
+    </div>
+
+    <div class="acct-orders">
+        <div class="acct-orders__header">
+            Recent orders
+            @if (hasOrders)
+            {
+                <a asp-controller="AccountDashboard" asp-action="Orders" class="fh-order-num" style="font-size:13px;">View all →</a>
+            }
+        </div>
+
+        @if (!hasOrders)
+        {
+            <div class="acct-orders__empty">
+                <p>Nothing here yet. Once you place an order, it'll show up in this space.</p>
+                <a asp-controller="Shop" asp-action="Index" class="acct-orders__cta">Browse the collection</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
                         <tr>
-                            <td class="fw-semibold">@order.OrderNumber</td>
-                            <td>@order.CreatedAt.ToString("dd MMM yyyy")</td>
-                            <td>Tk @order.GrandTotal.ToString("N0")</td>
-                            <td><span class="badge @statusClass">@order.Status</span></td>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="px-3 pb-2">
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            var statusClass = order.Status switch
+                            {
+                                OrderStatus.Delivered => "fh-status--blue",
+                                OrderStatus.Shipped => "fh-status--info",
+                                OrderStatus.Processing => "fh-status--warning",
+                                OrderStatus.Confirmed => "fh-status--success",
+                                OrderStatus.Pending => "fh-status--secondary",
+                                OrderStatus.Cancelled or OrderStatus.Returned => "fh-status--danger",
+                                _ => "fh-status--primary"
+                            };
+
+                            <tr>
+                                <td><a asp-controller="AccountDashboard" asp-action="OrderDetails" asp-route-id="@order.Id" class="fh-order-num">@order.OrderNumber</a></td>
+                                <td>@order.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td class="fw-semibold">Tk @order.GrandTotal.ToString("N0")</td>
+                                <td><span class="fh-status @statusClass">@order.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="acct-orders__footer">
                 <a asp-controller="AccountDashboard" asp-action="Orders">View all orders →</a>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>

@@ -1,80 +1,459 @@
 ﻿@model FashionHouse.Domain.Entities.Order
+@using FashionHouse.Domain.Enums
 @{
     ViewData["Title"] = $"Order {Model.OrderNumber}";
+    var restocked = Model.Status is OrderStatus.Cancelled or OrderStatus.Returned;
+
+    string StatusTone(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "warning",
+        OrderStatus.Processing or OrderStatus.Confirmed => "info",
+        OrderStatus.Shipped => "primary",
+        OrderStatus.Delivered or OrderStatus.Confirmed => "success",
+        OrderStatus.Cancelled or OrderStatus.Returned => "danger",
+        _ => "secondary"
+    };
+
+    string PaymentTone(PaymentStatus s) => s switch
+    {
+        PaymentStatus.Paid => "success",
+        PaymentStatus.Pending => "warning",
+        PaymentStatus.Failed => "danger",
+        PaymentStatus.Refunded => "info",
+        _ => "secondary"
+    };
+
+    var orderStatuses = Enum.GetValues<OrderStatus>();
+    var paymentStatuses = Enum.GetValues<PaymentStatus>();
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <partial name="_ResponsePartial" />
-        </div>
+@section Styles {
+    <style>
+        .fh-ord {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
 
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header border-bottom">
-                    <h5 class="card-title mb-0">Order @Model.OrderNumber</h5>
-                    <small class="text-muted">Placed on @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</small>
+        /* Header */
+        .fh-ord__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+            .fh-ord__head h4 {
+                margin: 0 0 4px;
+                font-size: 24px;
+                font-weight: 800;
+            }
+
+            .fh-ord__head .fh-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 10px;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 13.5px;
+            }
+
+        .fh-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+            .fh-back:hover {
+                background: rgb(var(--c));
+                border-color: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        .fh-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 800;
+        }
+
+            .fh-pill::before {
+                content: "";
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+
+        .fh-pill--warning {
+            background: rgba(255, 171, 0, .14);
+            color: #a3660a;
+        }
+
+        .fh-pill--info {
+            background: rgba(3, 195, 236, .14);
+            color: #0891a8;
+        }
+
+        .fh-pill--primary {
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+        }
+
+        .fh-pill--success {
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+        }
+
+        .fh-pill--danger {
+            background: rgba(255, 62, 29, .12);
+            color: #d8371a;
+        }
+
+        .fh-pill--secondary {
+            background: rgba(128, 128, 128, .14);
+            color: #6b6f76;
+        }
+
+        /* Cards */
+        .fh-sec {
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+        }
+
+        .fh-sec__head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        .fh-sec__icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 19px;
+        }
+
+        .fh-sec__head h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .fh-sec__body {
+            padding: 22px;
+        }
+
+        /* Items table */
+        .fh-items table {
+            margin: 0;
+        }
+
+        .fh-items thead th {
+            padding: 12px 6px;
+            border: 0;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--bs-secondary-color, #8a8d93);
+            white-space: nowrap;
+        }
+
+        .fh-items tbody td {
+            padding: 14px 6px;
+            vertical-align: middle;
+            border-color: var(--bs-border-color, #eceef1);
+        }
+
+        .fh-items .fh-prod {
+            font-weight: 700;
+        }
+
+        .fh-items .fh-sku {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 8px;
+            background: rgba(128,128,128,.1);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .fh-items .fh-qty {
+            display: inline-block;
+            min-width: 30px;
+            text-align: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(128,128,128,.1);
+            font-weight: 700;
+            font-size: 12.5px;
+        }
+
+        .fh-items .fh-total {
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .fh-totals {
+            margin: 18px 0 0;
+            border-top: 1px dashed var(--bs-border-color, #e7e9ee);
+            padding-top: 14px;
+        }
+
+        .fh-totals__row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 6px;
+            font-size: 14px;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+            .fh-totals__row.fh-discount span:last-child {
+                color: #4a9a1c;
+                font-weight: 700;
+            }
+
+            .fh-totals__row.fh-grand {
+                margin-top: 6px;
+                padding: 12px 6px 4px;
+                border-top: 1px solid var(--bs-border-color, #e7e9ee);
+                font-size: 16px;
+                font-weight: 800;
+                color: var(--bs-body-color);
+            }
+
+                .fh-totals__row.fh-grand span:last-child {
+                    font-size: 20px;
+                }
+
+        .fh-note {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(128, 128, 128, .06);
+            font-size: 13.5px;
+        }
+
+            .fh-note i {
+                flex: none;
+                font-size: 18px;
+                color: rgb(var(--c));
+            }
+
+        /* Shipping */
+        .fh-ship__row {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+            .fh-ship__row i {
+                flex: none;
+                width: 18px;
+                margin-top: 2px;
+                color: var(--bs-secondary-color, #8a8d93);
+            }
+
+        .fh-ship__name {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        /* Status form */
+        .fh-form .form-label {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .fh-form .form-select {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 14px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-form .form-select:focus {
+                border-color: rgb(var(--c));
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        .fh-alert {
+            display: flex;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+            .fh-alert i {
+                flex: none;
+                font-size: 18px;
+            }
+
+        .fh-alert--warn {
+            background: #fff6e0;
+            color: #8a5a00;
+        }
+
+        .fh-alert--info {
+            background: rgba(3, 195, 236, .12);
+            color: #0891a8;
+        }
+
+        .fh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            background: rgb(var(--c));
+            color: #fff !important;
+            box-shadow: 0 10px 22px rgba(var(--c), .32);
+            transition: transform .15s ease, box-shadow .2s ease;
+        }
+
+            .fh-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 14px 28px rgba(var(--c), .4);
+            }
+
+        @@media (max-width: 767px) {
+            .fh-sec__body {
+                padding: 18px;
+            }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-ord">
+    <partial name="_ResponsePartial" />
+
+    <div class="fh-ord__head">
+        <div>
+            <h4>Order @Model.OrderNumber</h4>
+            <div class="fh-meta">
+                <span><i class="icon-base bx bx-calendar"></i> @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</span>
+                <span class="fh-pill fh-pill--@StatusTone(Model.Status)">@Model.Status</span>
+                <span class="fh-pill fh-pill--@PaymentTone(Model.PaymentStatus)">@Model.PaymentStatus</span>
+            </div>
+        </div>
+        <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="fh-back">
+            <i class="icon-base bx bx-arrow-back"></i> Back to orders
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="fh-sec fh-items">
+                <div class="fh-sec__head">
+                    <span class="fh-sec__icon"><i class="icon-base bx bx-receipt"></i></span>
+                    <h5>Items</h5>
                 </div>
-                <div class="card-body table-responsive">
+                <div class="fh-sec__body table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Product</th>
                                 <th>SKU</th>
                                 <th>Unit Price</th>
-                                <th>Qty</th>
-                                <th>Line Total</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Line Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model.OrderItems)
                             {
                                 <tr>
-                                    <td>@item.ProductName</td>
-                                    <td>@item.SKU</td>
+                                    <td class="fh-prod">@item.ProductName</td>
+                                    <td><span class="fh-sku">@item.SKU</span></td>
                                     <td>Tk @item.UnitPrice.ToString("N0")</td>
-                                    <td>@item.Quantity</td>
-                                    <td>Tk @item.LineTotal.ToString("N0")</td>
+                                    <td class="text-center"><span class="fh-qty">×@item.Quantity</span></td>
+                                    <td class="text-end fh-total">Tk @item.LineTotal.ToString("N0")</td>
                                 </tr>
                             }
                         </tbody>
-                        <tfoot>
-                            <tr><td colspan="4" class="text-end">Subtotal</td><td>Tk @Model.SubTotal.ToString("N0")</td></tr>
-                            <tr><td colspan="4" class="text-end">Shipping</td><td>Tk @Model.ShippingFee.ToString("N0")</td></tr>
-                            <tr><td colspan="4" class="text-end">Discount</td><td>- Tk @Model.Discount.ToString("N0")</td></tr>
-                            <tr><td colspan="4" class="text-end fw-bold">Grand Total</td><td class="fw-bold">Tk @Model.GrandTotal.ToString("N0")</td></tr>
-                        </tfoot>
                     </table>
+
+                    <div class="fh-totals">
+                        <div class="fh-totals__row"><span>Subtotal</span><span>Tk @Model.SubTotal.ToString("N0")</span></div>
+                        <div class="fh-totals__row"><span>Shipping</span><span>Tk @Model.ShippingFee.ToString("N0")</span></div>
+                        <div class="fh-totals__row fh-discount"><span>Discount</span><span>− Tk @Model.Discount.ToString("N0")</span></div>
+                        <div class="fh-totals__row fh-grand"><span>Grand Total</span><span>Tk @Model.GrandTotal.ToString("N0")</span></div>
+                    </div>
 
                     @if (!string.IsNullOrEmpty(Model.Notes))
                     {
-                        <div class="mt-3"><strong>Customer note:</strong> @Model.Notes</div>
+                        <div class="fh-note">
+                            <i class="icon-base bx bx-message-square-detail"></i>
+                            <div><strong>Customer note:</strong> @Model.Notes</div>
+                        </div>
                     }
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header border-bottom"><h5 class="card-title mb-0">Shipping Address</h5></div>
-                <div class="card-body">
-                    <p class="mb-1 fw-semibold">@Model.ShippingFullName</p>
-                    <p class="mb-1">@Model.ShippingEmail</p>
-                    <p class="mb-1">@Model.ShippingPhone</p>
-                    <p class="mb-0">@Model.ShippingFullAddress, @Model.ShippingDistrict @Model.ShippingPostalCode</p>
+        <div class="col-lg-4">
+            <div class="fh-sec">
+                <div class="fh-sec__head">
+                    <span class="fh-sec__icon"><i class="icon-base bx bx-map-pin"></i></span>
+                    <h5>Shipping address</h5>
+                </div>
+                <div class="fh-sec__body">
+                    <div class="fh-ship__name">@Model.ShippingFullName</div>
+                    <div class="fh-ship__row"><i class="icon-base bx bx-envelope"></i> @Model.ShippingEmail</div>
+                    <div class="fh-ship__row"><i class="icon-base bx bx-phone"></i> @Model.ShippingPhone</div>
+                    <div class="fh-ship__row"><i class="icon-base bx bx-home"></i> @Model.ShippingFullAddress, @Model.ShippingDistrict @Model.ShippingPostalCode</div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header border-bottom"><h5 class="card-title mb-0">Update Status</h5></div>
-                <div class="card-body">
+            <div class="fh-sec">
+                <div class="fh-sec__head">
+                    <span class="fh-sec__icon"><i class="icon-base bx bx-refresh"></i></span>
+                    <h5>Update status</h5>
+                </div>
+                <div class="fh-sec__body fh-form">
                     <form asp-action="UpdateStatus" method="post">
                         <input type="hidden" name="Id" value="@Model.Id" />
 
                         <div class="mb-3">
                             <label class="form-label">Order Status</label>
                             <select name="Status" class="form-select">
-                                @foreach (var status in Enum.GetValues<FashionHouse.Domain.Enums.OrderStatus>())
+                                @foreach (var status in orderStatuses)
                                 {
                                     <option value="@((int)status)" selected="@(status == Model.Status)">@status</option>
                                 }
@@ -84,23 +463,29 @@
                         <div class="mb-3">
                             <label class="form-label">Payment Status</label>
                             <select name="PaymentStatus" class="form-select">
-                                @foreach (var status in Enum.GetValues<FashionHouse.Domain.Enums.PaymentStatus>())
+                                @foreach (var status in paymentStatuses)
                                 {
                                     <option value="@((int)status)" selected="@(status == Model.PaymentStatus)">@status</option>
                                 }
                             </select>
                         </div>
 
-                        @if (Model.Status is FashionHouse.Domain.Enums.OrderStatus.Cancelled or FashionHouse.Domain.Enums.OrderStatus.Returned)
+                        @if (restocked)
                         {
-                            <div class="alert alert-info py-2">Stock was already restocked for this order.</div>
+                            <div class="fh-alert fh-alert--info">
+                                <i class="icon-base bx bx-info-circle"></i>
+                                <span>Stock was already restocked for this order.</span>
+                            </div>
                         }
                         else
                         {
-                            <div class="alert alert-warning py-2">Setting Cancelled/Returned will restock these items.</div>
+                            <div class="fh-alert fh-alert--warn">
+                                <i class="icon-base bx bx-error"></i>
+                                <span>Setting Cancelled/Returned will restock these items.</span>
+                            </div>
                         }
 
-                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                        <button type="submit" class="fh-btn"><i class="icon-base bx bx-save"></i> Save</button>
                     </form>
                 </div>
             </div>

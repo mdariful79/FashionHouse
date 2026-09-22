@@ -2,35 +2,400 @@
     ViewData["Title"] = "Products";
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <partial name="_ResponsePartial" />
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0">Products</h5>
-                    <a asp-area="admin" asp-controller="products" asp-action="create" class="btn btn-primary">
-                        <i class="bx bx-plus"></i> Add Product
-                    </a>
-                </div>
-                <div class="card-body table-responsive pt-0">
-                    <partial name="_ModalPartial" />
-                    <table id="productTable" class="table table-bordered table-hover w-100">
-                        <thead>
-                            <tr>
-                                <th>SL</th>
-                                <th>Image</th>
-                                <th>Name</th>
-                                <th>SKU</th>
-                                <th>Price (Tk)</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
+    <style>
+        .fh-list {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
+
+        /* Page header */
+        .fh-list__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+            .fh-list__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
+
+            .fh-list__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 20px;
+            border-radius: 999px;
+            background: rgb(var(--c));
+            color: #fff !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none !important;
+            box-shadow: 0 8px 18px rgba(var(--c), .32);
+            transition: transform .15s ease, box-shadow .2s ease;
+        }
+
+            .fh-add:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 12px 24px rgba(var(--c), .4);
+            }
+
+        /* Card */
+        .fh-list .card {
+            border-radius: 18px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+            overflow: hidden;
+        }
+
+        .fh-list .card-body {
+            padding: 20px 22px 8px;
+        }
+
+        /* DataTables toolbar */
+        .fh-list .dt-container .row:first-child {
+            margin-bottom: 14px;
+        }
+
+        .fh-list .dt-search input,
+        .fh-list .dt-length select {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 999px;
+            background-color: rgba(128, 128, 128, .05);
+            padding: 8px 16px;
+            font-size: 14px;
+            transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+
+        .fh-list .dt-search input {
+            min-width: 240px;
+        }
+
+        .fh-list .dt-length select {
+            padding-right: 32px;
+        }
+
+            .fh-list .dt-search input:focus,
+            .fh-list .dt-length select:focus {
+                outline: none;
+                border-color: rgb(var(--c));
+                background-color: transparent;
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        .fh-list .dt-search label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Table */
+        #productTable {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+            #productTable thead th {
+                padding: 13px 16px;
+                border: 0;
+                background: rgba(128, 128, 128, .07);
+                font-size: 11.5px;
+                font-weight: 800;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--bs-secondary-color, #8a8d93);
+                white-space: nowrap;
+            }
+
+                #productTable thead th:first-child {
+                    border-radius: 12px 0 0 12px;
+                }
+
+                #productTable thead th:last-child {
+                    border-radius: 0 12px 12px 0;
+                }
+
+            #productTable tbody td {
+                padding: 14px 16px;
+                vertical-align: middle;
+                border-color: var(--bs-border-color, #eceef1);
+            }
+
+            #productTable tbody tr {
+                transition: background .15s ease;
+            }
+
+                #productTable tbody tr:hover {
+                    background: rgba(var(--c), .05);
+                }
+
+        .fh-thumb {
+            display: block;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        /* Hover image preview */
+        .fh-thumb {
+            cursor: zoom-in;
+            transition: transform .15s ease, box-shadow .2s ease;
+        }
+
+            .fh-thumb:hover {
+                transform: scale(1.06);
+                box-shadow: 0 6px 16px rgba(17, 17, 17, .18);
+            }
+
+        .fh-preview {
+            position: fixed;
+            z-index: 2000;
+            width: 296px;
+            height: 296px;
+            padding: 8px;
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            box-shadow: 0 24px 50px rgba(17, 17, 17, .28);
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(.96);
+            pointer-events: none;
+            transition: opacity .15s ease, transform .15s ease, visibility .15s;
+        }
+
+            .fh-preview.show {
+                opacity: 1;
+                visibility: visible;
+                transform: scale(1);
+            }
+
+            .fh-preview img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 12px;
+                background: rgba(128, 128, 128, .08);
+            }
+
+        .fh-thumb--empty {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: rgba(128, 128, 128, .1);
+            color: #9aa0a8;
+        }
+
+        .fh-name {
+            font-weight: 700;
+        }
+
+        .fh-sku {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 8px;
+            background: rgba(128, 128, 128, .1);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12.5px;
+        }
+
+        .fh-price {
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .fh-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+            .fh-status::before {
+                content: "";
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+
+        .fh-status--on {
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+        }
+
+        .fh-status--off {
+            background: rgba(255, 62, 29, .12);
+            color: #d8371a;
+        }
+
+        /* Row actions */
+        .fh-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .fh-act {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 0;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, transform .15s ease;
+        }
+
+            .fh-act:hover {
+                transform: translateY(-1px);
+            }
+
+        .fh-act--edit {
+            background: rgba(var(--c), .12);
+            color: rgb(var(--c)) !important;
+        }
+
+            .fh-act--edit:hover {
+                background: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        .fh-act--del {
+            background: rgba(255, 62, 29, .12);
+            color: #ff3e1d;
+        }
+
+            .fh-act--del:hover {
+                background: #ff3e1d;
+                color: #fff;
+            }
+
+        /* Footer: info + pagination */
+        .fh-list .dt-info {
+            font-size: 13px;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+        .fh-list .dt-paging .page-link {
+            min-width: 36px;
+            margin: 0 2px;
+            border: 0;
+            border-radius: 999px !important;
+            background: transparent;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background .2s ease, color .2s ease;
+        }
+
+            .fh-list .dt-paging .page-link:hover {
+                background: rgba(var(--c), .12);
+            }
+
+        .fh-list .dt-paging .page-item.active .page-link {
+            background: rgb(var(--c));
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(var(--c), .35);
+        }
+
+        .fh-list .dt-paging .page-item.disabled .page-link {
+            opacity: .4;
+        }
+
+        /* Empty + processing */
+        .fh-empty {
+            padding: 36px 12px;
+            text-align: center;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+            .fh-empty i {
+                display: block;
+                margin: 0 auto 8px;
+                font-size: 44px;
+                opacity: .55;
+            }
+
+            .fh-empty strong {
+                display: block;
+                margin-bottom: 2px;
+                color: var(--bs-body-color);
+            }
+
+        .fh-list .dt-processing {
+            border-radius: 12px;
+            font-weight: 700;
+            color: rgb(var(--c));
+        }
+
+        @@media (max-width: 575px) {
+            .fh-list .dt-search input {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .fh-list__head h4 {
+                font-size: 20px;
+            }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-list">
+    <div class="fh-list__head">
+        <div>
+            <h4>Products</h4>
+            <p>Manage your catalog: prices, SKUs and availability.</p>
+        </div>
+        <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="fh-add">
+            <i class="icon-base bx bx-plus"></i> Add Product
+        </a>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <div class="card">
+        <div class="card-body table-responsive">
+            <partial name="_ModalPartial" />
+            <table id="productTable" class="table table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Price (Tk)</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -41,19 +406,27 @@
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
-    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
-
     <script>
         $(function () {
+        function esc(v) {
+        return $('<div>').text(v == null ? '' : v).html();
+        }
+
         $("#productTable").DataTable({
         processing: true,
         serverSide: true,
-        responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         pagingType: "simple_numbers",
-        order: [], // disable default sort — was implicitly sorting column 0 (SL)
+        language: {
+        search: '',
+        searchPlaceholder: 'Search products…',
+        lengthMenu: '_MENU_',
+        processing: 'Loading…',
+        info: 'Showing _START_–_END_ of _TOTAL_ products',
+        infoEmpty: 'No products',
+        emptyTable: '<div class="fh-empty"><i class="icon-base bx bx-package"></i><strong>No products yet</strong>Click “Add Product” to create your first one.</div>',
+        zeroRecords: '<div class="fh-empty"><i class="icon-base bx bx-search-alt"></i><strong>No matching products</strong>Try a different search term.</div>'
+        },
         ajax: {
         url: "/Admin/Products/GetPagedProducts",
         type: "POST",
@@ -76,39 +449,78 @@
         searchable: false,
         render: function (data) {
         return data
-        ? `<img src="${data}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" />`
-        : `<span class="badge bg-label-secondary">No image</span>`;
+        ? `<img class="fh-thumb" src="${esc(data)}" alt="" />`
+        : `<span class="fh-thumb--empty"><i class="icon-base bx bx-image"></i></span>`;
         }
         },
-        { data: 1 }, // ProductName
-        { data: 2 }, // SKU
-        { data: 3 }, // Price
+        {
+        data: 1, // ProductName
+        render: function (data) { return `<span class="fh-name">${esc(data)}</span>`; }
+        },
+        {
+        data: 2, // SKU
+        render: function (data) { return data ? `<span class="fh-sku">${esc(data)}</span>` : '—'; }
+        },
+        {
+        data: 3, // Price
+        render: function (data) {
+        var n = Number(String(data).replace(/,/g, ''));
+        return `<span class="fh-price">${ isNaN(n) ? esc(data) : Math.round(n).toLocaleString('en-US')}</span>`;
+        }
+        },
         {
         data: 4, // IsActive
-        orderable: true, // was false
+        orderable: true,
         searchable: false,
         render: function (data) {
         return data === 'Active'
-        ? '<span class="badge rounded-pill bg-label-success">Active</span>'
-        : '<span class="badge rounded-pill bg-label-danger">Inactive</span>';
+        ? '<span class="fh-status fh-status--on">Active</span>'
+        : '<span class="fh-status fh-status--off">Inactive</span>';
         }
         },
         {
         data: 5, // Id
-        orderable: false,
+        orderable: true,
         searchable: false,
         render: function (data) {
         return `
-        <a href="/Admin/Products/Update/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
-        <i class="bx bx-edit"></i>
+        <div class="fh-actions">
+        <a href="/Admin/Products/Update/${data}" class="fh-act fh-act--edit" title="Edit">
+        <i class="icon-base bx bx-edit"></i>
         </a>
-        <button type="button" class="btn btn-sm btn-icon btn-outline-danger show-bs-modal" data-id="${data}" title="Delete">
-        <i class="bx bx-trash"></i>
-        </button>`;
+        <button type="button" class="fh-act fh-act--del show-bs-modal" data-id="${data}" title="Delete">
+        <i class="icon-base bx bx-trash"></i>
+        </button>
+        </div>`;
         }
         }
         ]
         });
+
+        // Large image preview on hover
+        var $preview = $('<div class="fh-preview"><img alt=""></div>').appendTo('body');
+        var previewSize = 296, gap = 14;
+
+        function hidePreview() { $preview.removeClass('show'); }
+
+        $("#productTable")
+        .on('mouseenter', '.fh-thumb', function () {
+        var r = this.getBoundingClientRect();
+        $preview.find('img').attr('src', this.src);
+
+        var left = r.right + gap;
+        if (left + previewSize > window.innerWidth - 8) left = r.left - gap - previewSize;
+        if (left < 8) left = 8;
+
+        var top = r.top + r.height / 2 - previewSize / 2;
+        top = Math.max(8, Math.min(top, window.innerHeight - previewSize - 8));
+
+        $preview.css({ left: left + 'px', top: top + 'px' }).addClass('show');
+        })
+        .on('mouseleave', '.fh-thumb', hidePreview)
+        .on('draw.dt', hidePreview);
+
+        $(window).on('scroll resize', hidePreview);
 
         $("#productTable").on('click', '.show-bs-modal', function () {
         let id = $(this).data('id');

@@ -3,24 +3,451 @@
     ViewData["Title"] = "Add Product";
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row mb-6 gy-6">
-        <div class="col-xl">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Add Product</h5>
-                    <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn btn-sm btn-outline-secondary">
-                        Back to list
-                    </a>
-                </div>
-                <div class="card-body">
-                    <partial name="_ResponsePartial" />
+@section Styles {
+    <style>
+        .fh-form {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
 
-                    <form asp-area="Admin" asp-controller="Products" asp-action="Create" asp-antiforgery="true"
-                          enctype="multipart/form-data" method="post">
+        /* Header */
+        .fh-form__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            .fh-form__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
 
+            .fh-form__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+            .fh-back:hover {
+                background: rgb(var(--c));
+                border-color: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        /* Layout */
+        .fh-form__grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .fh-side {
+            position: sticky;
+            top: 90px;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Section cards */
+        .fh-sec {
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+        }
+
+        .fh-side .fh-sec {
+            margin-bottom: 0;
+        }
+
+        .fh-sec__head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        .fh-sec__icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 19px;
+        }
+
+        .fh-sec__head h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .fh-sec__head small {
+            display: block;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+
+        .fh-sec__body {
+            padding: 22px;
+        }
+
+        /* Fields */
+        .fh-form .form-label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .fh-form .form-control,
+        .fh-form .form-select {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 14px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-form .form-control:focus,
+            .fh-form .form-select:focus {
+                border-color: rgb(var(--c));
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        .fh-form .input-group-text {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px 0 0 12px;
+            background: rgba(128, 128, 128, .08);
+            font-weight: 700;
+        }
+
+        .fh-form .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .fh-form .text-danger {
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .fh-off {
+            display: none;
+            margin-top: 8px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-off.show {
+                display: inline-block;
+            }
+
+            .fh-off.bad {
+                background: rgba(255, 62, 29, .12);
+                color: #d8371a;
+            }
+
+        /* Status switch card */
+        .fh-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+            .fh-status strong {
+                display: block;
+                font-size: 14px;
+            }
+
+            .fh-status small {
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 12.5px;
+            }
+
+            .fh-status .form-check-input {
+                width: 2.6em;
+                height: 1.4em;
+                cursor: pointer;
+            }
+
+        /* Buttons */
+        .fh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        .fh-btn--primary {
+            background: rgb(var(--c));
+            color: #fff !important;
+            box-shadow: 0 10px 22px rgba(var(--c), .32);
+        }
+
+            .fh-btn--primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 14px 28px rgba(var(--c), .4);
+            }
+
+        .fh-btn--ghost {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+        }
+
+            .fh-btn--ghost:hover {
+                border-color: var(--bs-body-color);
+            }
+
+        /* Image dropzone */
+        .fh-drop {
+            display: block;
+            padding: 30px 20px;
+            border: 2px dashed #cfd3d9;
+            border-radius: 16px;
+            background: rgba(128, 128, 128, .04);
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+            .fh-drop:hover,
+            .fh-drop.is-drag {
+                border-color: rgb(var(--c));
+                background: rgba(var(--c), .07);
+            }
+
+        .fh-drop__icon {
+            display: grid;
+            place-items: center;
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 28px;
+        }
+
+        .fh-drop strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .fh-drop span {
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+        }
+
+        .fh-count {
+            margin-left: auto;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(128, 128, 128, .12);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-count.ok {
+                background: rgba(113, 221, 55, .16);
+                color: #4a9a1c;
+            }
+
+        .fh-imgalert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #fff6e0;
+            color: #8a5a00;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+            .fh-imgalert.d-none {
+                display: none !important;
+            }
+
+        .fh-imggrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+            .fh-imggrid:empty {
+                display: none;
+            }
+
+        .fh-tile {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(128, 128, 128, .08);
+            border: 2px solid transparent;
+            aspect-ratio: 1 / 1;
+        }
+
+            .fh-tile.is-primary {
+                border-color: rgb(var(--c));
+                box-shadow: 0 8px 20px rgba(var(--c), .25);
+            }
+
+            .fh-tile img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .fh-tile__badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgb(var(--c));
+            color: #fff;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .fh-tile__bar {
+            position: absolute;
+            inset: auto 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 8px;
+            background: linear-gradient(to top, rgba(0, 0, 0, .65), transparent);
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        .fh-tile:hover .fh-tile__bar,
+        .fh-tile:focus-within .fh-tile__bar {
+            opacity: 1;
+        }
+
+        .fh-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border: 0;
+            border-radius: 999px;
+            background: #fff;
+            color: #111;
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .fh-chip--del {
+            padding: 5px 8px;
+            color: #d8371a;
+        }
+
+        .fh-chip i {
+            font-size: 14px;
+        }
+
+        .fh-tip {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @@media (max-width: 1199px) {
+            .fh-form__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fh-side {
+                position: static;
+            }
+        }
+
+        @@media (hover: none) {
+            .fh-tile__bar {
+                opacity: 1;
+            }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-form">
+    <div class="fh-form__head">
+        <div>
+            <h4>Add Product</h4>
+            <p>Fill in the details, upload images, then save.</p>
+        </div>
+        <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="fh-back">
+            <i class="icon-base bx bx-arrow-back"></i> Back to list
+        </a>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <form asp-area="Admin" asp-controller="Products" asp-action="Create" asp-antiforgery="true"
+          enctype="multipart/form-data" method="post">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="fh-form__grid">
+            <div>
+                <!-- Basic information -->
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-info-circle"></i></span>
+                        <div>
+                            <h5>Basic information</h5>
+                            <small>Name, SKU and where the product belongs</small>
+                        </div>
+                    </div>
+                    <div class="fh-sec__body">
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="form-label" asp-for="CategoryId">Category</label>
@@ -58,57 +485,114 @@
                                 <span asp-validation-for="SKU" class="text-danger"></span>
                             </div>
 
-                            <div class="col-md-6 mb-4">
+                            <div class="col-12">
+                                <label class="form-label" asp-for="Description">Description</label>
+                                <textarea class="form-control" rows="4" asp-for="Description" placeholder="Describe the fabric, fit and care instructions…"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-purchase-tag"></i></span>
+                        <div>
+                            <h5>Pricing</h5>
+                            <small>Set the regular price and an optional discounted price</small>
+                        </div>
+                    </div>
+                    <div class="fh-sec__body">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
                                 <label class="form-label" asp-for="Price">Price</label>
-                                <input type="number" step="0.01" class="form-control" asp-for="Price" />
+                                <div class="input-group">
+                                    <span class="input-group-text">Tk</span>
+                                    <input type="number" step="0.01" class="form-control" asp-for="Price" />
+                                </div>
                                 <span asp-validation-for="Price" class="text-danger"></span>
                             </div>
 
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-6 mb-2">
                                 <label class="form-label" asp-for="DiscountedPrice">Discounted Price</label>
-                                <input type="number" step="0.01" class="form-control" asp-for="DiscountedPrice" />
+                                <div class="input-group">
+                                    <span class="input-group-text">Tk</span>
+                                    <input type="number" step="0.01" class="form-control" asp-for="DiscountedPrice" />
+                                </div>
                                 <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-12 mb-4">
-                                <label class="form-label" asp-for="Description">Description</label>
-                                <textarea class="form-control" rows="3" asp-for="Description"></textarea>
-                                <span asp-validation-for="Description" class="text-danger"></span>
-                            </div>
-
-                            <div class="col-12 mb-4">
-                                <div class="form-check form-switch">
-                                    <input asp-for="IsActive" class="form-check-input" role="switch" />
-                                    <label asp-for="IsActive" class="form-check-label">Active</label>
-                                </div>
+                                <span id="discountHint" class="fh-off"></span>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="card mt-2 mb-4">
-                            <h5 class="card-header">
-                                Product Images
-                                <span id="imageCountBadge" class="badge bg-label-secondary ms-2">0 / 3 minimum</span>
-                            </h5>
-                            <div class="card-body">
-                                <div id="imageAlert" class="alert alert-warning d-none">
-                                    Add at least 3 images before activating this product.
-                                </div>
-
-                                <div id="imageGrid" class="row g-3 mb-3"></div>
-
-                                <input type="file" id="imageUploadInput" name="imageFiles" class="form-control" multiple
-                                       accept="image/jpeg,image/jpg,image/png,image/webp" />
-                                <small class="text-muted">You can select multiple files at once (jpg, jpeg, png, webp — max 5MB each). Click "Set Primary" on any thumbnail to choose the main image.</small>
-                            </div>
+                <!-- Images -->
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-images"></i></span>
+                        <div>
+                            <h5>Product images</h5>
+                            <small>Add at least 3. The first image is the primary one.</small>
+                        </div>
+                        <span id="imageCountBadge" class="fh-count">0 / 3 minimum</span>
+                    </div>
+                    <div class="fh-sec__body">
+                        <div id="imageAlert" class="fh-imgalert d-none">
+                            <i class="icon-base bx bx-error-circle"></i>
+                            Add at least 3 images before activating this product.
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                    </form>
+                        <div id="imageGrid" class="fh-imggrid"></div>
+
+                        <label for="imageUploadInput" id="dropZone" class="fh-drop">
+                            <span class="fh-drop__icon"><i class="icon-base bx bx-cloud-upload"></i></span>
+                            <strong>Drag &amp; drop images here, or click to browse</strong>
+                            <span>JPG, JPEG, PNG or WEBP · up to 5MB each · select several at once</span>
+                        </label>
+                        <input type="file" id="imageUploadInput" name="imageFiles" class="visually-hidden" multiple
+                               accept="image/jpeg,image/jpg,image/png,image/webp" />
+                    </div>
                 </div>
             </div>
+
+            <!-- Sidebar -->
+            <aside class="fh-side">
+                <div class="fh-sec">
+                    <div class="fh-sec__body">
+                        <div class="fh-status mb-4">
+                            <div>
+                                <strong>Active</strong>
+                                <small>Active products are visible in the shop</small>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input asp-for="IsActive" class="form-check-input" role="switch" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="fh-btn fh-btn--primary">
+                            <i class="icon-base bx bx-save"></i> Save product
+                        </button>
+                        <a asp-action="Index" class="fh-btn fh-btn--ghost">Cancel</a>
+                    </div>
+                </div>
+
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-bulb"></i></span>
+                        <h5>Image tips</h5>
+                    </div>
+                    <div class="fh-sec__body">
+                        <ul class="fh-tip">
+                            <li>Use at least 3 clear photos.</li>
+                            <li>Hover an image and choose <b>Primary</b> to make it the main photo.</li>
+                            <li>Square images look best in the shop grid.</li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
         </div>
-    </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -137,10 +621,38 @@
                     });
             });
 
+            // ---- Live discount hint ----
+            function updateDiscountHint() {
+                var price = parseFloat($('#Price').val());
+                var disc = parseFloat($('#DiscountedPrice').val());
+                var $hint = $('#discountHint').removeClass('show bad');
+
+                if (isNaN(price) || isNaN(disc) || price <= 0 || disc <= 0) return;
+
+                if (disc >= price) {
+                    $hint.text('Discounted price should be lower than the price').addClass('show bad');
+                    return;
+                }
+
+                // Round DOWN to 1 decimal so a tiny price never displays as "100% off"
+                var pct = Math.floor((1 - disc / price) * 1000) / 10;
+                var saved = Math.round(price - disc).toLocaleString('en-US');
+                var text = pct + '% off · customer saves Tk ' + saved;
+
+                if (pct >= 90) {
+                    // Discounted Price is the final selling price in Tk, not a percentage
+                    $hint.text(text + ' — check: this is the final price, not a %').addClass('show bad');
+                } else {
+                    $hint.text(text).addClass('show');
+                }
+            }
+            $('#Price, #DiscountedPrice').on('input', updateDiscountHint);
+            updateDiscountHint();
+
             // ---- Accumulate + preview selected images before submit ----
             // The FIRST file in this array becomes the primary image server-side
             // (see ProductsController.SaveProductImages: first saved file with no
-            // existing primary is marked isPrimary = true). "Set Primary" just
+            // existing primary is marked isPrimary = true). "Primary" just
             // reorders this array so the chosen file is at index 0.
             var selectedFiles = [];
             var maxSizeBytes = 5 * 1024 * 1024;
@@ -151,26 +663,29 @@
                 selectedFiles.forEach(function (file, idx) {
                     var url = URL.createObjectURL(file);
                     var isPrimary = idx === 0;
-                    var $col = $(
-                        '<div class="col-3 position-relative" data-idx="' + idx + '">' +
-                            '<img class="img-fluid rounded ' + (isPrimary ? 'border border-primary border-3' : '') + '" />' +
-                            '<div class="mt-1 d-flex justify-content-between align-items-center">' +
+                    var $tile = $(
+                        '<div class="fh-tile ' + (isPrimary ? 'is-primary' : '') + '" data-idx="' + idx + '">' +
+                            '<img alt="" />' +
+                            (isPrimary ? '<span class="fh-tile__badge">Primary</span>' : '') +
+                            '<div class="fh-tile__bar">' +
                                 (isPrimary
-                                    ? '<span class="small text-primary fw-semibold">Primary</span>'
-                                    : '<button type="button" class="btn btn-sm btn-outline-primary set-primary-btn">Set Primary</button>') +
-                                '<button type="button" class="btn btn-sm btn-outline-danger remove-image-btn">' +
-                                    '<i class="bx bx-trash"></i>' +
+                                    ? '<span></span>'
+                                    : '<button type="button" class="fh-chip set-primary-btn"><i class="icon-base bx bx-star"></i>Primary</button>') +
+                                '<button type="button" class="fh-chip fh-chip--del remove-image-btn" title="Remove">' +
+                                    '<i class="icon-base bx bx-trash"></i>' +
                                 '</button>' +
                             '</div>' +
                         '</div>'
                     );
-                    $col.find('img').attr('src', url).one('load', function () {
+                    $tile.find('img').attr('src', url).one('load', function () {
                         URL.revokeObjectURL(url);
                     });
-                    $grid.append($col);
+                    $grid.append($tile);
                 });
 
-                $('#imageCountBadge').text(selectedFiles.length + ' / 3 minimum');
+                $('#imageCountBadge')
+                    .text(selectedFiles.length + ' / 3 minimum')
+                    .toggleClass('ok', selectedFiles.length >= 3);
                 $('#imageAlert').toggleClass('d-none', selectedFiles.length >= 3);
 
                 syncFileInput();
@@ -184,11 +699,12 @@
                 $('#imageUploadInput')[0].files = dt.files;
             }
 
-            $('#imageUploadInput').on('change', function () {
-                var newFiles = Array.prototype.slice.call(this.files || []);
+            function addFiles(fileList) {
+                var newFiles = Array.prototype.slice.call(fileList || []);
+                var allowed = ['image/jpeg', 'image/png', 'image/webp'];
 
                 newFiles.forEach(function (file) {
-                    if (!file.type.startsWith('image/')) return;
+                    if (allowed.indexOf(file.type) === -1) return;
                     if (file.size > maxSizeBytes) {
                         alert('"' + file.name + '" exceeds the 5MB size limit and was skipped.');
                         return;
@@ -197,7 +713,26 @@
                 });
 
                 renderImagePreview();
+            }
+
+            $('#imageUploadInput').on('change', function () {
+                addFiles(this.files);
             });
+
+            // Drag & drop support
+            $('#dropZone')
+                .on('dragenter dragover', function (e) {
+                    e.preventDefault();
+                    $(this).addClass('is-drag');
+                })
+                .on('dragleave dragend', function () {
+                    $(this).removeClass('is-drag');
+                })
+                .on('drop', function (e) {
+                    e.preventDefault();
+                    $(this).removeClass('is-drag');
+                    addFiles(e.originalEvent.dataTransfer.files);
+                });
 
             $('#imageGrid').on('click', '.remove-image-btn', function () {
                 var idx = $(this).closest('[data-idx]').data('idx');

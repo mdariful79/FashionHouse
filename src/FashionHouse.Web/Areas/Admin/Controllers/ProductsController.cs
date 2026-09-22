@@ -182,6 +182,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
             {
                 var query = _mapper.Map<GetAllProductsByPagingQuery>(model);
                 query.SearchText = model.Search.Value;
+
                query.SortText = model.FormatSortExpression(null, null, "ProductName", "SKU", "Price", "IsActive");
 
                 var (items, total, totalDisplay) = await _mediator.SendQueryAsync<GetAllProductsByPagingQuery,
@@ -201,7 +202,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                         primaryImages.TryGetValue(item.Id, out var img) ? $"/uploads/products/{img.ImageUrl}" : "",
                         HttpUtility.HtmlEncode(item.ProductName),
                         HttpUtility.HtmlEncode(item.SKU),
-                        $"৳{item.Price:N2}",
+                       $"৳ {(item.DiscountedPrice ?? item.Price):N2}",
                         item.IsActive ? "Active" : "Inactive",
                         item.Id.ToString()
                             }).ToArray()
