@@ -9,7 +9,7 @@
         OrderStatus.Pending => "warning",
         OrderStatus.Processing or OrderStatus.Confirmed => "info",
         OrderStatus.Shipped => "primary",
-        OrderStatus.Delivered or OrderStatus.Confirmed => "success",
+        OrderStatus.Delivered => "success",
         OrderStatus.Cancelled or OrderStatus.Returned => "danger",
         _ => "secondary"
     };
@@ -124,6 +124,11 @@
         .fh-pill--secondary {
             background: rgba(128, 128, 128, .14);
             color: #6b6f76;
+        }
+
+        .fh-pill--blue {
+            background: rgba(37, 99, 235, .14);
+            color: #2563eb;
         }
 
         /* Cards */

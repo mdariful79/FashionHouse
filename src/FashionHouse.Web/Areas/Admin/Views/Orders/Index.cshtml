@@ -2,42 +2,388 @@
     ViewData["Title"] = "Orders";
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <partial name="_ResponsePartial" />
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0">Orders</h5>
-                    <select id="statusFilter" class="form-select" style="width:auto;">
-                        <option value="">All statuses</option>
-                        <option value="1">Pending</option>
-                        <option value="2">Confirmed</option>
-                        <option value="3">Processing</option>
-                        <option value="4">Shipped</option>
-                        <option value="5">Delivered</option>
-                        <option value="6">Cancelled</option>
-                        <option value="7">Returned</option>
-                    </select>
-                </div>
-                <div class="card-body table-responsive pt-0">
-                    <table id="orderTable" class="table table-bordered table-hover w-100">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Payment</th>
-                                <th>Placed On</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
+    <style>
+        .fh-list {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
+
+        .fh-list__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+            .fh-list__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
+
+            .fh-list__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .fh-filter label {
+                font-size: 12.5px;
+                font-weight: 700;
+                color: var(--bs-secondary-color, #8a8d93);
+                white-space: nowrap;
+            }
+
+            .fh-filter select {
+                border: 1.5px solid var(--bs-border-color, #e7e9ee);
+                border-radius: 999px;
+                background-color: rgba(128, 128, 128, .05);
+                padding: 8px 34px 8px 16px;
+                font-size: 13.5px;
+                font-weight: 600;
+                min-width: 170px;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8d93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 14px center;
+                background-size: 12px;
+                transition: border-color .2s ease, box-shadow .2s ease;
+            }
+
+                .fh-filter select:focus {
+                    outline: none;
+                    border-color: rgb(var(--c));
+                    box-shadow: 0 0 0 3px rgba(var(--c), .15);
+                }
+
+        .fh-list .card {
+            border-radius: 18px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+            overflow: hidden;
+        }
+
+        .fh-list .card-body {
+            padding: 20px 22px 8px;
+        }
+
+        .fh-list .dt-container .row:first-child {
+            margin-bottom: 14px;
+        }
+
+        .fh-list .dt-search input {
+            min-width: 240px;
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 999px;
+            background-color: rgba(128, 128, 128, .05);
+            padding: 8px 16px;
+            font-size: 14px;
+            transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-list .dt-search input:focus {
+                outline: none;
+                border-color: rgb(var(--c));
+                background-color: transparent;
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        #orderTable {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+            #orderTable thead th {
+                padding: 13px 16px;
+                border: 0;
+                background: rgba(128, 128, 128, .07);
+                font-size: 11.5px;
+                font-weight: 800;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--bs-secondary-color, #8a8d93);
+                white-space: nowrap;
+            }
+
+                #orderTable thead th:first-child {
+                    border-radius: 12px 0 0 12px;
+                }
+
+                #orderTable thead th:last-child {
+                    border-radius: 0 12px 12px 0;
+                }
+
+            #orderTable tbody td {
+                padding: 14px 16px;
+                vertical-align: middle;
+                border-color: var(--bs-border-color, #eceef1);
+            }
+
+            #orderTable tbody tr {
+                transition: background .15s ease;
+            }
+
+                #orderTable tbody tr:hover {
+                    background: rgba(var(--c), .05);
+                }
+
+        .fh-order-num {
+            color: rgb(var(--c)) !important;
+            font-weight: 800;
+            text-decoration: none !important;
+        }
+
+            .fh-order-num:hover {
+                text-decoration: underline !important;
+            }
+
+        .fh-cust {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fh-cust__avatar {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 12.5px;
+            font-weight: 800;
+        }
+
+        .fh-items {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(128, 128, 128, .1);
+            font-weight: 700;
+            font-size: 12.5px;
+        }
+
+        .fh-total {
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .fh-date {
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13.5px;
+            white-space: nowrap;
+        }
+
+        .fh-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+            .fh-status::before {
+                content: "";
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+
+        .fh-status--secondary {
+            background: rgba(128, 128, 128, .14);
+            color: #6b6f76;
+        }
+
+        .fh-status--info {
+            background: rgba(3, 195, 236, .14);
+            color: #0891a8;
+        }
+
+        .fh-status--primary {
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+        }
+
+        .fh-status--warning {
+            background: rgba(255, 171, 0, .16);
+            color: #a3660a;
+        }
+
+        .fh-status--success {
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+        }
+
+        .fh-status--danger {
+            background: rgba(255, 62, 29, .12);
+            color: #d8371a;
+        }
+
+        .fh-status--dark {
+            background: rgba(30, 30, 33, .12);
+            color: #1e1e21;
+        }
+
+        .fh-status--blue {
+            background: rgba(37, 99, 235, .12);
+            color: #2563eb;
+        }
+
+        .fh-act {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 0;
+            border-radius: 10px;
+            font-size: 18px;
+            background: rgba(var(--c), .12);
+            color: rgb(var(--c)) !important;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, transform .15s ease;
+        }
+
+            .fh-act:hover {
+                background: rgb(var(--c));
+                color: #fff !important;
+                transform: translateY(-1px);
+            }
+
+        .fh-list .dt-info {
+            font-size: 13px;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+        .fh-list .dt-paging .page-link {
+            min-width: 36px;
+            margin: 0 2px;
+            border: 0;
+            border-radius: 999px !important;
+            background: transparent;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background .2s ease, color .2s ease;
+        }
+
+            .fh-list .dt-paging .page-link:hover {
+                background: rgba(var(--c), .12);
+            }
+
+        .fh-list .dt-paging .page-item.active .page-link {
+            background: rgb(var(--c));
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(var(--c), .35);
+        }
+
+        .fh-list .dt-paging .page-item.disabled .page-link {
+            opacity: .4;
+        }
+
+        .fh-empty {
+            padding: 36px 12px;
+            text-align: center;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+            .fh-empty i {
+                display: block;
+                margin: 0 auto 8px;
+                font-size: 44px;
+                opacity: .55;
+            }
+
+            .fh-empty strong {
+                display: block;
+                margin-bottom: 2px;
+                color: var(--bs-body-color);
+            }
+
+        @@media (max-width: 575px) {
+            .fh-list .dt-search input {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .fh-list__head {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .fh-filter {
+                justify-content: space-between;
+            }
+
+                .fh-filter select {
+                    width: 100%;
+                }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-list">
+    <div class="fh-list__head">
+        <div>
+            <h4>Orders</h4>
+            <p>View and manage customer orders.</p>
+        </div>
+        <div class="fh-filter">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+                <option value="">All statuses</option>
+                <option value="1">Pending</option>
+                <option value="2">Confirmed</option>
+                <option value="3">Processing</option>
+                <option value="4">Shipped</option>
+                <option value="5">Delivered</option>
+                <option value="6">Cancelled</option>
+                <option value="7">Returned</option>
+            </select>
+        </div>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <div class="card">
+        <div class="card-body table-responsive">
+            <table id="orderTable" class="table table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Placed On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -45,59 +391,91 @@
 @section Scripts {
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
 
     <script>
         $(function () {
+        function esc(v) { return $('<div>').text(v == null ? '' : v).html(); }
+        function initial(v) { return v ? v.trim().charAt(0).toUpperCase() : '?'; }
+
+        var statusTone = {
+        Pending: 'secondary', Confirmed: 'success', Processing: 'warning',
+        Shipped: 'info', Delivered: 'blue', Cancelled: 'danger', Returned: 'danger'
+        };
+        var paymentTone = { Pending: 'secondary', Paid: 'success', Failed: 'danger', Refunded: 'warning' };
+
         var table = $("#orderTable").DataTable({
         processing: true,
         serverSide: true,
-        responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         pagingType: "simple_numbers",
         order: [[6, 'desc']],
+        language: {
+        search: '',
+        searchPlaceholder: 'Search orders…',
+        processing: 'Loading…',
+        info: 'Showing _START_–_END_ of _TOTAL_ orders',
+        infoEmpty: 'No orders',
+        emptyTable: '<div class="fh-empty"><i class="icon-base bx bx-receipt"></i><strong>No orders yet</strong>New orders will show up here.</div>',
+        zeroRecords: '<div class="fh-empty"><i class="icon-base bx bx-search-alt"></i><strong>No matching orders</strong>Try a different search or status.</div>'
+        },
         ajax: {
         url: "/Admin/Orders/GetPagedOrders",
         type: "POST",
         contentType: "application/json",
         dataType: "json",
         data: function (d) {
-        d.StatusFilter = $("#statusFilter").val() || null;
+        var raw = $("#statusFilter").val();
+        d.StatusFilter = raw ? parseInt(raw, 10) : null;
         return JSON.stringify(d);
         }
         },
         columns: [
-        { data: 0 }, // Order #
-        { data: 1 }, // Customer
-        { data: 2 }, // Items
+        {
+        data: 0, // Order #
+        render: function (data, type, row) {
+        if (type !== 'display') return data;
+        return `<a href="/Admin/Orders/Details/${esc(row[7])}" class="fh-order-num">#${esc(data)}</a>`;
+        }
+        },
+        {
+        data: 1, // Customer
+        render: function (data) {
+        var name = esc(data);
+        return `<div class="fh-cust"><span class="fh-cust__avatar">${initial(data)}</span><span>${name}</span></div>`;
+        }
+        },
+        {
+        data: 2, // Items
+        render: function (data) { return `<span class="fh-items">${esc(data)}</span>`; }
+        },
         {
         data: 3, // Total
-        render: function (data) { return 'Tk ' + data; }
+        render: function (data) { return `<span class="fh-total">Tk ${esc(data)}</span>`; }
         },
         {
         data: 4, // Status
         render: function (data) {
-        var map = { Pending: 'secondary', Confirmed: 'info', Processing: 'primary',
-        Shipped: 'warning', Delivered: 'success', Cancelled: 'danger', Returned: 'dark' };
-        return `<span class="badge bg-label-${map[data] || 'secondary'}">${data}</span>`;
+        return `<span class="fh-status fh-status--${statusTone[data] || 'secondary'}">${esc(data)}</span>`;
         }
         },
         {
         data: 5, // Payment
         render: function (data) {
-        var map = { Pending: 'secondary', Paid: 'success', Failed: 'danger', Refunded: 'warning' };
-        return `<span class="badge bg-label-${map[data] || 'secondary'}">${data}</span>`;
+        return `<span class="fh-status fh-status--${paymentTone[data] || 'secondary'}">${esc(data)}</span>`;
         }
         },
-        { data: 6, orderable: false }, // Placed On
+        {
+        data: 6, // Placed On
+        orderable: false,
+        render: function (data) { return `<span class="fh-date">${esc(data)}</span>`; }
+        },
         {
         data: 7, // Id
         orderable: false,
         searchable: false,
         render: function (data) {
-        return `<a href="/Admin/Orders/Details/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="View">
-        <i class="bx bx-show"></i>
+        return `<a href="/Admin/Orders/Details/${esc(data)}" class="fh-act" title="View">
+        <i class="icon-base bx bx-show"></i>
         </a>`;
         }
         }
