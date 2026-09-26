@@ -3,170 +3,584 @@
     ViewData["Title"] = Model.Product.ProductName;
     var images = Model.Product.ProductImages.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.DisplayOrder).ToList();
     var onSale = Model.Product.DiscountedPrice.HasValue && Model.Product.DiscountedPrice < Model.Product.Price;
+    var inStock = Model.AvailableStock > 0;
 }
 
-<!-- Shop Details Section Begin -->
-<section class="shop-details">
-    <div class="product__details__pic">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="product__details__breadcrumb">
-                        <a asp-controller="Home" asp-action="Index">Home</a>
-                        <a asp-controller="Shop" asp-action="Index">Shop</a>
-                        <span>@Model.Product.ProductName</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
+<style>
+    .fh-details-page {
+        --fh-accent: #e53637;
+        --fh-ink: #111111;
+        --fh-muted: #6b6f76;
+        --fh-line: #eceef1;
+        --fh-soft: #f7f8fa;
+        --fh-radius: 18px;
+    }
+
+    .fh-details-crumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 26px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--fh-muted);
+    }
+
+        .fh-details-crumb a {
+            color: var(--fh-muted);
+            text-decoration: none;
+            transition: color .2s ease;
+        }
+
+            .fh-details-crumb a:hover {
+                color: var(--fh-ink);
+            }
+
+        .fh-details-crumb span {
+            color: var(--fh-ink);
+        }
+
+        .fh-details-crumb .sep {
+            opacity: .5;
+        }
+
+    .fh-details-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+    }
+
+    /* Gallery */
+    .fh-gallery__main {
+        border-radius: var(--fh-radius);
+        overflow: hidden;
+        background: var(--fh-soft);
+        border: 1px solid var(--fh-line);
+        aspect-ratio: 4 / 5;
+    }
+
+        .fh-gallery__main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .fh-gallery__thumbs {
+        display: flex;
+        gap: 12px;
+        margin-top: 14px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .fh-thumb {
+        flex: 0 0 auto;
+        width: 76px;
+        height: 76px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        background: var(--fh-soft);
+        cursor: pointer;
+        padding: 0;
+        transition: border-color .2s ease, opacity .2s ease;
+        opacity: .7;
+    }
+
+        .fh-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .fh-thumb.active {
+            border-color: var(--fh-ink);
+            opacity: 1;
+        }
+
+        .fh-thumb:hover {
+            opacity: 1;
+        }
+
+    /* Info */
+    .fh-details-info {
+        padding-top: 4px;
+    }
+
+    .fh-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+        .fh-badge.in-stock {
+            background: #e8f7ee;
+            color: #1e8a4c;
+        }
+
+        .fh-badge.out-stock {
+            background: #fdecec;
+            color: #c62828;
+        }
+
+        .fh-badge svg {
+            width: 13px;
+            height: 13px;
+        }
+
+    .fh-details-info h1 {
+        margin: 0 0 6px;
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--fh-ink);
+        line-height: 1.2;
+    }
+
+    .fh-details-category {
+        margin: 0 0 18px;
+        color: var(--fh-muted);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .fh-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+        .fh-price-row .price-now {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+        .fh-price-row .price-was {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--fh-muted);
+            text-decoration: line-through;
+        }
+
+        .fh-price-row .price-save {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--fh-accent);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+    .fh-details-desc {
+        color: var(--fh-muted);
+        font-size: 15px;
+        line-height: 1.75;
+        margin-bottom: 28px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--fh-line);
+    }
+
+    .fh-add-form {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .fh-qty-stepper {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--fh-line);
+        border-radius: 999px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+        .fh-qty-stepper button {
+            width: 42px;
+            height: 46px;
+            border: 0;
+            background: transparent;
+            color: var(--fh-ink);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+
+            .fh-qty-stepper button:hover {
+                background: var(--fh-ink);
+                color: #fff;
+            }
+
+        .fh-qty-stepper input {
+            width: 48px;
+            height: 46px;
+            border: 0;
+            border-left: 1px solid var(--fh-line);
+            border-right: 1px solid var(--fh-line);
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--fh-ink);
+            -moz-appearance: textfield;
+        }
+
+            .fh-qty-stepper input::-webkit-outer-spin-button,
+            .fh-qty-stepper input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+    .fh-add-btn {
+        flex: 1;
+        min-width: 200px;
+        padding: 16px 28px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--fh-accent);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+        .fh-add-btn:hover {
+            background: var(--fh-ink);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(17, 17, 17, .25);
+        }
+
+    .fh-add-btn:disabled {
+        background: var(--fh-line);
+        color: var(--fh-muted);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Related */
+    .fh-related {
+        margin-top: 64px;
+        padding-top: 48px;
+        border-top: 1px solid var(--fh-line);
+    }
+
+        .fh-related h3 {
+            margin: 0 0 28px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--fh-ink);
+        }
+
+    .fh-related-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .fh-r-card {
+        background: #fff;
+        border: 1px solid var(--fh-line);
+        border-radius: var(--fh-radius);
+        overflow: hidden;
+        transition: box-shadow .25s ease, border-color .2s ease;
+        position: relative;
+    }
+
+        .fh-r-card:hover {
+            border-color: #dfe2e7;
+            box-shadow: 0 12px 28px rgba(17, 17, 17, .06);
+        }
+
+    .fh-r-card__pic {
+        aspect-ratio: 3 / 4;
+        background: var(--fh-soft);
+        overflow: hidden;
+    }
+
+        .fh-r-card__pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .3s ease;
+        }
+
+    .fh-r-card:hover .fh-r-card__pic img {
+        transform: scale(1.04);
+    }
+
+    .fh-r-sale {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--fh-accent);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .fh-r-card__body {
+        padding: 16px;
+    }
+
+        .fh-r-card__body h6 {
+            margin: 0 0 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+            .fh-r-card__body h6 a {
+                color: var(--fh-ink);
+                text-decoration: none;
+            }
+
+            .fh-r-card__body h6 a:hover {
+                color: var(--fh-accent);
+            }
+
+    .fh-r-price {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+        .fh-r-price .now {
+            font-weight: 800;
+            color: var(--fh-ink);
+            font-size: 15px;
+        }
+
+        .fh-r-price .was {
+            font-size: 13px;
+            color: var(--fh-muted);
+            text-decoration: line-through;
+        }
+
+    .fh-r-add {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--fh-line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--fh-ink);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background .2s ease, color .2s ease;
+    }
+
+        .fh-r-add:hover {
+            background: var(--fh-ink);
+            color: #fff;
+        }
+
+    @@media (max-width: 991px) {
+        .fh-details-layout {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        .fh-related-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .fh-details-info h1 {
+            font-size: 24px;
+        }
+
+        .fh-related-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+    }
+</style>
+
+<section class="fh-details-page spad">
+    <div class="container">
+        <div class="fh-details-crumb">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+            <span class="sep">/</span>
+            <a asp-controller="Shop" asp-action="Index">Shop</a>
+            <span class="sep">/</span>
+            <span>@Model.Product.ProductName</span>
+        </div>
+
+        <div class="fh-details-layout">
+            <div>
                 @if (images.Any())
                 {
-                    <div class="col-lg-3 col-md-3">
-                        <ul class="nav nav-tabs" role="tablist">
-                            @for (var i = 0; i < images.Count; i++)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link @(i == 0 ? "active" : "")" data-toggle="tab" href="#tabs-@(i + 1)" role="tab">
-                                        <div class="product__thumb__pic set-bg" data-setbg="@Url.Content($"~/uploads/products/{images[i].ImageUrl}")"></div>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
+                    <div class="fh-gallery__main">
+                        <img id="mainImage" src="@Url.Content($"~/uploads/products/{images[0].ImageUrl}")" alt="@Model.Product.ProductName">
                     </div>
-                    <div class="col-lg-6 col-md-9">
-                        <div class="tab-content">
+                    @if (images.Count > 1)
+                    {
+                        <div class="fh-gallery__thumbs">
                             @for (var i = 0; i < images.Count; i++)
                             {
-                                <div class="tab-pane @(i == 0 ? "active" : "")" id="tabs-@(i + 1)" role="tabpanel">
-                                    <div class="product__details__pic__item">
-                                        <img src="~/uploads/products/@images[i].ImageUrl" alt="@Model.Product.ProductName">
-                                    </div>
-                                </div>
+                                <button type="button" class="fh-thumb @(i == 0 ? "active" : "")" data-full="@Url.Content($"~/uploads/products/{images[i].ImageUrl}")">
+                                    <img src="@Url.Content($"~/uploads/products/{images[i].ImageUrl}")" alt="@Model.Product.ProductName">
+                                </button>
                             }
                         </div>
-                    </div>
+                    }
                 }
                 else
                 {
-                    <div class="col-lg-9 offset-lg-3">
-                        <div class="product__details__pic__item">
-                            <img src="~/FrontLayout/img/product/product-2.jpg" alt="@Model.Product.ProductName">
-                        </div>
+                    <div class="fh-gallery__main">
+                        <img src="~/FrontLayout/img/product/product-2.jpg" alt="@Model.Product.ProductName">
                     </div>
                 }
             </div>
-        </div>
-    </div>
-    <div class="product__details__content">
-        <div class="container">
-            <div class="row d-flex justify-content-center">
-                <div class="col-lg-8">
-                    <div class="product__details__text">
-                        <h4>@Model.Product.ProductName</h4>
 
-                        @if (onSale)
-                        {
-                            <h3>
-                                Tk @Model.Product.DiscountedPrice!.Value.ToString("N0")
-                                <span style="text-decoration:line-through; opacity:.5; font-size:.7em; margin-left:8px;">Tk @Model.Product.Price.ToString("N0")</span>
-                            </h3>
-                        }
-                        else
-                        {
-                            <h3>Tk @Model.Product.Price.ToString("N0")</h3>
-                        }
-
-                        <p>@Model.Product.Description</p>
-
-                        @if (Model.AvailableStock > 0)
-                        {
-                            <p class="text-success">In stock (@Model.AvailableStock available)</p>
-
-                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@Model.Product.Id" />
-                                <div class="product__details__cart__option">
-                                    <div class="quantity">
-                                        <div class="pro-qty">
-                                            <input type="number" name="quantity" value="1" min="1" max="@Model.AvailableStock">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="primary-btn">Add to Cart</button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <p class="text-danger">Out of stock</p>
-                        }
-
-                        <div class="product__details__last__option">
-                            <ul>
-                                <li><span>SKU:</span> @Model.Product.SKU</li>
-                                <li><span>Category:</span> @Model.Product.Category?.Name</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Shop Details Section End -->
-@if (Model.RelatedProducts.Any())
-{
-    <!-- Related Section Begin -->
-    <section class="related spad">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3 class="related-title">Related Products</h3>
-                </div>
-            </div>
-            <div class="row">
-                @foreach (var p in Model.RelatedProducts)
+            <div class="fh-details-info">
+                @if (inStock)
                 {
-                    var primaryImage = p.ProductImages.OrderByDescending(x => x.IsPrimary).FirstOrDefault();
-                    var pOnSale = p.DiscountedPrice.HasValue && p.DiscountedPrice < p.Price;
+                    <span class="fh-badge in-stock">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                        In Stock
+                    </span>
+                }
+                else
+                {
+                    <span class="fh-badge out-stock">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18" /><path d="M6 6l12 12" /></svg>
+                        Out of Stock
+                    </span>
+                }
 
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="product__item @(pOnSale ? "sale" : "")">
-                            <div class="product__item__pic set-bg"
-                                 data-setbg="@(primaryImage != null ? Url.Content($"~/uploads/products/{primaryImage.ImageUrl}") : Url.Content("~/FrontLayout/img/product/product-2.jpg"))">
+                <h1>@Model.Product.ProductName</h1>
+                @if (Model.Product.Category != null)
+                {
+                    <p class="fh-details-category">@Model.Product.Category.Name</p>
+                }
+
+                <div class="fh-price-row">
+                    @if (onSale)
+                    {
+                        <span class="price-now">Tk @Model.Product.DiscountedPrice!.Value.ToString("N0")</span>
+                        <span class="price-was">Tk @Model.Product.Price.ToString("N0")</span>
+                        <span class="price-save">-@(Math.Round((1 - (Model.Product.DiscountedPrice!.Value / Model.Product.Price)) * 100))%</span>
+                    }
+                    else
+                    {
+                        <span class="price-now">Tk @Model.Product.Price.ToString("N0")</span>
+                    }
+                </div>
+
+                <p class="fh-details-desc">@Model.Product.Description</p>
+
+                @if (inStock)
+                {
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="fh-add-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Product.Id" />
+                        <div class="fh-qty-stepper">
+                            <button type="button" class="qty-decrease" aria-label="Decrease quantity">−</button>
+                            <input type="number" name="quantity" id="qtyInput" value="1" min="1" max="@Model.AvailableStock">
+                            <button type="button" class="qty-increase" aria-label="Increase quantity">+</button>
+                        </div>
+                        <button type="submit" class="fh-add-btn">Add to Cart</button>
+                    </form>
+                }
+                else
+                {
+                    <button type="button" class="fh-add-btn" disabled>Out of Stock</button>
+                }
+            </div>
+        </div>
+
+        @if (Model.RelatedProducts.Any())
+        {
+            <div class="fh-related">
+                <h3>Related Products</h3>
+                <div class="fh-related-grid">
+                    @foreach (var p in Model.RelatedProducts)
+                    {
+                        var primaryImage = p.ProductImages.OrderByDescending(x => x.IsPrimary).FirstOrDefault();
+                        var pOnSale = p.DiscountedPrice.HasValue && p.DiscountedPrice < p.Price;
+
+                        <div class="fh-r-card">
+                            <a asp-action="ShopDetails" asp-route-id="@p.Id" class="fh-r-card__pic" style="display:block;">
                                 @if (pOnSale)
                                 {
-                                    <span class="label">Sale</span>
+                                    <span class="fh-r-sale">Sale</span>
                                 }
-                                <ul class="product__hover">
-                                    <li><a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a></li>
-                                    <li><a href="#"><img src="~/FrontLayout/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                    <li><a asp-action="ShopDetails" asp-route-id="@p.Id"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
-                                </ul>
-                            </div>
-                            <div class="product__item__text">
+                                <img src="@(primaryImage != null ? Url.Content($"~/uploads/products/{primaryImage.ImageUrl}") : Url.Content("~/FrontLayout/img/product/product-2.jpg"))" alt="@p.ProductName">
+                            </a>
+                            <div class="fh-r-card__body">
                                 <h6><a asp-action="ShopDetails" asp-route-id="@p.Id">@p.ProductName</a></h6>
-
-                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                                <div class="fh-r-price">
+                                    @if (pOnSale)
+                                    {
+                                        <span class="now">Tk @p.DiscountedPrice!.Value.ToString("N0")</span>
+                                        <span class="was">Tk @p.Price.ToString("N0")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="now">Tk @p.Price.ToString("N0")</span>
+                                    }
+                                </div>
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@p.Id" />
                                     <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="add-cart">+ Add To Cart</button>
+                                    <button type="submit" class="fh-r-add">+ Add to Cart</button>
                                 </form>
-
-                                @if (pOnSale)
-                                {
-                                    <h5>Tk @p.DiscountedPrice!.Value.ToString("N0")</h5>
-                                }
-                                else
-                                {
-                                    <h5>Tk @p.Price.ToString("N0")</h5>
-                                }
                             </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
-        </div>
-    </section>
-    <!-- Related Section End -->
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.fh-thumb').on('click', function () {
+                $('.fh-thumb').removeClass('active');
+                $(this).addClass('active');
+                $('#mainImage').attr('src', $(this).data('full'));
+            });
+
+            var $qty = $('#qtyInput');
+            var max = parseInt($qty.attr('max')) || 9999;
+
+            $('.qty-increase').on('click', function () {
+                var val = parseInt($qty.val()) || 1;
+                if (val < max) $qty.val(val + 1);
+            });
+
+            $('.qty-decrease').on('click', function () {
+                var val = parseInt($qty.val()) || 1;
+                if (val > 1) $qty.val(val - 1);
+            });
+        });
+    </script>
 }

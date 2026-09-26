@@ -1,41 +1,423 @@
 ﻿@model CategoryModel
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row mb-6 gy-6">
-        <div class="col-xl">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Create new Category</h5>
-                    <small class="text-body float-end">(new)</small>
-                </div>
-                <div class="card-body">
-                    <partial name="_ResponsePartial" />
-                    <form asp-area="admin" asp-controller="categories" asp-action="create" asp-antiforgery="true" method="post">
-                        <div class="mb-6">
-                            <label class="form-label" asp-for="Name">Name</label>
-                            <input type="text" class="form-control" asp-for="Name" placeholder="Shoes" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+@{
+    ViewData["Title"] = "Add Category";
+}
+
+@section Styles {
+    <style>
+        .fh-form {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
+
+        /* Header */
+        .fh-form__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+            .fh-form__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
+
+            .fh-form__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+            .fh-back:hover {
+                background: rgb(var(--c));
+                border-color: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        /* Layout */
+        .fh-form__grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .fh-side {
+            position: sticky;
+            top: 90px;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Section cards */
+        .fh-sec {
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+        }
+
+        .fh-side .fh-sec {
+            margin-bottom: 0;
+        }
+
+        .fh-sec__head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        .fh-sec__icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 19px;
+        }
+
+        .fh-sec__head h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .fh-sec__head small {
+            display: block;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+
+        .fh-sec__body {
+            padding: 22px;
+        }
+
+        /* Fields */
+        .fh-form .form-label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .fh-form .form-control {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 14px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-form .form-control:focus {
+                border-color: rgb(var(--c));
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+            }
+
+        .fh-form .input-group-text {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px 0 0 12px;
+            background: rgba(128, 128, 128, .08);
+            font-weight: 700;
+        }
+
+        .fh-form .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .fh-form .text-danger {
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .fh-help {
+            margin-top: 6px;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+
+        .fh-count {
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Status switch card */
+        .fh-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+            .fh-status strong {
+                display: block;
+                font-size: 14px;
+            }
+
+            .fh-status small {
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 12.5px;
+            }
+
+            .fh-status .form-check-input {
+                width: 2.6em;
+                height: 1.4em;
+                cursor: pointer;
+            }
+
+        /* Buttons */
+        .fh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        .fh-btn--primary {
+            background: rgb(var(--c));
+            color: #fff !important;
+            box-shadow: 0 10px 22px rgba(var(--c), .32);
+        }
+
+            .fh-btn--primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 14px 28px rgba(var(--c), .4);
+            }
+
+        .fh-btn--ghost {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            color: var(--bs-body-color) !important;
+        }
+
+            .fh-btn--ghost:hover {
+                border-color: var(--bs-body-color);
+            }
+
+        /* Live preview */
+        .fh-pill {
+            flex-shrink: 0;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-pill.off {
+                background: rgba(128, 128, 128, .14);
+                color: var(--bs-secondary-color, #8a8d93);
+            }
+
+        .fh-preview__name {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            word-break: break-word;
+        }
+
+        .fh-preview__slug {
+            margin: 2px 0 12px;
+            color: rgb(var(--c));
+            font-size: 12.5px;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .fh-preview__desc {
+            margin: 0;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        @@media (max-width: 1199px) {
+            .fh-form__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fh-side {
+                position: static;
+            }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-form">
+    <div class="fh-form__head">
+        <div>
+            <h4>Add Category</h4>
+            <p>Group your products so customers can find them faster.</p>
+        </div>
+        <a asp-area="admin" asp-controller="categories" asp-action="index" class="fh-back">
+            <i class="icon-base bx bx-arrow-back"></i> Back to list
+        </a>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <form asp-area="admin" asp-controller="categories" asp-action="create" asp-antiforgery="true" method="post">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="fh-form__grid">
+            <div>
+                <!-- Basic information -->
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-info-circle"></i></span>
+                        <div>
+                            <h5>Basic information</h5>
+                            <small>Name, page address and a short description</small>
                         </div>
-                        <div class="mb-6">
-                            <label class="form-label" asp-for="Slug">Slug</label>
-                            <input type="text" class="form-control" asp-for="Slug" placeholder="shoes" />
-                            <span asp-validation-for="Slug" class="text-danger"></span>
+                    </div>
+                    <div class="fh-sec__body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label" asp-for="Name">Name</label>
+                                <input type="text" class="form-control" asp-for="Name" placeholder="Shoes" autocomplete="off" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Slug" class="form-label">Slug</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">/</span>
+                                    <input asp-for="Slug" class="form-control" placeholder="Leave blank to auto-generate" autocomplete="off" />
+                                </div>
+                                <div class="fh-help">Leave it empty and the slug is created from the name when you save.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label" asp-for="Description">Description</label>
+                                    <span id="descCount" class="fh-count">0 characters</span>
+                                </div>
+                                <textarea class="form-control" rows="5" asp-for="Description" placeholder="Describe what belongs in this category…"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
                         </div>
-                        <div class="mb-6">
-                            <label class="form-label" asp-for="Description">Description</label>
-                            <textarea class="form-control" asp-for="Description"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                        <div class="form-check mb-6">
-                            <input class="form-check-input" type="checkbox" asp-for="IsActive" />
-                            <label class="form-check-label" asp-for="IsActive">Active</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </form>
+                    </div>
                 </div>
             </div>
+
+            <!-- Sidebar -->
+            <aside class="fh-side">
+                <div class="fh-sec">
+                    <div class="fh-sec__body">
+                        <div class="fh-status mb-4">
+                            <div>
+                                <strong>Active</strong>
+                                <small>Active categories are visible in the shop</small>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input asp-for="IsActive" class="form-check-input" role="switch" />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="fh-btn fh-btn--primary">
+                            <i class="icon-base bx bx-save"></i> Save category
+                        </button>
+                        <a asp-area="admin" asp-controller="categories" asp-action="index" class="fh-btn fh-btn--ghost">Cancel</a>
+                    </div>
+                </div>
+
+                <div class="fh-sec">
+                    <div class="fh-sec__head">
+                        <span class="fh-sec__icon"><i class="icon-base bx bx-show"></i></span>
+                        <h5>Preview</h5>
+                    </div>
+                    <div class="fh-sec__body">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <h6 id="pvName" class="fh-preview__name">Category name</h6>
+                            <span id="pvStatus" class="fh-pill">Active</span>
+                        </div>
+                        <p id="pvSlug" class="fh-preview__slug">/</p>
+                        <p id="pvDesc" class="fh-preview__desc">Your description appears here.</p>
+                    </div>
+                </div>
+            </aside>
         </div>
-    </div>
+    </form>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(function () {
+            var $name = $('#Name');
+            var $slug = $('#Slug');
+            var $desc = $('#Description');
+            var $active = $('#IsActive');
+
+            function toSlug(value) {
+                return value
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '-')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+
+            // Keep the slug in sync with the name until the user edits it by hand.
+            var slugEdited = $.trim($slug.val()) !== '';
+
+            function render() {
+                $('#pvName').text($.trim($name.val()) || 'Category name');
+                $('#pvSlug').text('/' + $.trim($slug.val()));
+                $('#pvDesc').text($.trim($desc.val()) || 'Your description appears here.');
+                $('#descCount').text($desc.val().length + ' characters');
+
+                var on = $active.is(':checked');
+                $('#pvStatus').text(on ? 'Active' : 'Hidden').toggleClass('off', !on);
+            }
+
+            $name.on('input', function () {
+                if (!slugEdited) $slug.val(toSlug($name.val()));
+                render();
+            });
+
+            $slug.on('input', function () {
+                slugEdited = $.trim($slug.val()) !== '';
+                render();
+            });
+
+            $desc.on('input', render);
+            $active.on('change', render);
+
+            render();
+        });
+    </script>
 }

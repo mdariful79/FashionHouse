@@ -1,35 +1,275 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Categories";
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <partial name="_ResponsePartial" />
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0">View Categories</h5>
-                    <a asp-area="admin" asp-controller="categories" asp-action="create" class="btn btn-primary">
-                        <i class="bx bx-plus"></i> Add Category
-                    </a>
-                </div>
-                <div class="card-body table-responsive pt-0">
-                    <partial name="_ModalPartial" />
-                    <table id="categories" class="table table-bordered table-hover w-100">
-                        <thead>
-                            <tr>
-                                <th>SL</th>
-                                <th>Name</th>
-                                <th>Slug</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
+
+    <style>
+        .fh-form {
+            --c: var(--bs-primary-rgb, 105, 108, 255);
+        }
+
+        /* Header */
+        .fh-form__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+            .fh-form__head h4 {
+                margin: 0 0 2px;
+                font-size: 24px;
+                font-weight: 800;
+            }
+
+            .fh-form__head p {
+                margin: 0;
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 14px;
+            }
+
+        .fh-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            border-radius: 999px;
+            background: rgb(var(--c));
+            color: #fff !important;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none !important;
+            box-shadow: 0 10px 22px rgba(var(--c), .32);
+            transition: transform .15s ease, box-shadow .2s ease;
+        }
+
+            .fh-add:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 14px 28px rgba(var(--c), .4);
+            }
+
+        /* Section card */
+        .fh-sec {
+            margin-bottom: 20px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 18px;
+            background: var(--bs-card-bg, #fff);
+            box-shadow: 0 6px 20px rgba(17, 17, 17, .04);
+        }
+
+        .fh-sec__head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+        }
+
+        .fh-sec__icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: rgba(var(--c), .14);
+            color: rgb(var(--c));
+            font-size: 19px;
+        }
+
+        .fh-sec__head h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .fh-sec__head small {
+            display: block;
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 12.5px;
+        }
+
+        .fh-sec__body {
+            padding: 22px;
+        }
+
+        /* Table */
+        .fh-list .table {
+            margin-bottom: 0;
+        }
+
+            .fh-list .table thead th {
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+                background: rgba(128, 128, 128, .06);
+                color: var(--bs-secondary-color, #8a8d93);
+                font-size: 12.5px;
+                font-weight: 800;
+                white-space: nowrap;
+            }
+
+                .fh-list .table thead th:first-child {
+                    border-radius: 12px 0 0 12px;
+                }
+
+                .fh-list .table thead th:last-child {
+                    border-radius: 0 12px 12px 0;
+                }
+
+            .fh-list .table tbody td {
+                padding: 14px 16px;
+                border-bottom: 1px solid var(--bs-border-color, #e7e9ee);
+                font-size: 14px;
+                vertical-align: middle;
+            }
+
+            .fh-list .table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+
+            .fh-list .table tbody tr:hover > * {
+                background-color: rgba(var(--c), .05);
+            }
+
+            .fh-list .table td:nth-child(2) {
+                font-weight: 700;
+            }
+
+            .fh-list .table td:nth-child(3) {
+                color: var(--bs-secondary-color, #8a8d93);
+            }
+
+        /* Status pills */
+        .fh-pill {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: rgba(113, 221, 55, .16);
+            color: #4a9a1c;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .fh-pill.off {
+                background: rgba(255, 62, 29, .12);
+                color: #d8371a;
+            }
+
+        /* Row actions */
+        .fh-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            margin-right: 4px;
+            border: 1px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--bs-body-color) !important;
+            font-size: 17px;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+
+            .fh-act:hover {
+                background: rgb(var(--c));
+                border-color: rgb(var(--c));
+                color: #fff !important;
+            }
+
+        .fh-act--del:hover {
+            background: #d8371a;
+            border-color: #d8371a;
+        }
+
+        /* DataTables controls */
+        .fh-list .dt-search input,
+        .fh-list .dt-length select {
+            border: 1.5px solid var(--bs-border-color, #e7e9ee);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 14px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+            .fh-list .dt-search input:focus,
+            .fh-list .dt-length select:focus {
+                border-color: rgb(var(--c));
+                box-shadow: 0 0 0 3px rgba(var(--c), .15);
+                outline: 0;
+            }
+
+        .fh-list .dt-length select {
+            min-width: 76px;
+            margin-right: 8px;
+            padding: 8px 38px 8px 16px;
+            background-position: right 14px center;
+            background-size: 14px 10px;
+        }
+
+        .fh-list .dt-info {
+            color: var(--bs-secondary-color, #8a8d93);
+            font-size: 13px;
+        }
+
+        .fh-list .page-link {
+            margin: 0 2px;
+            border: 0;
+            border-radius: 10px !important;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .fh-list .page-item.active .page-link {
+            background: rgb(var(--c));
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(var(--c), .3);
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y fh-form fh-list">
+    <div class="fh-form__head">
+        <div>
+            <h4>Categories</h4>
+            <p>Manage the categories that organize your shop.</p>
+        </div>
+        <a asp-area="admin" asp-controller="categories" asp-action="create" class="fh-add">
+            <i class="icon-base bx bx-plus"></i> Add Category
+        </a>
+    </div>
+
+    <partial name="_ResponsePartial" />
+
+    <div class="fh-sec">
+        <div class="fh-sec__head">
+            <span class="fh-sec__icon"><i class="icon-base bx bx-category"></i></span>
+            <div>
+                <h5>All categories</h5>
+                <small>Search, edit or delete a category</small>
             </div>
+        </div>
+        <div class="fh-sec__body table-responsive">
+            <partial name="_ModalPartial" />
+            <table id="categories" class="table table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th>SL</th>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -40,10 +280,6 @@
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css">
-    <link rel="stylesheet" href="~/sneat/assets/css/custom-datatables.css">
-
     <script>
         $(function () {
         $("#categories").DataTable({
@@ -52,6 +288,11 @@
         responsive: true,
         autoWidth: true,
         pagingType: "simple_numbers",
+        language: {
+        search: "",
+        searchPlaceholder: "Search categories…",
+        emptyTable: "No categories yet. Use Add Category to create the first one."
+        },
         ajax: {
         url: "/Admin/Categories/GetPagedCategories",
         type: "POST",
@@ -76,26 +317,25 @@
         searchable: false,
         render: function (data) {
         return data === 'Active'
-        ? '<span class="badge rounded-pill bg-label-success">Active</span>'
-        : '<span class="badge rounded-pill bg-label-danger">Inactive</span>';
+        ? '<span class="fh-pill">Active</span>'
+        : '<span class="fh-pill off">Inactive</span>';
         }
         },
         {
         data: 3,
         orderable: false,
         searchable: false,
-        render: function (data, type, row) {
+        render: function (data) {
         return `
-        <a href="/Admin/Categories/Update/${data}" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
-        <i class="bx bx-edit"></i>
+        <a href="/Admin/Categories/Update/${data}" class="fh-act" title="Edit">
+        <i class="icon-base bx bx-edit"></i>
         </a>
-        <button type="button" class="btn btn-sm btn-icon btn-outline-danger show-bs-modal" data-id="${data}" title="Delete">
-        <i class="bx bx-trash"></i>
+        <button type="button" class="fh-act fh-act--del show-bs-modal" data-id="${data}" title="Delete">
+        <i class="icon-base bx bx-trash"></i>
         </button>`;
         }
         }
         ]
-    
         });
 
         $("#categories").on('click', '.show-bs-modal', function () {

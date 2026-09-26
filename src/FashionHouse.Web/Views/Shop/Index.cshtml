@@ -49,6 +49,22 @@
         display: block !important;
     }
 
+    .product__item__pic {
+        position: relative;
+    }
+
+        .product__item__pic .fh-pic-link {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .product__item__pic .product__hover {
+            position: relative;
+            z-index: 2;
+        }
+
     /* Touch devices have no hover: show both */
     @@media (hover: none) {
         .product__item:hover .fh-namecart .fh-name,
@@ -234,20 +250,26 @@
                     {
                         var primaryImage = p.ProductImages.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.DisplayOrder).FirstOrDefault();
                         var onSale = p.DiscountedPrice.HasValue && p.DiscountedPrice < p.Price;
+                        var newProduct = p.CreatedAt >= DateTime.UtcNow.AddDays(-7);
 
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item @(onSale ? "sale" : "")">
                                 <div class="product__item__pic set-bg"
                                      data-setbg="@(primaryImage != null ? Url.Content($"~/uploads/products/{primaryImage.ImageUrl}") : Url.Content("~/FrontLayout/img/product/product-2.jpg"))">
+                                    <a class="fh-pic-link" asp-action="ShopDetails" asp-route-id="@p.Id" aria-label="View @p.ProductName"></a>
                                     @if (onSale)
                                     {
                                         <span class="label">Sale</span>
                                     }
-                                    <ul class="product__hover">
+                                    @if (!onSale && newProduct)
+                                    {
+                                        <span class="label" style="background: #FF5E0E">New Arraival</span>
+                                    }
+                                    @* <ul class="product__hover">
                                         <li><a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a></li>
                                         <li><a href="#"><img src="~/FrontLayout/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
                                         <li><a asp-action="ShopDetails" asp-route-id="@p.Id"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
-                                    </ul>
+                                    </ul> *@
                                 </div>
                                 <div class="product__item__text">
                                     <div class="fh-namecart">
