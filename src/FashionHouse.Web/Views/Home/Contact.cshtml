@@ -4,11 +4,289 @@
     Layout = "_Layout";
 }
 
+<style>
+    .contact-modern {
+        padding: 100px 0;
+        background: #f8f9fb;
+    }
+
+    .contact-modern .section-title span {
+        display: inline-block;
+        color: #ff5722;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .contact-modern .section-title h2 {
+        font-size: 38px;
+        font-weight: 700;
+        color: #1b1b1b;
+        margin-bottom: 18px;
+    }
+
+    .contact-modern .section-title p {
+        color: #6b6f76;
+        line-height: 1.8;
+        margin-bottom: 40px;
+    }
+
+    .contact-info-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(20, 20, 43, 0.06);
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .contact-info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(20, 20, 43, 0.10);
+    }
+
+    .contact-info-card .icon {
+        flex: 0 0 48px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #fff3ec;
+        color: #ff5722;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .contact-info-card h4 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1b1b1b;
+        margin-bottom: 6px;
+    }
+
+    .contact-info-card p {
+        color: #6b6f76;
+        margin: 0;
+        line-height: 1.7;
+    }
+
+    .map-modern {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(20, 20, 43, 0.08);
+        margin-bottom: 30px;
+    }
+
+    .map-modern iframe {
+        display: block;
+        border: 0;
+        filter: grayscale(15%);
+    }
+
+    .contact-form-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(20, 20, 43, 0.06);
+    }
+
+    .contact-form-card h3 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: #1b1b1b;
+    }
+
+    .form-floating-modern {
+        position: relative;
+        margin-bottom: 22px;
+    }
+
+    .form-floating-modern input,
+    .form-floating-modern textarea {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px 16px 6px;
+        font-size: 15px;
+        background: #fbfbfd;
+        transition: border-color .2s ease, background .2s ease;
+        outline: none;
+    }
+
+    .form-floating-modern textarea {
+        min-height: 140px;
+        resize: vertical;
+        padding-top: 16px;
+    }
+
+    .form-floating-modern input:focus,
+    .form-floating-modern textarea:focus {
+        border-color: #ff5722;
+        background: #fff;
+    }
+
+    .form-floating-modern label {
+        position: absolute;
+        top: 14px;
+        left: 16px;
+        color: #9aa0a6;
+        font-size: 15px;
+        pointer-events: none;
+        transition: all .15s ease;
+        background: transparent;
+    }
+
+    .form-floating-modern input:focus + label,
+    .form-floating-modern input:not(:placeholder-shown) + label,
+    .form-floating-modern textarea:focus + label,
+    .form-floating-modern textarea:not(:placeholder-shown) + label {
+        top: 4px;
+        font-size: 11px;
+        color: #ff5722;
+        font-weight: 600;
+    }
+
+    .btn-send-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+        background: #ff5722;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        padding: 15px 34px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background .2s ease, transform .2s ease;
+    }
+
+    .btn-send-modern:hover {
+        background: #e64a19;
+        transform: translateY(-2px);
+    }
+
+    .contact-alert {
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 22px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .contact-alert.success {
+        background: #e9f9ee;
+        color: #1e7a3d;
+        border: 1px solid #bdeccb;
+    }
+
+    .contact-alert.error {
+        background: #fdeceb;
+        color: #b3271e;
+        border: 1px solid #f6c7c3;
+    }
+
+    /* Honeypot: hidden from real users, catches bots */
+    .hp-field {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .btn-send-modern[disabled] {
+        opacity: .6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Thank-you modal */
+    .thanks-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 20, 30, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+        padding: 20px;
+    }
+
+    .thanks-overlay.open {
+        display: flex;
+    }
+
+    .thanks-modal {
+        background: #fff;
+        border-radius: 18px;
+        max-width: 380px;
+        width: 100%;
+        padding: 40px 32px 32px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        animation: thanksPop .2s ease;
+    }
+
+    @@keyframes thanksPop {
+        from { transform: scale(.92); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .thanks-modal .check {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #e9f9ee;
+        color: #1e7a3d;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .thanks-modal h4 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1b1b1b;
+        margin-bottom: 10px;
+    }
+
+    .thanks-modal p {
+        color: #6b6f76;
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .thanks-modal button {
+        border: none;
+        background: #ff5722;
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 28px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .thanks-modal button:hover {
+        background: #e64a19;
+    }
+</style>
+
 <!-- Map Begin -->
-<div class="map">
+<div class="map-modern">
     <iframe src="https://maps.google.com/maps?q=Dhaka%2C%20Bangladesh&t=&z=13&ie=UTF8&iwloc=&output=embed"
             width="100%"
-            height="450"
+            height="420"
             frameborder="0"
             scrolling="no"
             marginheight="0"
@@ -16,47 +294,69 @@
     </iframe>
 </div>
 <!-- Map End -->
+
 <!-- Contact Section Begin -->
-<section class="contact spad">
+<section class="contact-modern">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 col-md-6">
-                <div class="contact__text">
-                    <div class="section-title">
-                        <span>Information</span>
-                        <h2>Contact Us</h2>
-                        <p>
-                            As you might expect of a company that began as a high-end interiors contractor, we pay
-                            strict attention.
-                        </p>
+                <div class="section-title">
+                    <span>Information</span>
+                    <h2>Contact Us</h2>
+                    <p>
+                        As you might expect of a company that began as a high-end interiors contractor, we pay
+                        strict attention to every detail — including how we respond to you.
+                    </p>
+                </div>
+
+                <div class="contact-info-card">
+                    <div class="icon">📍</div>
+                    <div>
+                        <h4>Dhaka</h4>
+                        <p>Ground Floor, Ahmed Tower, 28, 30 Kemal Ataturk Ave, Dhaka 1213<br />+880-17777-12345</p>
                     </div>
-                    <ul>
-                        <li>
-                            <h4>Dhaka</h4>
-                            <p>Ground Floor, Ahmed Tower, 28, 30 Kemal Ataturk Ave, Dhaka 1213<br />+880-17777-12345</p>
-                        </li>
-                        <li>
-                            <h4>Cox's Bazar</h4>
-                            <p>Dolphine Avenue, Kolatoli, Cox's Bazar - 4700 <br />+880-18888-12345</p>
-                        </li>
-                    </ul>
+                </div>
+
+                <div class="contact-info-card">
+                    <div class="icon">📍</div>
+                    <div>
+                        <h4>Cox's Bazar</h4>
+                        <p>Dolphine Avenue, Kolatoli, Cox's Bazar - 4700<br />+880-18888-12345</p>
+                    </div>
                 </div>
             </div>
+
             <div class="col-lg-6 col-md-6">
-                <div class="contact__form">
-                    <form asp-controller="Contact" asp-action="Send" method="post">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <input type="text" name="name" placeholder="Name">
-                            </div>
-                            <div class="col-lg-6">
-                                <input type="text" name="email" placeholder="Email">
-                            </div>
-                            <div class="col-lg-12">
-                                <textarea name="message" placeholder="Message"></textarea>
-                                <button type="submit" class="site-btn">Send Message</button>
-                            </div>
+                <div class="contact-form-card">
+                    <h3>Send us a message</h3>
+
+                    <div id="contactError" class="contact-alert error" style="display:none;"></div>
+
+                    <form id="contactForm" asp-controller="Contact" asp-action="Send" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Honeypot field: real users never see or fill this -->
+                        <div class="hp-field">
+                            <label for="website">Leave this field empty</label>
+                            <input type="text" id="website" name="Website" tabindex="-1" autocomplete="off">
                         </div>
+
+                        <div class="form-floating-modern">
+                            <input type="text" id="name" name="Name" placeholder=" " required>
+                            <label for="name">Your Name</label>
+                        </div>
+
+                        <div class="form-floating-modern">
+                            <input type="email" id="email" name="Email" placeholder=" " required>
+                            <label for="email">Your Email</label>
+                        </div>
+
+                        <div class="form-floating-modern">
+                            <textarea id="message" name="Message" placeholder=" " required></textarea>
+                            <label for="message">Your Message</label>
+                        </div>
+
+                        <button type="submit" id="contactSubmitBtn" class="btn-send-modern">Send Message →</button>
                     </form>
                 </div>
             </div>
@@ -64,3 +364,68 @@
     </div>
 </section>
 <!-- Contact Section End -->
+
+<!-- Thank-you Modal -->
+<div class="thanks-overlay" id="thanksOverlay">
+    <div class="thanks-modal">
+        <div class="check">✓</div>
+        <h4>Thank you!</h4>
+        <p>Your message has been sent. We'll get back to you shortly. Redirecting you to the home page…</p>
+        <button type="button" id="thanksContinueBtn">Continue to Home</button>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById('contactForm');
+        var submitBtn = document.getElementById('contactSubmitBtn');
+        var errorBox = document.getElementById('contactError');
+        var overlay = document.getElementById('thanksOverlay');
+        var continueBtn = document.getElementById('thanksContinueBtn');
+        var homeUrl = '@Url.Content("~/")';
+        var redirectTimer = null;
+
+        function goHome() {
+            if (redirectTimer) { clearTimeout(redirectTimer); }
+            window.location.href = homeUrl;
+        }
+
+        function showThanksModal() {
+            overlay.classList.add('open');
+            redirectTimer = setTimeout(goHome, 4000);
+        }
+
+        continueBtn.addEventListener('click', goHome);
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            errorBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+                .then(function (result) {
+                    if (result.ok && result.data && result.data.success) {
+                        form.reset();
+                        showThanksModal();
+                    } else {
+                        errorBox.textContent = (result.data && result.data.message) || 'Sorry, something went wrong. Please try again.';
+                        errorBox.style.display = 'block';
+                    }
+                })
+                .catch(function () {
+                    errorBox.textContent = 'Sorry, something went wrong. Please check your connection and try again.';
+                    errorBox.style.display = 'block';
+                })
+                .finally(function () {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Message →';
+                });
+        });
+    })();
+</script>
