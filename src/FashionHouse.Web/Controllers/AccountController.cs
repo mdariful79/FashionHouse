@@ -28,7 +28,7 @@ namespace FashionHouse.Web.Controllers
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            //IEmailService emailService,
+            IEmailService emailService,
             IMapper mapper,
             IMediator mediator)
         {
@@ -37,7 +37,7 @@ namespace FashionHouse.Web.Controllers
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            //_emailService = emailService;
+            _emailService = emailService;
             _mapper = mapper;
             _mediator = mediator;
         }
@@ -93,8 +93,8 @@ namespace FashionHouse.Web.Controllers
 
                     var fullName = $"{user.FirstName} {user.LastName}";
 
-                    //await _emailService.SendEmailAsync(fullName, model.Email, "Confirm your email",
-                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailService.SendEmailAsync(fullName, model.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -111,6 +111,63 @@ namespace FashionHouse.Web.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
+            return View(model);
+        }
+        [HttpGet]
+        public IActionResult RegisterConfirmation(string email, string? returnUrl = null)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToAction(nameof(Register));
+            }
+
+            ViewData["Email"] = email;
+            ViewData["ReturnUrl"] = returnUrl ?? Url.Content("~/");
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code, string? returnUrl = null)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View(new ConfirmEmailModel
+                {
+                    IsSuccess = false,
+                    ReturnUrl = returnUrl ?? Url.Content("~/")
+                });
+            }
+
+            string decodedCode;
+            try
+            {
+                decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            }
+            catch (FormatException)
+            {
+                return View(new ConfirmEmailModel
+                {
+                    IsSuccess = false,
+                    Email = user.Email ?? string.Empty,
+                    ReturnUrl = returnUrl ?? Url.Content("~/")
+                });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
+
+            var model = new ConfirmEmailModel
+            {
+                IsSuccess = result.Succeeded,
+                Email = user.Email ?? string.Empty,
+                ReturnUrl = returnUrl ?? Url.Content("~/")
+            };
 
             return View(model);
         }

@@ -1,4 +1,5 @@
 ﻿using FashionHouse.Application.Contracts.Services;
+using FashionHouse.Domain.Enums;
 using FashionHouse.Domain.Utilities;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
@@ -33,7 +34,7 @@ namespace FashionHouse.Infrastructure.Services
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port,
-                    _smtpSettings.SmtpEncryption != SmtpEncryptionTypes.Normal);
+                    _smtpSettings.SmtpEncryption != SmtpEncryptionTypes.TLS);
 
                 client.Timeout = _smtpSettings.Timeout;
 

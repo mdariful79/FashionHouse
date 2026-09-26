@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FashionHouse.Domain.Utilities
+namespace FashionHouse.Domain.Enums
 {
     public enum SmtpEncryptionTypes
     {

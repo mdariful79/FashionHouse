@@ -116,15 +116,18 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
             }
 
             var name = $"{user.FirstName} {user.LastName}";
-            var result = await _userManager.DeleteAsync(user);
 
-            if (result.Succeeded)
+            user.IsActive = false;
+            var lockoutResult = await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (updateResult.Succeeded && lockoutResult.Succeeded)
             {
-                TempData["Success"] = $"{name} was deleted.";
+                TempData["Success"] = $"{name} was deactivated.";
             }
             else
             {
-                TempData["Error"] = $"Could not delete {name}.";
+                TempData["Error"] = $"Could not deactivate {name}.";
             }
 
             return RedirectToAction(nameof(Index));
