@@ -18,17 +18,23 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var model = new HomeModel();
+            var model = new HomeModel
+            {
+                CategoryCount = await _db.Categories.CountAsync(ct),
+                SubCategoryCount = await _db.SubCategories.CountAsync(ct),
+                ProductCount = await _db.Products.CountAsync(ct),
+                StockCount = await _db.Inventories.SumAsync(i => i.Quantity, ct)
+            };
 
             model.RecentOrders = await _db.Orders
                 .AsNoTracking()
-                .OrderByDescending(o => o.CreatedAt)          // your order date property
+                .OrderByDescending(o => o.CreatedAt)
                 .Take(6)
                 .Select(o => new RecentOrderRow
                 {
                     Id = o.Id,
                     OrderNumber = o.OrderNumber,
-                    CustomerName = o.Customer.FirstName +' '+o.Customer.LastName,        // your customer name property
+                    CustomerName = o.Customer.FirstName + " " + o.Customer.LastName,
                     OrderedAt = o.CreatedAt,
                     ItemCount = o.OrderItems.Sum(i => i.Quantity),
                     PaymentMethod = o.PaymentMethod,

@@ -2,7 +2,11 @@
 {
     public class HomeModel
     {
-        // ...your existing properties (CategoryCount, ProductCount, etc.)...
+
+        public int CategoryCount { get; set; }
+        public int SubCategoryCount { get; set; }
+        public int ProductCount { get; set; }
+        public int StockCount { get; set; }
 
         public IReadOnlyList<RecentOrderRow> RecentOrders { get; set; } = new List<RecentOrderRow>();
     }

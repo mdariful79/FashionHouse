@@ -7,10 +7,10 @@
 
     // Counts: uncomment the matching line once HomeModel exposes the property.
     // Until then the cards show "—".
-    int? categoryCount = null;     // categoryCount = Model.CategoryCount;
-    int? subCategoryCount = null;  // subCategoryCount = Model.SubCategoryCount;
-    int? productCount = null;      // productCount = Model.ProductCount;
-    int? stockCount = null;        // stockCount = Model.StockCount;
+    int? categoryCount = Model.CategoryCount;     // categoryCount = Model.CategoryCount;
+    int? subCategoryCount = Model.SubCategoryCount;  // subCategoryCount = Model.SubCategoryCount;
+    int? productCount = Model.ProductCount;      // productCount = Model.ProductCount;
+    int? stockCount = Model.StockCount;        // stockCount = Model.StockCount;
 
     string Show(int? value) => value.HasValue ? value.Value.ToString("N0") : "—";
 
