@@ -1,14 +1,17 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Cortex.Mediator.DependencyInjection;
+using FashionHouse.Application.Contracts.Services;
 using FashionHouse.Application.Features.Categories.Command;
 using FashionHouse.Domain.Utilities;
 using FashionHouse.Infrastructure.Data;
 using FashionHouse.Infrastructure.Extensions;
+using FashionHouse.Web.Services;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using static FashionHouse.Web.Services.ReCaptchaService;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.File("Logs/web-log-.log", rollingInterval: RollingInterval.Day)
@@ -83,6 +86,19 @@ try
 
     #region AppSettings Configuration
     builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+    #endregion
+
+    #region reCaptcha Configuration
+    builder.Services.Configure<ReCaptchaOptions>(builder.Configuration.GetSection("ReCaptcha"));
+    builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
+    #endregion
+
+    #region Application Cookie configuration
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
     #endregion
 
     builder.Services.AddControllersWithViews();

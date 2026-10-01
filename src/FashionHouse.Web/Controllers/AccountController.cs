@@ -3,6 +3,7 @@ using FashionHouse.Application.Contracts.Services;
 using FashionHouse.Application.Features.Customers.Command;
 using FashionHouse.Infrastructure.Identity;
 using FashionHouse.Web.Models.Account;
+using FashionHouse.Web.Services;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace FashionHouse.Web.Controllers
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly IReCaptchaService _recaptcha;
         public AccountController(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
@@ -30,7 +32,8 @@ namespace FashionHouse.Web.Controllers
             ILogger<RegisterModel> logger,
             IEmailService emailService,
             IMapper mapper,
-            IMediator mediator)
+            IMediator mediator,
+            IReCaptchaService recaptcha)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -40,6 +43,7 @@ namespace FashionHouse.Web.Controllers
             _emailService = emailService;
             _mapper = mapper;
             _mediator = mediator;
+            _recaptcha = recaptcha;
         }
         public async Task<IActionResult> Register(string? returnUrl = null)
         {
@@ -53,6 +57,9 @@ namespace FashionHouse.Web.Controllers
         {
             model.ReturnUrl ??= Url.Content("~/");
             model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (!await _recaptcha.VerifyAsync(model.RecaptchaToken, "register"))
+                ModelState.AddModelError(string.Empty, "reCAPTCHA verification failed. Please try again.");
 
             if (ModelState.IsValid)
             {
@@ -210,6 +217,10 @@ namespace FashionHouse.Web.Controllers
             model.ReturnUrl ??= Url.Content("~/");
             model.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            if (!await _recaptcha.VerifyAsync(model.RecaptchaToken, "login"))
+                ModelState.AddModelError(string.Empty, "reCAPTCHA verification failed. Please try again.");
+
+
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(
@@ -263,6 +274,10 @@ namespace FashionHouse.Web.Controllers
         }
         [HttpGet]
         public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+        public async Task<IActionResult> AccessDenied()
         {
             return View();
         }

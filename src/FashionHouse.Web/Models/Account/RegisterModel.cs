@@ -30,5 +30,6 @@ namespace FashionHouse.Web.Models.Account
 
         public string? ReturnUrl { get; set; }
         public IList<AuthenticationScheme>? ExternalLogins { get; set; }
+        public string? RecaptchaToken { get; set; }
     }
 }
