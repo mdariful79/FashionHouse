@@ -1,4 +1,5 @@
 ﻿using FashionHouse.Domain.Contracts;
+using FashionHouse.Domain.Enums;
 
 namespace FashionHouse.Domain.Entities
 {
@@ -16,5 +17,7 @@ namespace FashionHouse.Domain.Entities
         // Navigation
         public Order Order { get; set; }
         public Product Product { get; set; }
+        public ProductColor Color { get; set; }
+        public ProductSize Size { get; set; }
     }
 }

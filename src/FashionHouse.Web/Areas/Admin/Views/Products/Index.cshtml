@@ -223,6 +223,42 @@
             white-space: nowrap;
         }
 
+        /* Color dots + size chips */
+        .fh-dots {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .fh-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid rgba(128, 128, 128, .45);
+        }
+
+        .fh-more {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--bs-secondary-color, #8a8d93);
+        }
+
+        .fh-szs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .fh-sz {
+            padding: 2px 8px;
+            border-radius: 7px;
+            background: rgba(var(--c), .12);
+            color: rgb(var(--c));
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+
         .fh-status {
             display: inline-flex;
             align-items: center;
@@ -370,7 +406,7 @@
     <div class="fh-list__head">
         <div>
             <h4>Products</h4>
-            <p>Manage your catalog: prices, SKUs and availability.</p>
+            <p>Manage your catalog: prices, SKUs, colors, sizes and availability.</p>
         </div>
         <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="fh-add">
             <i class="icon-base bx bx-plus"></i> Add Product
@@ -390,6 +426,8 @@
                         <th>Name</th>
                         <th>SKU</th>
                         <th>Price (Tk)</th>
+                        <th>Colors</th>
+                        <th>Sizes</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -411,6 +449,14 @@
         function esc(v) {
         return $('<div>').text(v == null ? '' : v).html();
         }
+
+        var colorHex = {
+        Black: '#111111', White: '#ffffff', Red: '#e53935', Blue: '#1e88e5',
+        Green: '#43a047', Yellow: '#fdd835', Gray: '#9e9e9e', Brown: '#795548',
+        Pink: '#ec407a', Purple: '#8e24aa', Orange: '#fb8c00', Navy: '#1a237e',
+        Beige: '#d9c3a0', Maroon: '#800000'
+        };
+        var maxDots = 5;
 
         $("#productTable").DataTable({
         processing: true,
@@ -436,7 +482,7 @@
         },
         columns: [
         {
-        data: null,
+        data: null, // SL
         orderable: false,
         searchable: false,
         render: function (data, type, row, meta) {
@@ -465,11 +511,40 @@
         data: 3, // Price
         render: function (data) {
         var n = Number(String(data).replace(/,/g, ''));
-        return `<span class="fh-price">${ isNaN(n) ? esc(data) : Math.round(n).toLocaleString('en-US')}</span>`;
+        return `<span class="fh-price">${isNaN(n) ? esc(data) : Math.round(n).toLocaleString('en-US')}</span>`;
         }
         },
         {
-        data: 4, // IsActive
+        data: 4, // Colors (comma-separated names)
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        if (!data) return '—';
+        var names = String(data).split(',');
+        var dots = names.slice(0, maxDots).map(function (n) {
+        return `<span class="fh-dot" title="${esc(n)}" style="background:${colorHex[n] || '#ccc'}"></span>`;
+        }).join('');
+        var more = names.length > maxDots
+        ? `<span class="fh-more" title="${esc(names.slice(maxDots).join(', '))}">+${names.length - maxDots}</span>`
+        : '';
+        return `<div class="fh-dots">${dots}${more}</div>`;
+        }
+        },
+        {
+        data: 5, // Sizes (comma-separated names)
+        orderable: false,
+        searchable: false,
+        render: function (data) {
+        if (!data) return '—';
+        return '<div class="fh-szs">' +
+        String(data).split(',').map(function (s) {
+        return `<span class="fh-sz">${esc(s)}</span>`;
+        }).join('') +
+        '</div>';
+        }
+        },
+        {
+        data: 6, // IsActive
         orderable: true,
         searchable: false,
         render: function (data) {
@@ -479,8 +554,8 @@
         }
         },
         {
-        data: 5, // Id
-        orderable: true,
+        data: 7, // Id
+        orderable: false,
         searchable: false,
         render: function (data) {
         return `

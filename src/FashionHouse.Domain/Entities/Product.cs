@@ -1,5 +1,6 @@
 ﻿using FashionHouse.Domain.Contracts;
 using FashionHouse.Domain.Entities;
+using FashionHouse.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,8 @@ namespace FashionHouse.Domain.Entities
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public decimal? DiscountedPrice { get; set; }
+        public List<ProductColor> Colors { get; set; } = new();
+        public List<ProductSize> Sizes { get; set; } = new();
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

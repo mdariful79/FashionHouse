@@ -19,12 +19,6 @@ namespace FashionHouse.Application.Features.Products.Command
 
         public async Task<Product> Handle(ProductUpdateCommand command, CancellationToken cancellationToken)
         {
-            //var isDuplicateName = await _unitOfWork.ProductRepository.IsDuplicateProductName(
-            //    command.ProductName, command.Id, cancellationToken);
-
-            //if (isDuplicateName)
-            //    throw new DuplicateDataException("Product name is duplicate");
-
             var isDuplicateSku = await _unitOfWork.ProductRepository.IsDuplicateSku(
                 command.SKU, command.Id, cancellationToken);
 
@@ -34,6 +28,10 @@ namespace FashionHouse.Application.Features.Products.Command
             var product = _unitOfWork.ProductRepository.GetById(command.Id);
             product = _mapper.Map(command, product);
             product.UpdatedAt = DateTime.UtcNow;
+            
+            // Assign a fresh list so EF detects the change via the ValueComparer
+            product.Colors = command.Colors.Distinct().OrderBy(c => c).ToList();
+            product.Sizes = command.Sizes.Distinct().OrderBy(s => s).ToList();
 
             await _unitOfWork.ProductRepository.EditAsync(product, cancellationToken);
             await _unitOfWork.SaveAsync(cancellationToken);

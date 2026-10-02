@@ -1,4 +1,5 @@
-﻿@model FashionHouse.Web.Models.Shop.ShopDetailsModel
+﻿@using FashionHouse.Domain.Enums
+@model FashionHouse.Web.Models.Shop.ShopDetailsModel
 @{
     ViewData["Title"] = Model.Product.ProductName;
 
@@ -15,7 +16,123 @@
 
     var onSale = Model.Product.DiscountedPrice.HasValue && Model.Product.DiscountedPrice < Model.Product.Price;
     var inStock = Model.AvailableStock > 0;
+
+    var sizes = Model.Product.Sizes;
+    var colors = Model.Product.Colors;
+    var swatches = new Dictionary<ProductColor, string>
+    {
+        [ProductColor.Black] = "#111111",
+        [ProductColor.White] = "#ffffff",
+        [ProductColor.Red] = "#e53935",
+        [ProductColor.Blue] = "#1e88e5",
+        [ProductColor.Green] = "#43a047",
+        [ProductColor.Yellow] = "#fdd835",
+        [ProductColor.Gray] = "#9e9e9e",
+        [ProductColor.Brown] = "#795548",
+        [ProductColor.Pink] = "#ec407a",
+        [ProductColor.Purple] = "#8e24aa",
+        [ProductColor.Orange] = "#fb8c00",
+        [ProductColor.Navy] = "#1a237e",
+        [ProductColor.Beige] = "#d9c3a0",
+        [ProductColor.Maroon] = "#800000"
+    };
 }
+
+<style>
+    .product__details__option__color label.fh-color {
+        display: inline-block;
+        vertical-align: middle;
+        width: 30px;
+        height: 30px;
+        margin: 0 12px 0 0;
+        border-radius: 50%;
+        border: 1px solid rgba(128, 128, 128, .45);
+        position: relative;
+        cursor: pointer;
+        transition: box-shadow .15s ease, transform .15s ease;
+    }
+
+        .product__details__option__color label.fh-color:hover {
+            transform: scale(1.08);
+        }
+
+        /* Clear selected ring (the template's own ring is a faint gray) */
+        .product__details__option__color label.fh-color.active {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+        }
+
+            .product__details__option__color label.fh-color.active:after {
+                display: none;
+            }
+
+        .product__details__option__color label.fh-color input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+    /* Size + Color row */
+    .shop-details .product__details__option {
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center !important;
+        gap: 12px 40px;
+    }
+
+    /* Color group (own classes, so template CSS can't interfere) */
+    .fh-color-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .fh-opt-label {
+        font-size: 15px;
+        color: #111;
+        line-height: 1;
+        margin: 0;
+    }
+
+    .fh-swatches {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .fh-swatch {
+        display: block;
+        width: 30px;
+        height: 30px;
+        margin: 0;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(128, 128, 128, .45);
+        position: relative;
+        cursor: pointer;
+        transition: box-shadow .15s ease, transform .15s ease;
+    }
+
+        .fh-swatch:hover {
+            transform: scale(1.08);
+        }
+
+        .fh-swatch.active {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+        }
+
+        .fh-swatch input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    #variantError {
+        flex-basis: 100%;
+        text-align: center;
+    }
+</style>
 
 <!-- Shop Details Section Begin -->
 <section class="shop-details">
@@ -88,49 +205,44 @@
 
                         <p>@Model.Product.Description</p>
 
-                        <div class="product__details__option">
-                            <div class="product__details__option__size">
-                                <span>Size:</span>
-                                <label for="xxl">
-                                    xxl
-                                    <input type="radio" id="xxl">
-                                </label>
-                                <label class="active" for="xl">
-                                    xl
-                                    <input type="radio" id="xl">
-                                </label>
-                                <label for="l">
-                                    l
-                                    <input type="radio" id="l">
-                                </label>
-                                <label for="sm">
-                                    s
-                                    <input type="radio" id="sm">
-                                </label>
+                        @if (sizes.Any() || colors.Any())
+                        {
+                            <div class="product__details__option">
+                                @if (sizes.Any())
+                                {
+                                    <div class="product__details__option__size">
+                                        <span>Size:</span>
+                                        @foreach (var size in sizes)
+                                        {
+                                            <label for="size_@size">
+                                                @size
+                                                <input type="radio" id="size_@size" name="size" value="@size" form="addToCartForm">
+                                            </label>
+                                        }
+                                    </div>
+                                }
+                                @if (colors.Any())
+                                {
+                                    <div class="fh-color-group">
+                                        <span class="fh-opt-label">Color:</span>
+                                        <div class="fh-swatches">
+                                            @foreach (var color in colors)
+                                            {
+                                                <label for="color_@color" title="@color" class="fh-swatch"
+                                                       style="background:@swatches[color]">
+                                                    <input type="radio" id="color_@color" name="color" value="@color" form="addToCartForm">
+                                                </label>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                <small id="variantError" class="text-danger" style="display:none;"></small>
                             </div>
-                            <div class="product__details__option__color">
-                                <span>Color:</span>
-                                <label class="c-1" for="sp-1">
-                                    <input type="radio" id="sp-1">
-                                </label>
-                                <label class="c-2" for="sp-2">
-                                    <input type="radio" id="sp-2">
-                                </label>
-                                <label class="c-3" for="sp-3">
-                                    <input type="radio" id="sp-3">
-                                </label>
-                                <label class="c-4" for="sp-4">
-                                    <input type="radio" id="sp-4">
-                                </label>
-                                <label class="c-9" for="sp-9">
-                                    <input type="radio" id="sp-9">
-                                </label>
-                            </div>
-                        </div>
+                        }
 
                         @if (inStock)
                         {
-                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="product__details__cart__option js-qty-form">
+                            <form id="addToCartForm" asp-controller="Cart" asp-action="AddToCart" method="post" class="product__details__cart__option js-qty-form">
                                 <input type="hidden" name="productId" value="@Model.Product.Id" />
                                 <div class="quantity">
                                     <div class="pro-qty">
@@ -269,7 +381,7 @@
                                     <div class="product__details__tab__content__item">
                                         <h5>Products Infomation</h5>
                                         <p>
-                                           
+
                                         </p>
                                         <p>
                                             As is the case with any new technology product, the cost of a Pocket PC
@@ -342,7 +454,7 @@
                 cursor: pointer;
             }
 
-        /* Hover: swap name for Add To Cart */
+        /* Hover: swap name for Select Options */
         .product__item:hover .fh-namecart .fh-name {
             display: none !important;
         }
@@ -410,11 +522,9 @@
                                 <div class="fh-namecart">
                                     <a class="fh-name" asp-controller="Shop" asp-action="ShopDetails" asp-route-id="@p.Id">@(string.IsNullOrWhiteSpace(p.ProductName) ? "(No name)" : p.ProductName)</a>
 
-                                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="fh-cart">
-                                        <input type="hidden" name="productId" value="@p.Id" />
-                                        <input type="hidden" name="quantity" value="1" />
-                                        <button type="submit" class="fh-cart-btn">+ Add To Cart</button>
-                                    </form>
+                                    <div class="fh-cart">
+                                        <a class="fh-cart-btn" asp-controller="Shop" asp-action="ShopDetails" asp-route-id="@p.Id">+ Select Options</a>
+                                    </div>
                                 </div>
 
                                 <div class="rating">
@@ -468,6 +578,26 @@
 
             $('.js-qty-form').on('submit', function () {
                 clampQty($(this).find('.pro-qty input'));
+            });
+
+            // Selected state for size / color (the template's JS also toggles .active,
+            // this just makes it reliable)
+            $('.product__details__option input[type=radio]').on('change', function () {
+                $(this).closest('div').find('label').removeClass('active');
+                $(this).closest('label').addClass('active');
+                $('#variantError').hide();
+            });
+
+            // Require a size / color choice before adding to cart
+            $('#addToCartForm').on('submit', function (e) {
+                var missing = [];
+                if ($('input[name=size]').length && !$('input[name=size]:checked').length) missing.push('a size');
+                if ($('input[name=color]').length && !$('input[name=color]:checked').length) missing.push('a color');
+
+                if (missing.length) {
+                    e.preventDefault();
+                    $('#variantError').text('Please select ' + missing.join(' and ') + '.').show();
+                }
             });
         });
     </script>

@@ -23,6 +23,10 @@ namespace FashionHouse.Application.Features.Products.Command
             product.Id = IdentityGenerator.NewSequentialGuid();
             product.CreatedAt = DateTime.UtcNow;
 
+            // Set explicitly so we don't depend on Mapster's collection mapping
+            product.Colors = command.Colors.Distinct().OrderBy(c => c).ToList();
+            product.Sizes = command.Sizes.Distinct().OrderBy(s => s).ToList();
+
             await _unitOfWork.ProductRepository.AddAsync(product, cancellationToken);
             await _unitOfWork.SaveAsync(cancellationToken);
 

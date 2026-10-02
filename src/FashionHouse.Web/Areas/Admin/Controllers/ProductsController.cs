@@ -53,6 +53,8 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductModel model, List<IFormFile> imageFiles, CancellationToken cancellationToken)
         {
+            NormalizeVariants(model);
+
             if (ModelState.IsValid)
             {
                 var skuExists = await _mediator.SendQueryAsync(
@@ -66,6 +68,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 {
                     try
                     {
+                        // ProductAddCommand must expose Colors and Sizes (same names/types as ProductModel)
                         var command = _mapper.Map<ProductAddCommand>(model);
                         var createdProduct = await _mediator.SendCommandAsync(command, cancellationToken);
 
@@ -102,6 +105,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
             model.SubCategoryOptions = await GetSubCategoryOptions(model.CategoryId, cancellationToken);
             return View(model);
         }
+
         public async Task<IActionResult> Update(Guid id, CancellationToken cancellationToken)
         {
             try
@@ -111,6 +115,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
 
                 if (result != null)
                 {
+                    // Colors and Sizes are copied by Mapster because the names match on Product and ProductModel
                     var model = _mapper.Map<ProductModel>(result);
                     model.CategoryOptions = await GetCategoryOptions(cancellationToken);
                     model.SubCategoryOptions = await GetSubCategoryOptions(result.CategoryId, cancellationToken);
@@ -130,9 +135,12 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(ProductModel model, CancellationToken cancellationToken)
         {
+            NormalizeVariants(model);
+
             if (ModelState.IsValid)
             {
                 var skuExists = await _mediator.SendQueryAsync(
@@ -146,6 +154,7 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 {
                     try
                     {
+                        // ProductUpdateCommand must expose Colors and Sizes (same names/types as ProductModel)
                         var command = _mapper.Map<ProductUpdateCommand>(model);
                         await _mediator.SendCommandAsync(command, cancellationToken);
 
@@ -183,7 +192,8 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 var query = _mapper.Map<GetAllProductsByPagingQuery>(model);
                 query.SearchText = model.Search.Value;
 
-               query.SortText = model.FormatSortExpression(null, null, "ProductName", "SKU", "Price", "IsActive");
+                // Column order in the table: SL, Image, Name, SKU, Price, Colors, Sizes, Status, Actions
+                query.SortText = model.FormatSortExpression(null, null, "ProductName", "SKU", "Price", null, null, "IsActive");
 
                 var (items, total, totalDisplay) = await _mediator.SendQueryAsync<GetAllProductsByPagingQuery,
                     (IList<Product>, int, int)>(query, cancellationToken);
@@ -199,12 +209,14 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                     data = (from item in items
                             select new string[]
                             {
-                        primaryImages.TryGetValue(item.Id, out var img) ? $"/uploads/products/{img.ImageUrl}" : "",
-                        HttpUtility.HtmlEncode(item.ProductName),
-                        HttpUtility.HtmlEncode(item.SKU),
-                       $"৳ {(item.DiscountedPrice ?? item.Price):N2}",
-                        item.IsActive ? "Active" : "Inactive",
-                        item.Id.ToString()
+                                primaryImages.TryGetValue(item.Id, out var img) ? $"/uploads/products/{img.ImageUrl}" : "",
+                                HttpUtility.HtmlEncode(item.ProductName),
+                                HttpUtility.HtmlEncode(item.SKU),
+                                $"৳ {(item.DiscountedPrice ?? item.Price):N2}",
+                                string.Join(",", item.Colors.Select(c => c.ToString())),
+                                string.Join(",", item.Sizes.Select(s => s.ToString())),
+                                item.IsActive ? "Active" : "Inactive",
+                                item.Id.ToString()
                             }).ToArray()
                 };
 
@@ -324,6 +336,15 @@ namespace FashionHouse.Web.Areas.Admin.Controllers
                 _logger.LogError(ex, "Failed to set primary image {ImageId} for product {ProductId}", id, productId);
                 return Json(new { success = false, message = "Failed to set primary image." });
             }
+        }
+
+        // ---------------- Helpers ----------------
+
+        // Removes duplicate selections and keeps sizes in XS -> XXL order.
+        private static void NormalizeVariants(ProductModel model)
+        {
+            model.Colors = (model.Colors ?? new()).Distinct().ToList();
+            model.Sizes = (model.Sizes ?? new()).Distinct().OrderBy(s => s).ToList();
         }
 
         private async Task<(int savedCount, int skippedCount)> SaveProductImages(

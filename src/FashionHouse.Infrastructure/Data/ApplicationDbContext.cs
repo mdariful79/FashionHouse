@@ -1,7 +1,9 @@
 ﻿using FashionHouse.Domain.Entities;
+using FashionHouse.Domain.Enums;
 using FashionHouse.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace FashionHouse.Infrastructure.Data
 {
@@ -26,6 +28,12 @@ namespace FashionHouse.Infrastructure.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
 
+        private static ValueComparer<List<T>> ListComparer<T>() where T : struct, Enum =>
+            new(
+                (a, b) => a!.SequenceEqual(b!),
+                v => v.Aggregate(0, (h, x) => HashCode.Combine(h, x)),
+                v => v.ToList());
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -42,6 +50,29 @@ namespace FashionHouse.Infrastructure.Data
                 .HasForeignKey(x => x.SubCategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Colors / Sizes stored as comma-separated enum ints, e.g. "0,2,5"
+            builder.Entity<Product>()
+                .Property(p => p.Colors)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => string.Join(',', v.Select(c => (int)c)),
+                    v => string.IsNullOrEmpty(v)
+                        ? new List<ProductColor>()
+                        : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                           .Select(s => (ProductColor)int.Parse(s)).ToList(),
+                    ListComparer<ProductColor>());
+
+            builder.Entity<Product>()
+                .Property(p => p.Sizes)
+                .HasMaxLength(50)
+                .HasConversion(
+                    v => string.Join(',', v.Select(s => (int)s)),
+                    v => string.IsNullOrEmpty(v)
+                        ? new List<ProductSize>()
+                        : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                           .Select(s => (ProductSize)int.Parse(s)).ToList(),
+                    ListComparer<ProductSize>());
+
             builder.Entity<ProductImage>()
                 .HasOne(x => x.Product)
                 .WithMany(x => x.ProductImages)
@@ -57,6 +88,7 @@ namespace FashionHouse.Infrastructure.Data
             builder.Entity<Inventory>()
                 .HasIndex(x => x.ProductId)
                 .IsUnique();
+
             builder.Entity<Customer>()
                 .HasIndex(x => x.Email)
                 .IsUnique();
@@ -77,7 +109,6 @@ namespace FashionHouse.Infrastructure.Data
                 .HasIndex(x => x.CustomerId)
                 .IsUnique();
 
-         
             builder.Entity<Cart>()
                 .Property(x => x.Id)
                 .ValueGeneratedNever();
@@ -97,6 +128,11 @@ namespace FashionHouse.Infrastructure.Data
                 .WithMany(x => x.CartItems)
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Same product in a different color/size is a separate cart line
+            builder.Entity<CartItem>()
+                .HasIndex(x => new { x.CartId, x.ProductId, x.Color, x.Size })
+                .IsUnique();
 
             builder.Entity<Order>()
                 .HasOne(x => x.Customer)

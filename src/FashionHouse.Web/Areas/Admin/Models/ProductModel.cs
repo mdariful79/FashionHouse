@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FashionHouse.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace FashionHouse.Web.Areas.Admin.Models
 {
@@ -29,6 +30,11 @@ namespace FashionHouse.Web.Areas.Admin.Models
 
         [Range(0, double.MaxValue, ErrorMessage = "Discounted price cannot be negative")]
         public decimal? DiscountedPrice { get; set; }
+        [MinLength(1, ErrorMessage = "Select at least one color")]
+        public List<ProductColor> Colors { get; set; } = new();
+
+        [MinLength(1, ErrorMessage = "Select at least one size")]
+        public List<ProductSize> Sizes { get; set; } = new();
 
         public bool IsActive { get; set; } = true;
         [Display(Name = "Pictures")]
