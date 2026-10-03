@@ -580,8 +580,6 @@
                 clampQty($(this).find('.pro-qty input'));
             });
 
-            // Selected state for size / color (the template's JS also toggles .active,
-            // this just makes it reliable)
             $('.product__details__option input[type=radio]').on('change', function () {
                 $(this).closest('div').find('label').removeClass('active');
                 $(this).closest('label').addClass('active');

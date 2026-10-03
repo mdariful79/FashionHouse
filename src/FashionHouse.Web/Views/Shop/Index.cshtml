@@ -1,6 +1,72 @@
-﻿@model FashionHouse.Web.Models.Shop.ShopIndexModel
+﻿@using FashionHouse.Domain.Enums
+@model FashionHouse.Web.Models.Shop.ShopIndexModel
 @{
     ViewData["Title"] = "Shop";
+
+    var swatches = new Dictionary<ProductColor, string>
+    {
+        [ProductColor.Black] = "#111111",
+        [ProductColor.White] = "#ffffff",
+        [ProductColor.Red] = "#e53935",
+        [ProductColor.Blue] = "#1e88e5",
+        [ProductColor.Green] = "#43a047",
+        [ProductColor.Yellow] = "#fdd835",
+        [ProductColor.Gray] = "#9e9e9e",
+        [ProductColor.Brown] = "#795548",
+        [ProductColor.Pink] = "#ec407a",
+        [ProductColor.Purple] = "#8e24aa",
+        [ProductColor.Orange] = "#fb8c00",
+        [ProductColor.Navy] = "#1a237e",
+        [ProductColor.Beige] = "#d9c3a0",
+        [ProductColor.Maroon] = "#800000"
+    };
+    var priceRanges = new List<(string Label, decimal? Min, decimal? Max)>
+    {
+        ("Tk 0 - 1,000", 0m, 1000m),
+        ("Tk 1,000 - 3,000", 1000m, 3000m),
+        ("Tk 3,000 - 5,000", 3000m, 5000m),
+        ("Tk 5,000 - 10,000", 5000m, 10000m),
+        ("Tk 10,000+", 10000m, null)
+    };
+    string FilterUrl(Guid? cat, Guid? sub, ProductColor? col, ProductSize? sz)
+        => Url.Action("Index", "Shop", new
+        {
+            categoryId = cat,
+            subCategoryId = sub,
+            color = col,
+            size = sz,
+            minPrice = Model.MinPrice,
+            maxPrice = Model.MaxPrice,
+            sort = Model.Sort
+        })!;
+
+    string PriceUrl(decimal? min, decimal? max)
+        => Url.Action("Index", "Shop", new
+        {
+            categoryId = Model.CategoryId,
+            subCategoryId = Model.SubCategoryId,
+            color = Model.Color,
+            size = Model.Size,
+            minPrice = min,
+            maxPrice = max,
+            sort = Model.Sort
+        })!;
+
+    string SortUrl(string? sortBy)
+        => Url.Action("Index", "Shop", new
+        {
+            categoryId = Model.CategoryId,
+            subCategoryId = Model.SubCategoryId,
+            color = Model.Color,
+            size = Model.Size,
+            minPrice = Model.MinPrice,
+            maxPrice = Model.MaxPrice,
+            sort = sortBy
+        })!;
+
+    var hasFilter = Model.CategoryId.HasValue || Model.SubCategoryId.HasValue || Model.Color.HasValue
+                    || Model.Size.HasValue || Model.MinPrice.HasValue || Model.MaxPrice.HasValue
+                    || !string.IsNullOrEmpty(Model.Sort);
 }
 <style>
     .product__item .fh-namecart {
@@ -78,7 +144,81 @@
             margin-top: 4px !important;
         }
     }
+
+    /* ---------- Sidebar filters ---------- */
+    .shop__sidebar__categories a.fh-active,
+    .shop__sidebar__brand a.fh-active {
+        color: #111;
+        font-weight: 700;
+    }
+
+    .shop__sidebar__price a.fh-active {
+        color: #111;
+        font-weight: 700;
+    }
+
+    /* the "Default" placeholder in the sort dropdown should not be pickable */
+    .shop__product__option__right .nice-select .option.disabled {
+        display: none;
+    }
+
+    .fh-clear-filters {
+        color: #e53637;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .fh-filter-sizes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .fh-filter-sizes a {
+            min-width: 38px;
+            padding: 6px 10px;
+            text-align: center;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #111;
+            border: 1px solid #e1e1e1;
+            background: #fff;
+        }
+
+            .fh-filter-sizes a:hover {
+                border-color: #111;
+            }
+
+            .fh-filter-sizes a.active {
+                background: #111;
+                color: #fff;
+                border-color: #111;
+            }
+
+    .fh-filter-colors {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+        .fh-filter-colors a {
+            display: block;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(128, 128, 128, .45);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+            .fh-filter-colors a:hover {
+                transform: scale(1.08);
+            }
+
+            .fh-filter-colors a.active {
+                box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+            }
 </style>
+
 <!-- Shop Section Begin -->
 <section class="shop spad">
     <div class="container">
@@ -93,6 +233,15 @@
                     </div>
                     <div class="shop__sidebar__accordion">
                         <div class="accordion" id="accordionExample">
+
+                            @if (hasFilter)
+                            {
+                                <div class="mb-3">
+                                    <a asp-controller="Shop" asp-action="Index" class="fh-clear-filters">✕ Clear all filters</a>
+                                </div>
+                            }
+
+                            <!-- Categories -->
                             <div class="card">
                                 <div class="card-heading">
                                     <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
@@ -101,35 +250,51 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__categories">
                                             <ul class="nice-scroll">
-                                                <li><a href="#">Men (20)</a></li>
-                                                <li><a href="#">Women (20)</a></li>
-                                                <li><a href="#">Bags (20)</a></li>
-                                                <li><a href="#">Clothing (20)</a></li>
-                                                <li><a href="#">Shoes (20)</a></li>
-                                                <li><a href="#">Accessories (20)</a></li>
-                                                <li><a href="#">Kids (20)</a></li>
+                                                @foreach (var c in Model.Categories)
+                                                {
+                                                    var isActive = Model.CategoryId == c.Id;
+                                                    <li>
+                                                        <a class="@(isActive ? "fh-active" : "")"
+                                                           href="@FilterUrl(isActive ? null : c.Id, null, Model.Color, Model.Size)">
+                                                            @c.Name (@c.Count)
+                                                        </a>
+                                                    </li>
+                                                }
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                </div>
-                                <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__brand">
-                                            <ul>
-                                                <li><a href="#">Louis Vuitton</a></li>
-                                                <li><a href="#">Chanel</a></li>
-                                                <li><a href="#">Hermes</a></li>
-                                                <li><a href="#">Gucci</a></li>
-                                            </ul>
+
+                            <!-- Branding (SubCategory) -->
+                            @if (Model.SubCategories.Any())
+                            {
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
+                                    </div>
+                                    <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__brand">
+                                                <ul>
+                                                    @foreach (var s in Model.SubCategories)
+                                                    {
+                                                        var isActive = Model.SubCategoryId == s.Id;
+                                                        <li>
+                                                            <a class="@(isActive ? "fh-active" : "")"
+                                                               href="@FilterUrl(Model.CategoryId, isActive ? null : s.Id, Model.Color, Model.Size)">
+                                                                @s.Name (@s.Count)
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+
+                            <!-- Filter Price (static) -->
                             <div class="card">
                                 <div class="card-heading">
                                     <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
@@ -138,56 +303,66 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__price">
                                             <ul>
-                                                <li><a href="#">$0.00 - $50.00</a></li>
-                                                <li><a href="#">$50.00 - $100.00</a></li>
-                                                <li><a href="#">$100.00 - $150.00</a></li>
-                                                <li><a href="#">$150.00 - $200.00</a></li>
-                                                <li><a href="#">$200.00 - $250.00</a></li>
-                                                <li><a href="#">250.00+</a></li>
+                                                @foreach (var r in priceRanges)
+                                                {
+                                                    var isActive = Model.MinPrice == r.Min && Model.MaxPrice == r.Max;
+                                                    <li>
+                                                        <a class="@(isActive ? "fh-active" : "")"
+                                                           href="@(isActive ? PriceUrl(null, null) : PriceUrl(r.Min, r.Max))">@r.Label</a>
+                                                    </li>
+                                                }
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-toggle="collapse" data-target="#collapseFour">Size</a>
-                                </div>
-                                <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__size">
-                                            <label for="xs">xs<input type="radio" id="xs"></label>
-                                            <label for="sm">s<input type="radio" id="sm"></label>
-                                            <label for="md">m<input type="radio" id="md"></label>
-                                            <label for="xl">xl<input type="radio" id="xl"></label>
-                                            <label for="2xl">2xl<input type="radio" id="2xl"></label>
-                                            <label for="xxl">xxl<input type="radio" id="xxl"></label>
-                                            <label for="3xl">3xl<input type="radio" id="3xl"></label>
-                                            <label for="4xl">4xl<input type="radio" id="4xl"></label>
+
+                            <!-- Size -->
+                            @if (Model.AvailableSizes.Any())
+                            {
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseFour">Size</a>
+                                    </div>
+                                    <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="fh-filter-sizes">
+                                                @foreach (var sz in Model.AvailableSizes)
+                                                {
+                                                    var isActive = Model.Size == sz;
+                                                    <a class="@(isActive ? "active" : "")"
+                                                       href="@FilterUrl(Model.CategoryId, Model.SubCategoryId, Model.Color, isActive ? null : sz)">@sz</a>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
-                                </div>
-                                <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__color">
-                                            <label class="c-1" for="sp-1"><input type="radio" id="sp-1"></label>
-                                            <label class="c-2" for="sp-2"><input type="radio" id="sp-2"></label>
-                                            <label class="c-3" for="sp-3"><input type="radio" id="sp-3"></label>
-                                            <label class="c-4" for="sp-4"><input type="radio" id="sp-4"></label>
-                                            <label class="c-5" for="sp-5"><input type="radio" id="sp-5"></label>
-                                            <label class="c-6" for="sp-6"><input type="radio" id="sp-6"></label>
-                                            <label class="c-7" for="sp-7"><input type="radio" id="sp-7"></label>
-                                            <label class="c-8" for="sp-8"><input type="radio" id="sp-8"></label>
-                                            <label class="c-9" for="sp-9"><input type="radio" id="sp-9"></label>
+                            }
+
+                            <!-- Colors -->
+                            @if (Model.AvailableColors.Any())
+                            {
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
+                                    </div>
+                                    <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="fh-filter-colors">
+                                                @foreach (var col in Model.AvailableColors)
+                                                {
+                                                    var isActive = Model.Color == col;
+                                                    <a class="@(isActive ? "active" : "")" title="@col"
+                                                       style="background:@swatches[col]"
+                                                       href="@FilterUrl(Model.CategoryId, Model.SubCategoryId, isActive ? null : col, Model.Size)"></a>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+
+                            <!-- Tags (static) -->
                             <div class="card">
                                 <div class="card-heading">
                                     <a data-toggle="collapse" data-target="#collapseSix">Tags</a>
@@ -206,6 +381,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -229,10 +405,13 @@
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__right">
                                 <p>Sort by Price:</p>
-                                <select>
-                                    <option value="">Low To High</option>
-                                    <option value="">$0 - $55</option>
-                                    <option value="">$55 - $100</option>
+                                <select id="fhSort">
+                                    @if (string.IsNullOrEmpty(Model.Sort))
+                                    {
+                                        <option value="" selected disabled>Default</option>
+                                    }
+                                    <option value="@SortUrl("price_asc")" selected="@(Model.Sort == "price_asc")">Low To High</option>
+                                    <option value="@SortUrl("price_desc")" selected="@(Model.Sort == "price_desc")">High To Low</option>
                                 </select>
                             </div>
                         </div>
@@ -265,11 +444,6 @@
                                     {
                                         <span class="label" style="background: #FF5E0E">New Arraival</span>
                                     }
-                                    @* <ul class="product__hover">
-                                        <li><a href="#"><img src="~/FrontLayout/img/icon/heart.png" alt=""></a></li>
-                                        <li><a href="#"><img src="~/FrontLayout/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                        <li><a asp-action="ShopDetails" asp-route-id="@p.Id"><img src="~/FrontLayout/img/icon/search.png" alt=""></a></li>
-                                    </ul> *@
                                 </div>
                                 <div class="product__item__text">
                                     <div class="fh-namecart">
@@ -315,7 +489,8 @@
                             <div class="product__pagination">
                                 @for (var i = 1; i <= Model.TotalPages; i++)
                                 {
-                                    <a class="@(i == Model.CurrentPage ? "active" : "")" asp-action="Index" asp-route-page="@i">@i</a>
+                                    <a class="@(i == Model.CurrentPage ? "active" : "")"
+                                       href="@Url.Action("Index", "Shop", new { page = i, categoryId = Model.CategoryId, subCategoryId = Model.SubCategoryId, color = Model.Color, size = Model.Size, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice, sort = Model.Sort })">@i</a>
                                 }
                             </div>
                         </div>
@@ -326,3 +501,14 @@
     </div>
 </section>
 <!-- Shop Section End -->
+@section Scripts {
+    <script>
+        $(function () {
+            $('#fhSort').on('change', function () {
+                if (this.value) {
+                    window.location.href = this.value;
+                }
+            });
+        });
+    </script>
+}

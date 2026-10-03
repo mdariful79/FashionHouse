@@ -1,5 +1,6 @@
 ﻿using Cortex.Mediator.Queries;
 using FashionHouse.Domain.Entities;
+using FashionHouse.Domain.Enums;
 
 namespace FashionHouse.Application.Features.Products.Query
 {
@@ -9,5 +10,11 @@ namespace FashionHouse.Application.Features.Products.Query
         public int PageSize { get; set; } = 12;
         public string? SearchText { get; set; }
         public Guid? CategoryId { get; set; }
+        public Guid? SubCategoryId { get; set; }
+        public ProductColor? Color { get; set; }
+        public ProductSize? Size { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public string? SortBy { get; set; }   
     }
 }

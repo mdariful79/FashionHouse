@@ -10,7 +10,6 @@ namespace FashionHouse.Application.Contracts.Repositories
     public interface IProductRepository : IRepository<Product, Guid>
     {
         //Task<bool> IsDuplicateProductName(string productName, Guid? id, CancellationToken cancellationToken);
-
         Task<bool> IsDuplicateSku(string sku, Guid? id, CancellationToken cancellationToken);
         Task<IList<Product>> GetActiveWithoutInventoryAsync(CancellationToken cancellationToken);
         Task<(IList<Product>, int, int)> GetActiveForShopAsync(GetActiveProductsForShopQuery query, CancellationToken cancellationToken);
@@ -20,5 +19,6 @@ namespace FashionHouse.Application.Contracts.Repositories
             CancellationToken cancellationToken);
         Task<Product?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken);
         Task<IList<Product>> GetRelatedAsync(Guid categoryId, Guid excludeProductId, int take, CancellationToken cancellationToken);
+        Task<ShopFilterOptionsDto> GetShopFilterOptionsAsync(Guid? categoryId, CancellationToken ct);
     }
 }
