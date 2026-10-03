@@ -20,5 +20,6 @@ namespace FashionHouse.Application.Contracts.Repositories
         Task<Product?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken);
         Task<IList<Product>> GetRelatedAsync(Guid categoryId, Guid excludeProductId, int take, CancellationToken cancellationToken);
         Task<ShopFilterOptionsDto> GetShopFilterOptionsAsync(Guid? categoryId, CancellationToken ct);
+        Task<HomeProductsDto> GetHomeProductsAsync(int take, CancellationToken ct);
     }
 }

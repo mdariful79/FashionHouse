@@ -7,8 +7,11 @@ namespace FashionHouse.Infrastructure.Data.Repositories
 {
     public class ProductRepository : Repository<Product, Guid>, IProductRepository
     {
+        private readonly ApplicationDbContext _db;
+
         public ProductRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
+            _db = dbContext;
         }
 
         public async Task<(IList<Product>, int, int)> GetPagedProducts(GetAllProductsByPagingQuery query, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ namespace FashionHouse.Infrastructure.Data.Repositories
         public async Task<(IList<Product>, int, int)> GetActiveForShopAsync(
             GetActiveProductsForShopQuery query, CancellationToken ct)
         {
+            // Non-nullable copies so EF never evaluates ".Value" on a null at query time.
             var hasCategory = query.CategoryId.HasValue;
             var categoryId = query.CategoryId ?? Guid.Empty;
 
@@ -63,7 +67,6 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 true,
                 ct);
 
-            
             IEnumerable<Product> filtered = all;
 
             if (query.Color.HasValue)
@@ -95,7 +98,7 @@ namespace FashionHouse.Infrastructure.Data.Repositories
             {
                 "price_asc" => filtered.OrderBy(EffectivePrice).ToList(),
                 "price_desc" => filtered.OrderByDescending(EffectivePrice).ToList(),
-                _ => filtered.ToList()   // already newest first
+                _ => filtered.ToList()  
             };
 
             var total = list.Count;
@@ -106,6 +109,50 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 .ToList();
 
             return (page, total, total);
+        }
+
+        public async Task<HomeProductsDto> GetHomeProductsAsync(int take, CancellationToken ct)
+        {
+            // New Arrivals: newest active products
+            var (newest, _, _) = await GetDynamicAsync(
+                x => x.IsActive,
+                "CreatedAt desc",
+                q => q.Include(p => p.ProductImages),
+                1, take, true, ct);
+
+            // Hot Sales: active products that currently have a discount
+            var (hot, _, _) = await GetDynamicAsync(
+                x => x.IsActive && x.DiscountedPrice != null && x.DiscountedPrice < x.Price,
+                "CreatedAt desc",
+                q => q.Include(p => p.ProductImages),
+                1, take, true, ct);
+
+            var topIds = await _db.OrderItems
+                .GroupBy(i => i.ProductId)
+                .Select(g => new { ProductId = g.Key, Qty = g.Sum(i => i.Quantity) })
+                .OrderByDescending(x => x.Qty)
+                .Take(take)
+                .Select(x => x.ProductId)
+                .ToListAsync(ct);
+
+            IList<Product> best = new List<Product>();
+            if (topIds.Count > 0)
+            {
+                var (found, _, _) = await GetDynamicAsync(
+                    x => x.IsActive && topIds.Contains(x.Id),
+                    null,
+                    q => q.Include(p => p.ProductImages),
+                    1, take, true, ct);
+
+                best = found.OrderBy(p => topIds.IndexOf(p.Id)).ToList();
+            }
+
+            return new HomeProductsDto
+            {
+                BestSellers = best,
+                NewArrivals = newest,
+                HotSales = hot
+            };
         }
 
         private static decimal EffectivePrice(Product p)
@@ -146,6 +193,7 @@ namespace FashionHouse.Infrastructure.Data.Repositories
                 Sizes = products.SelectMany(p => p.Sizes).Distinct().OrderBy(s => s).ToList()
             };
         }
+
         public async Task<Product?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken)
         {
             var (items, _, _) = await GetDynamicAsync(
