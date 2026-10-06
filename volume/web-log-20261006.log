@@ -1,0 +1,37 @@
+2026-10-06 10:35:33.961 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-10-06 10:35:34.163 +00:00 [INF] Starting application
+2026-10-06 10:35:34.286 +00:00 [WRN] No XML encryptor configured. Key {1b38d79c-33e2-4a17-be41-b1bd89f5a1f8} may be persisted to storage in unencrypted form.
+2026-10-06 10:35:34.322 +00:00 [WRN] Overriding HTTP_PORTS '8080' and HTTPS_PORTS ''. Binding to values defined by URLS instead 'http://*:80'.
+2026-10-06 10:35:44.442 +00:00 [WRN] Failed to determine the https port for redirect.
+2026-10-06 10:35:45.014 +00:00 [ERR] An exception was thrown while deserializing the token.
+Microsoft.AspNetCore.Antiforgery.AntiforgeryValidationException: The antiforgery token could not be decrypted.
+ ---> System.Security.Cryptography.CryptographicException: The key {473b8300-e605-4c22-af67-2b35277b5e25} was not found in the key ring. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.UnprotectCore(Byte[] protectedData, Boolean allowOperationsOnRevokedKeys, UnprotectStatus& status)
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.Unprotect(Byte[] protectedData)
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgeryTokenSerializer.Deserialize(String serializedToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgeryTokenSerializer.Deserialize(String serializedToken)
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery.GetCookieTokenDoesNotThrow(HttpContext httpContext)
+2026-10-06 10:56:14.041 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-10-06 10:56:14.295 +00:00 [INF] Starting application
+2026-10-06 10:56:14.422 +00:00 [WRN] No XML encryptor configured. Key {d91779f3-a8a8-4ac8-9557-14b87e587d8a} may be persisted to storage in unencrypted form.
+2026-10-06 10:56:14.458 +00:00 [WRN] Overriding HTTP_PORTS '8080' and HTTPS_PORTS ''. Binding to values defined by URLS instead 'http://*:80'.
+2026-10-06 11:00:59.560 +00:00 [WRN] Failed to determine the https port for redirect.
+2026-10-06 11:01:00.162 +00:00 [ERR] An exception was thrown while deserializing the token.
+Microsoft.AspNetCore.Antiforgery.AntiforgeryValidationException: The antiforgery token could not be decrypted.
+ ---> System.Security.Cryptography.CryptographicException: The key {1b38d79c-33e2-4a17-be41-b1bd89f5a1f8} was not found in the key ring. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.UnprotectCore(Byte[] protectedData, Boolean allowOperationsOnRevokedKeys, UnprotectStatus& status)
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.Unprotect(Byte[] protectedData)
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgeryTokenSerializer.Deserialize(String serializedToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgeryTokenSerializer.Deserialize(String serializedToken)
+   at Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery.GetCookieTokenDoesNotThrow(HttpContext httpContext)
+2026-10-06 11:01:47.922 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-10-06 11:01:48.064 +00:00 [INF] Starting application
+2026-10-06 11:01:48.093 +00:00 [WRN] No XML encryptor configured. Key {f016e7a3-206c-4504-83e0-79e0855744e2} may be persisted to storage in unencrypted form.
+2026-10-06 11:01:48.109 +00:00 [WRN] Overriding HTTP_PORTS '8080' and HTTPS_PORTS ''. Binding to values defined by URLS instead 'http://*:80'.
+2026-10-06 11:01:54.840 +00:00 [WRN] Failed to determine the https port for redirect.
+2026-10-06 11:01:56.402 +00:00 [WRN] No store type was specified for the decimal property 'DiscountedPrice' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-06 11:01:56.403 +00:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-06 11:01:56.506 +00:00 [INF] Executing query GetHomeProductsQuery
+2026-10-06 11:01:58.459 +00:00 [INF] Query GetHomeProductsQuery executed successfully in 1952 ms

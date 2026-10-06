@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: src/FashionHouse.Web/Dockerfile
+    image: fashion_house
+    env_file:
+      - src/FashionHouse.Web/web.env
+    volumes:
+      - fashion_house-data:/app/Logs/
+    ports:
+      - "8000:80"
+    entrypoint: ["dotnet", "FashionHouse.Web.dll"]
+
+volumes:
+  fashion_house-data:
+    external: true

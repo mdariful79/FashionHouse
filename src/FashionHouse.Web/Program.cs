@@ -101,6 +101,10 @@ try
     });
     #endregion
 
+    #region Docker IP Correction
+    builder.WebHost.UseUrls("http://*:80");
+    #endregion
+
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
 
